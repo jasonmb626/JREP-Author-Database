@@ -1,0 +1,1109 @@
+
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<!--
+Copyright © 2009-Present Aries Systems Corporation. All Rights Reserved.
+Copying, reverse engineering, adaptation or any other derivative use
+prohibited.  This material is proprietary and confidential information
+of Aries Systems Corporation.
+--> 
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head id="Head1"><title>
+	Editor Details
+</title><meta http-equiv="Content-Type" content="text/html; charset=utf-8" /><link rel="stylesheet" type="text/css" href="cssJQueryDialog.aspx" /><link rel="stylesheet" type="text/css" href="cssSiteStyle.aspx" />    
+
+    <style type="text/css">
+		.popupTable
+		{
+			border-collapse: collapse;
+			width: 100%;
+			line-height: 14px;
+		}
+		.popupTable th
+		{
+			border-top: 1px solid #CCCCCC;
+			background-color: #EEEEEE;
+			text-align: center;
+			font-weight: bold;
+			color: black;
+		}
+		.popupTable td
+		{
+			background-color: #EEEEEE;
+			padding: 3px;
+			border: 1px solid white;
+		}
+		.popupTable tr.final > td 
+        {
+			border-bottom: 1px solid #CCCCCC;
+		}
+		.popupTable .first 
+        {
+			border-left: 1px solid #CCCCCC;
+		}
+		.popupTable .last 
+        {
+			border-right: 1px solid #CCCCCC;
+		}
+		.treeTable
+		{
+		    border: 0px;
+		    padding: 0px;
+		    line-height: 18px;
+		}
+		.treeTable tr
+		{
+		    border: 0px;
+		    padding: 0px;
+		    line-height: 18px;
+		}
+		.treeTable td
+		{
+		    border: 0px;
+		    padding: 0px;
+		    line-height: 18px;
+		}
+		.treeTable div
+		{
+		    vertical-align: top;
+            word-wrap:break-word;
+		}
+        .treeTable table
+		{
+            width: 100%;
+		    vertical-align: top;
+            word-wrap:break-word;
+		}
+        .treeViewRootNode
+        {
+            width: 100%;
+            font-style: normal;
+        }
+		.treeViewRootLabel a:link
+		{
+		    color: #333333;
+		    text-decoration: none;
+		    width:auto;
+		}
+		.treeViewRootLabel:hover
+		{
+		    color: #333333;
+		    text-decoration: none;
+		    cursor: pointer;
+		}
+		.treeViewParentNode
+		{
+		    color: #333333;
+		    margin: 0px;
+		    padding: 0px;
+		    vertical-align: bottom;
+		    line-height: 18px;
+		    white-space:normal;/*TT28388 20150303 GBS Set treeViewParentNode.white-space css to be normal.*/
+		}
+		.treeViewParentNode td
+		{
+		    color: #333333;
+		    vertical-align: bottom;
+		    line-height: 18px;
+		}
+		.treeViewParentNode span
+		{
+		    line-height:14px;
+		    color: #333333;
+		    padding-top: 4px;
+		    padding-bottom: -4px;
+		    vertical-align: bottom;
+		}
+		.treeViewQuestionNode
+		{
+		    color: #333333;
+		    margin-bottom: -4px;
+		    padding-top: 5px;
+		    padding-bottom: -5px;
+		    vertical-align: bottom;
+		}
+		.treeViewLeafNode
+		{
+		    color: #0055aa;
+		    padding: 0px;
+		    vertical-align: top;
+		    /*height: 40px;*/
+		    margin-bottom: 20px;
+		}
+        .treeViewLeafNode div
+		{
+		    height: 100px;
+		}
+		.treeViewFollowOnNode
+		{
+		    padding-left: 20px;
+		}
+		.expandCollapse
+		{
+		    float:right;
+		    padding:2px;
+		}
+        .right-padding
+        {
+            padding-right: 2px;
+        }
+        .warningLabel 
+        { /* BUGFIX 29168 20151008 BBD */
+            margin-left: 1em;
+            font-weight: bold;
+        }
+        span.error-icon 
+        {
+            display: inline-block;
+            background-image: url("img/missing.png");
+            width: 16px;
+            height: 16px;
+            margin-right: .5em;
+        }
+        div.error-icon 
+        {
+            height: 4em;
+            float:left;
+        }
+        div#warningDialog {
+            white-space: pre-wrap;
+        }
+    </style>
+
+<script src="/jrep/ClientScript/jquery.js" type="text/javascript"></script>
+<script src="/jrep/ClientScript/jquery-ui.js" type="text/javascript"></script>   
+
+
+<script type="text/javascript" src="/jrep/ClientScript/jquery-selection.js"></script>
+<script type="text/javascript" src="/jrep/ClientScript/InsertSpecialChars.aspx?lang=en-US"></script>
+
+<script type="text/javascript">
+//<![CDATA[
+
+function FormatString(stringToFormat, replacementValues)
+{
+	return stringToFormat.replace(/{([0-9]+)}/g, function(wholematch, firstmatch)
+		  { var i = +firstmatch; return i < replacementValues.length ? replacementValues[i] : wholematch; }
+		);
+}
+
+
+
+function EscapeAttributeValue(value) 
+{
+
+        return value.replace(/&/g, '&amp;')
+                    .replace(/'/g, "&apos;")
+                    .replace(/"/g, '&quot;')
+                    .replace(/</g, '&lt;')
+                    .replace(/>/g, '&gt;');
+}
+
+//]]>
+</script>
+
+<script type="text/javascript" src="/jrep/WebUserControls/ClientJScript/translatedClientutil.aspx?lang=en-US"></script>
+<script type="text/javascript" src="/jrep/ClientScript/clientutil.aspx"></script>
+<script type="text/javascript" src="/jrep/ClientScript/translatedRevAttachClient.aspx?lang=en-US"></script>
+<script type="text/javascript" src="/jrep/ClientScript/revAttachClient.aspx"></script><script type="text/javascript" src="/jrep/ClientScript/translatedDateValidation.aspx?lang=en-US"></script>
+<script type="text/javascript" src="/jrep/ClientScript/dateValidation.aspx"></script>
+<script type="text/javascript">
+    
+
+var xmlHttpFactories = [
+ function() { return new XMLHttpRequest(); }, // IE 7.0 and everything non-Microsoft 
+ function()  { return new ActiveXObject("Msxml3.XMLHTTP");},
+ function() { return new ActiveXObject("Msxml2.XMLHTTP.6.0"); },
+ function()  { return new ActiveXObject("Msxml2.XMLHTTP.3.0"); },
+ function()  { return new ActiveXObject("Msxml2.XMLHTTP"); },
+ function()  { return new ActiveXObject("Microsoft.XMLHTTP"); }];
+ 
+ function createXmlHttpObject()
+ {
+    var xmlHttp = false;
+    
+    for (var i=0; i < xmlHttpFactories.length; i++)
+    {
+        try
+        {        
+             xmlHttp = xmlHttpFactories[i]();
+        }
+        catch(e)
+        {
+            continue;
+        }
+        break;
+    }
+    
+    return xmlHttp;
+ 
+ }
+ 
+ function configureXmlHttpRequest(xmlHttpReqObject, url, postData, asynch)
+ {
+    var sendMethod = (postData) ? 'POST' : 'GET';
+   
+    xmlHttpReqObject.open(sendMethod, url, asynch);
+    xmlHttpReqObject.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+    if (postData && postData.length!=null)
+    {
+        xmlHttpReqObject.setRequestHeader("Content-length", postData.length);
+    }
+//    xmlHttpReqObject.setRequestHeader("Connection", "close");
+    
+ }
+ 
+ 
+function sendXmlHttpRequest(callbackMethod, url, postData, asynch) 
+{
+   
+    var xmlHttpReqObject = false;
+    xmlHttpReqObject = createXmlHttpObject();
+            
+    if (xmlHttpReqObject)
+    {
+        configureXmlHttpRequest(xmlHttpReqObject, url, postData, asynch);
+        
+        xmlHttpReqObject.onreadystatechange = 
+		    function() 
+		    {
+                if (callbackMethod && xmlHttpReqObject.readyState == 4 && xmlHttpReqObject.status == 200 ) 
+		        {    
+        		    callbackMethod(xmlHttpReqObject);
+		        } 
+		    };
+		    
+		xmlHttpReqObject.send(postData);
+        
+        delete xmlHttpReqObject;
+    }
+}
+
+ 
+function xmlHTTPPost(updateFunction, url, querystring) 
+{
+    var xmlHttpReqObject = false;
+    
+    xmlHttpReqObject = createXmlHttpObject();
+    if (xmlHttpReqObject)
+    {
+
+        configureXmlHttpRequest(xmlHttpReqObject,url,true,true);
+        xmlHttpReqObject.onreadystatechange = 
+		    function() 
+		    {
+			    if (xmlHttpReqObject.readyState == 4 && xmlHttpReqObject.status == 200 ) 
+			    { 
+				    updateFunction(xmlHttpReqObject.responseText, "hello");
+			    }
+		    }
+    	
+        xmlHttpReqObject.send(querystring);
+                
+        delete xmlHttpReqObject;
+        
+    }
+}
+
+function xmlHTTPPostWithContext(updateFunction, url, querystring, context) 
+{
+    var xmlHttpReqObject = false;
+        	
+	xmlHttpReqObject = createXmlHttpObject();
+    
+    if (xmlHttpReqObject)
+    {	
+        configureXmlHttpRequest(xmlHttpReqObject, url, true,true);
+        
+        xmlHttpReqObject.onreadystatechange = 
+		    function() 
+		    {
+			    if (xmlHttpReqObject.readyState == 4 && xmlHttpReqObject.status == 200 ) 
+			    { 
+				    updateFunction(xmlHttpReqObject.responseText, context);
+			    }
+		    }
+    		
+        xmlHttpReqObject.send(querystring);
+        delete xmlHttpReqObject;
+    }
+    return true ;
+}
+</script> 
+
+<script src="ClientScript/CIFResultsLinkHandler.js" type ="text/javascript"></script>
+<script src="ClientScript/StatReviewerFunctions.aspx" type ="text/javascript"></script>
+<script type="text/javascript" src="./ClientScript/viewSubmissions.aspx?lang=en-US"></script>
+
+<script type="text/javascript">
+	//<![CDATA[
+
+	var intFormHasChanged = 0;
+
+	function DoProxyLogin(loginUrl)
+	{
+		VerifyProxy();
+	    opener.location.href = loginUrl;
+	}
+	function formChanged()
+	{
+		intFormHasChanged = 1;
+	}
+	function abstractEditWarning(fieldName)
+	{
+	    $("#errorDialog")[0].showDialog(FormatString("Warning\x3a The {0} cannot be edited from Manuscript Details - any changes will not be saved. \x28Editors with \x27Edit Submission\x27 privileges may edit the abstract by clicking the \x27Edit Submission\x27 action link.\x29", [fieldName]));
+	}
+	function authorCommentEditWarning()
+	{
+	    $("#errorDialog")[0].showDialog("Warning\x3a Author Comments cannot be edited from  Manuscript Details - any changes will not be saved. \x28Editors with \x27Edit Submission\x27 privileges may edit Author Comments by clicking the \x27Edit Submission\x27 action link\x29.");
+	}
+	function getHelpTitle()
+	{
+		var strAdnlManuscriptDetails = "Additional Manuscript Details Field Definition";
+		return strAdnlManuscriptDetails;
+	}
+
+	
+	var textUpdateTimer;
+
+	
+	function updateTextarea(object, maxLen)
+	{
+		textUpdateTimer = setTimeout("updateTextarea2('" + object.id + "', " + maxLen + ");", 0);
+	}
+		
+	function updateTextarea2(id, maxLen)
+	{
+		var object = document.getElementById(id);
+		
+		if (object.value.length > maxLen)
+		{
+			object.value = object.value.substr(0, maxLen);
+		    $("#errorDialog")[0].showDialog(FormatString("There is a {0} character limit for this textarea.\n The text may have been truncated.", [maxLen]));
+		}
+	}
+	function popupChargeFee(docID)
+	{
+		var name = "chargeFee.aspx?docID=" + docID;
+		openCenterWin(name,"chargeFee",1,1,0,0,0,0);
+	}
+	function popupFeesAndPayments(transactionID)
+	{
+		var name = "feesAndPayments.aspx?transID=" + transactionID;
+		openCenterWin(name,"feesAndPayments",1,1,0,0,0,0);
+	}
+	var popupChangeControllingGroupWindow;
+	function popupChangeControllingGroup()
+	{
+		var name = "DesignateControllingScheduleGroupSubmission.aspx?callPage=EMDetails.aspx&documentID=3523";
+	    popupChangeControllingGroupWindow = openCenterWinRet(name, "popupChangeControllingGroupWindow", 1, 1, 0, 0, 0, 0);
+	}
+
+    
+    function onAjaxCallbackPeopleCustomFlags(data)
+    {
+        var returnedData = JSON.parse(data);
+        var classString = ".js-custompeopleflags-" + returnedData.PeopleID.toString();
+        jQuery(classString).replaceWith(returnedData.FlagsHTML);
+    }
+	function onAjaxCallbackCustomFlagsOnly(requestResponseText)
+	{
+	    var customFlags = document.getElementById("customFlagsCell");
+	    if(customFlags != null)
+	    {
+	        customFlags.innerHTML = requestResponseText;
+	    }
+	    var customFlagsRow = document.getElementById("customFlagsRow");
+	    if(customFlagsRow != null && requestResponseText.length > 0)
+	    {
+	        customFlagsRow.style.display = "";
+	    }
+	    else if(customFlagsRow != null)
+	    {
+	        customFlagsRow.style.display = "none";
+	    }
+	}
+	function onAjaxCallbackTechCheckFlagsOnly(requestResponseText)
+	{
+	    var techCheckFlag = document.getElementById("techCheckFlag");
+	    if(techCheckFlag != null)
+	    {
+	        techCheckFlag.innerHTML = requestResponseText;
+	    }
+	}
+    
+    
+    
+    function UpdateSubmissionFlags (documentId, allCustomFlags) {
+        
+        
+        if (allCustomFlags) { // current list of submission flags associated with the submission
+            var customFlags = JSON.parse(allCustomFlags);
+            
+            // get all checkboxes representing the submission flags associated with the AMD fields
+            var $chckAmdFlags = jQuery(':checkbox.amdAssociatedFlag');
+
+            $chckAmdFlags.each(function(index, ele) {
+                var $chkAmdFlag = jQuery(this),
+                    flagId = $chkAmdFlag.attr('data-flagid'),
+                    fieldId =  $chkAmdFlag.attr('data-fieldId'),
+                    $hdnAmdWasChecked = jQuery('#hdnAMDWasChecked_' + fieldId),
+                    turnedOn = false;
+
+                jQuery.each(customFlags, function(i, flag) {
+                    if (flag.FlagId == flagId) {
+                        $hdnAmdWasChecked.val('True');
+                        turnedOn = true;
+                        return false;
+                    }
+                });
+
+                // TT#31416 20170516 VP, reset the amd hiddenfield if the flag was not selected
+                if (!turnedOn) {
+                    $hdnAmdWasChecked.val(''); 
+                }
+                // turn on the AMD associated flag if it is in the current list of submission flags 
+                // associated with the submission
+                $chkAmdFlag.prop('checked', turnedOn);
+            });
+        
+            
+            $(".customQuestionAnswerFlag").each(function(index, ele) {                
+                var foundFlag = false;
+                var customFlagID = ele.id.substring(25);               
+
+                
+                jQuery.each(customFlags, function(i, flag) {                    
+                    if (flag.FlagId == customFlagID) {
+                        foundFlag = true;                        
+                    }
+                });
+
+                
+                if (!foundFlag) {                                    
+                    $("#customQuestionAnswerFlag_" + customFlagID).remove();
+                }
+
+            });            
+
+        }
+        var url = "ajaxRequest.aspx";
+		var querystring = "scheme=16&docId=" + documentId + "&flagType=";
+
+		// 33035 20180621 MVK - replaced flagType parameter with value that indicates what type of flags to display,
+		// which is based on which tab of the application is active.
+		xmlHTTPPost(onAjaxCallbackCustomFlagsOnly, url, querystring + 1); 
+		xmlHTTPPost(onAjaxCallbackTechCheckFlagsOnly, url, querystring + "2");    
+	}
+
+    
+    function UpdatePeopleFlags(peopleId)
+    {
+        var url = "ajaxRequest.aspx";
+        var querystring = "scheme=32&peopleId=" + peopleId;
+        xmlHTTPPost(onAjaxCallbackPeopleCustomFlags, url, querystring);
+    }
+	function ViewExternalCorrespondence(externalCorrespondenceID, externalCorrespType, letterSecurityID)
+	{
+		var sNavUrl = "DotNetPopUps/ViewExternalCorrespondence.aspx";
+		sNavUrl += "?hdnExternalCorrespondenceID=" + externalCorrespondenceID;
+		sNavUrl += "&hdnExternalCorrespondenceType=" + externalCorrespType;
+		sNavUrl += "&hdnLetterSecurityID=" + letterSecurityID;
+		sNavUrl += "&hdnAssociatedEntityType=" + EXT_CORRES_ASSOC_TYPE_SUBMISSION;
+			
+		openCenterWin(sNavUrl, 'ViewExternalCorrespondence', 1, 1, 0, 0, 0, 0);
+	}
+	function VerifyProxy()
+	{
+        
+		var querystring = "scheme=21&documentId=3523&manuscriptNumber=JREP-D-16-00046&sectionId=1";
+		sendXmlHttpRequest(null, "ajaxRequest.aspx", querystring, false);
+	}
+    function refresh()
+    {
+        if (window.opener)
+        {
+            if (window.opener.refresh)
+            {
+                window.opener.refresh();
+            }
+            else
+            {
+                window.opener.location.reload();
+            }
+        }
+
+        document.form1.submit();
+    }
+	function refreshOpener() {
+		if (window.opener.detailsRefreshInvoked)
+		{
+		    // TT#25893    20130821    VP
+		    // If this page is Popped up from AddEditScheduleGroup.aspx, we pass the Submission Specific values and Submission's Controlling Schedule Group specific values
+		    // to the caller page, which uses these values to update the TOC.
+		    if (False) {
+		        var scheduleGroupToSubmissionMap = {};
+		       
+                scheduleGroupToSubmissionMap.DocumentID = 3523;
+		        scheduleGroupToSubmissionMap.TargetNumberOfPages = '';
+		        scheduleGroupToSubmissionMap.TargetStartPage = '';
+		        scheduleGroupToSubmissionMap.TargetEndPage = '';
+                scheduleGroupToSubmissionMap.TOCOrder = '0';
+		        scheduleGroupToSubmissionMap.TargetOnlinePubDate = '';
+		        scheduleGroupToSubmissionMap.ActualOnlinePubDate = '';
+
+		        
+		        scheduleGroupToSubmissionMap.BlackAndWhiteImageCount = '0'; 
+		        scheduleGroupToSubmissionMap.ColorImageCount = '0';
+
+		        scheduleGroupToSubmissionMap.DopplerBwCount = '';
+		        scheduleGroupToSubmissionMap.DopplerColorCount = '';
+		        scheduleGroupToSubmissionMap.NumFigures = '';
+		        scheduleGroupToSubmissionMap.EstimatedFigurePages = '';
+		        scheduleGroupToSubmissionMap.CharCountText = '';
+		        scheduleGroupToSubmissionMap.TextManuscriptPages = '';
+		        scheduleGroupToSubmissionMap.EstimatedTextPages = '';
+		        scheduleGroupToSubmissionMap.NumReferences = '';
+		        scheduleGroupToSubmissionMap.EstimatedReferencePages = '';
+		        scheduleGroupToSubmissionMap.NumTables = '';
+		        scheduleGroupToSubmissionMap.EstimatedTablePages = '';
+		        scheduleGroupToSubmissionMap.EstimatedPrintedPages = '';
+		        scheduleGroupToSubmissionMap.PreviousEditionChapter = '';
+		        scheduleGroupToSubmissionMap.PreviousEditionPages = '';
+
+		        window.opener.detailsRefreshInvoked(scheduleGroupToSubmissionMap);
+		    } else {
+		    window.opener.detailsRefreshInvoked();    
+		    }
+		}
+        
+		else if (window.opener.FGSubmissions && !(window.opener.detailsRefreshAvoidanceIndicator))
+		{
+			window.opener.location.href = window.opener.location.href;
+		}
+	}
+
+    	
+    function ResendApcPaymentRequest()
+    {
+        var okAction = function()
+        {
+            jQuery.ajax( {
+                url: 'APCAsynchPaymentDueTaskHandler.ashx',
+                type: 'post',
+                data: { 'documentID': '3523' }
+            } ).done( function ( response )
+            {
+                var rMsg = '';
+                if ( response == 'fail' )
+                {
+                    rMsg = 'There was an unknown error.  Please contact the Editorial Office.';
+                    $("#errorDialog")[0].showDialog( rMsg );
+                }
+                else
+                {
+                    rMsg = 'The Publication Charges Payment Request has been resent.';
+                    $("#requestCompleteDialog")[0].showDialog( rMsg );
+                }
+                jQuery( '#linkApcStatus' ).css( 'display', 'none' );
+            } );
+        };
+        $("#warningDialog")[0].showDialog('Are you sure you want to resend the Payment Request\x3f', okAction);
+    }
+    
+	function updateMultipleScheduleGroupsDisplay(keyScheduleGroupId)
+	{
+		popupChangeControllingGroupWindow.close();
+		jQuery.ajax({
+			url: 'EMDetailsMultipleGroupsDisplay.ashx',
+			type: 'post',
+			data: {
+				'documentID': '3523',
+				'canManageScheduleGroups': 'False',
+				'canViewScheduleGroups': 'False'
+			}		
+		}).done(function(response) {
+			jQuery("#ScheduleGroupsTable").html(response);
+		});
+		if (jQuery("#TargetNumPages").length > 0) {
+			jQuery("#TargetNumPages").html(sgData[keyScheduleGroupId].NumberOfPages);
+		}
+		if (jQuery("#ForControllingGroup").length > 0) {
+			jQuery("#ForControllingGroup").html(FormatString(forControllingGroupString, [sgData[keyScheduleGroupId].ScheduleGroupName]));
+		}
+		if (jQuery("#ScheduleGroupTargetOnlinePublicationDate").length > 0) {
+			jQuery("#ScheduleGroupTargetOnlinePublicationDate").html(sgData[keyScheduleGroupId].SGTargetOnlinePubDateFormatted);
+		}
+		if (jQuery("#ScheduleGroupTargetPublicationDate").length > 0) {
+			jQuery("#ScheduleGroupTargetPublicationDate").html(sgData[keyScheduleGroupId].SGTargetPubDateFormatted);
+		}
+		if (jQuery("#ScheduleGroupTargetVolume").length > 0) {
+			jQuery("#ScheduleGroupTargetVolume").html(sgData[keyScheduleGroupId].Volume);
+		}
+		if (jQuery("#ScheduleGroupTargetIssue").length > 0) {
+			jQuery("#ScheduleGroupTargetIssue").html(sgData[keyScheduleGroupId].Issue);
+		}
+		if (jQuery("#txtPositionInScheduleGroupContents").length > 0) {
+			jQuery("#txtPositionInScheduleGroupContents").val(sgData[keyScheduleGroupId].TocPosition);
+		}
+		if (jQuery("#txtTargetStartPage").length > 0) {
+			jQuery("#txtTargetStartPage").val(sgData[keyScheduleGroupId].StartPage);
+		}
+		if (jQuery("#txtTargetEndPage").length > 0) {
+			jQuery("#txtTargetEndPage").val(sgData[keyScheduleGroupId].EndPage);
+		}
+		if (jQuery("#ScheduleGroupNameLink").length > 0) {
+			jQuery("#ScheduleGroupNameLink").text(sgData[keyScheduleGroupId].ScheduleGroupName);
+			jQuery("#ScheduleGroupNameLink").attr("href", "javascript:popupScheduleGroupDetails(" + sgData[keyScheduleGroupId].ScheduleGroupId + ")");
+		}
+	}
+
+	function PopUpFundingInformationWindow(url)
+	{
+		openCenterWinPercentage(url, 'fundingInfo', 1, 1, 0, 0, 1, 0, 800, 600, 0.5);
+	}
+
+    // handles window.focus for showing/hiding the CIF results link table cell, if necessary
+	function WindowFocusEvent()
+	{
+	    var $CIFResultsLinkElements = $('.CIFResultsLinkElement');
+	    var $CIFTopLink = $('a[href*="CIF"]');
+	    CIFResultsLinkHandler_Initialize(CIFResultsLinkType_Submission, 3523);
+	    var resultCount = CIFResultsLinkHandler_GetStatusCount();
+
+	    if (resultCount > 0)
+	    {
+	        $CIFResultsLinkElements.show();
+	        $CIFTopLink.show();
+	    }
+	    else
+	    {
+	        $CIFResultsLinkElements.hide();
+	        $CIFTopLink.hide();
+	    }
+	}
+
+//]]>
+</script>
+	</head>
+<body>
+    <div id="requestCompleteDialog">
+	<div>
+
+	</div>
+</div>
+    <div id="errorDialog">
+	<div>
+
+	</div>
+</div>
+    <div id="warningDialog">
+	<div>
+
+	</div>
+</div>
+
+    <a name="top"></a>
+    <form name="form1" method="post" action="./EMDetails.aspx?docid=3523&amp;ms_num=JREP-D-16-00046&amp;sectionID=1" id="form1">
+<div>
+<input type="hidden" name="SessionThreadIdField" id="SessionThreadIdField" value="00000000-0000-0000-0000-000000000000" />
+<input type="hidden" name="__EVENTTARGET" id="__EVENTTARGET" value="" />
+<input type="hidden" name="__EVENTARGUMENT" id="__EVENTARGUMENT" value="" />
+<input type="hidden" name="__VIEWSTATE" id="__VIEWSTATE" value="4YCr2v2sN5D9IQvufuAIgCwOISSOpxx815MaJIf8YjXJ61DwOpo2E6gPwmGsyjyz5waHKZxStoPIZ3efr5zyIEavZYOPTVcSBW0dpRx8hHg5XThn" />
+</div>
+
+<script type="text/javascript">
+//<![CDATA[
+var theForm = document.forms['form1'];
+function __doPostBack(eventTarget, eventArgument) {
+    if (!theForm.onsubmit || (theForm.onsubmit() != false)) {
+        theForm.__EVENTTARGET.value = eventTarget;
+        theForm.__EVENTARGUMENT.value = eventArgument;
+        theForm.submit();
+    }
+}
+//]]>
+</script>
+
+
+<script src="/v16.1/WebResource.axd?d=pynGkmcFUV13He1Qd6_TZIUDN6TWiAwXYwtjOkgrzS5JV7NU8eAJdCv7jCJT2v2zXtT88A2&amp;t=637139106442328886" type="text/javascript"></script>
+
+
+<script src="/v16.1/WebResource.axd?d=3Y1DETvHa3juQtgP6Vkv_2Z0wvJXzNajnbbKgWxC1nrfpGkAIcPIn0uMdT3ycKvPy1O-5OWnJeI94ZbbPoXtmfBhqxVRV65qVtYjaRfBnTA9yqQ6eawtMOl0ojhCXlKyFeg04GCc34TY0uGYOFl2ZI_KXb41&amp;t=637230787391636573" type="text/javascript"></script>
+<script src="/v16.1/WebResource.axd?d=Fdn22wr6XWPABVB10QoKrC9WA9ZCDIackDAJ-KHsay1Kewe6b7tPsOt5SpabzPMVAVkjXcJNc-KelvUuvzXWKIDQaCisNRi_uOKCcLn_Ndqc8kniFvxhjTVJ17pxs0lKDgeQoBXFRx2kr3JJPe_86PIw37Ov8mZr859fG7AaDoHJxOkP0&amp;t=637230787391636573" type="text/javascript"></script>
+<script src="/v16.1/WebResource.axd?d=-J_rdEh-v0QKJFn7h6Nj--51IgNL8IgM6IqUTfrDr3YZckShXOHh9kEKjVfMpDcroaUAVG5oXqVEZ6-NLVwgNhEF8ybKxZx1JQh1D_xPL4BSSSnaA6ADvXvEIqSno1sPQhDfMyDYAMAbzSxQZ_4Tbu6PdGCfm8rU_ZoMXZ5YV0cd4lTW0&amp;t=637230787391636573" type="text/javascript"></script>
+<script src="/v16.1/WebResource.axd?d=3kX9Bgis_7FHLTST_GcdfELX8xTB1fmeF-g7wqgiGJsbg9jGqFFjmyg_mpeGE_zbmcs9zEYEE-XfntTOdpI9Xd71UJ2CrSusYxgWvOvn-9NHjjZ9VNEtWdyl1T-JoeocouRIfBM4YnyISL_PKboKIemEnBXjqC3gBBeKv0--ut72fZp-0&amp;t=637230787391636573" type="text/javascript"></script>
+<script src="/v16.1/WebResource.axd?d=uOzx-EYL6CN2J6PFudEwgLNmbfYHy5SoHO3HYz_6RkC5AgaRvQCt2SfvFMnzfeZoqGuVafAQG6w8YEDZH-rMOmGwsz7SJ-xeXFchqcpXma2eDeP_4ezkdh9yoZ_x_UO-ddmQomIOwbrABMq2pZRkTr1-9D7gIO3K30r1o6MdJIyEk4DGHzUOw0TaDcNwCT1zzDRTpfnBvd-bJQ-Xw0RY5e-Zd1A1&amp;t=637230787391636573" type="text/javascript"></script><style type='text/css'>.show-titlebar .ui-dialog-titlebar { display:block; }.show-titlebar .ui-dialog-title, .show-titlebar .ui-dialog-titlebar { background-color:#005C8A; color: white; }.no-close .ui-dialog-titlebar-close { display: none; }.show-titlebar .ui-dialog-title { float: none; margin-left: 5px; }.dialog-error-icon  { display: inline-block; background-image: url("/v16.1/WebResource.axd?d=diLu5Y2U1Ozlqhrr6E336ILVPZk1IUranw6uMkiQ9C5ihC9o8B8t2tY2OKr1qhAbHSHp8WXsE6KgZ_4kbprPGb6IW4ERdbqgYagQiEY-YntqHdpsprGgOIwW0-RO2luNnmUkTx7wKaH_I-1tH5Xkl50A-nE1&t=637230787391636573"); width: 16px; height: 16px; }.dialog-warning-icon  { display: inline-block; background-image: url("/v16.1/WebResource.axd?d=d7P43J3EwgHFBxtdi7mRHTauwbrbGiGBbhYRMo3oUhFE6apt2VsmXBzeTshpLCi2gZxKx1zZX20Rk8moFQWkzc-iavY8C84IxrvRDuVVPLetipGF-VmYRLouFyKL-BierjqAljfFMmkZ1VL-L3ILIF5ini81&t=637230787391636573"); width: 16px; height: 16px; }.dialog-info-icon  { display: inline-block; background-image: url("/v16.1/WebResource.axd?d=lQ-YEXTuy5rW2lt39QuuJtTbpgjkFSF7uTA7vUJRSmECNQwLcGbvUH9gepccod2fMeAHT3Q1cHiDOTL3PuyRj9LicefOLBvwTHDSZK9qIv8g1N94tZuB4Wo8PevgrOa0c7F1EeygIedHXRHLSlkXNdEdX_w1&t=637230787391636573"); width: 14px; height: 14px; }</style>
+<script type="text/javascript">
+//<![CDATA[
+var $requestCompleteDialog;
+                $(document).ready(function()
+                {
+                    $requestCompleteDialog = $("#requestCompleteDialog").dialog({
+                        title: 'Request Completed',
+                        modal : true,
+                        width: 450,
+                        autoOpen : false,
+                        resizable : false,
+                        buttons : {
+                                'OK' : function() { 
+                                    $requestCompleteDialog.dialog("close"); 
+                                     }
+                                 
+                            }
+                        ,
+                        draggable : false,
+                        dialogClass: 'show-titlebar no-close',
+                        closeOnEscape: true
+                    });
+                    $("#requestCompleteDialog").siblings('.ui-dialog-titlebar').prepend("<span class=''></span>");
+
+                    $("#requestCompleteDialog")[0].showDialog = function(text, okAction, cancelAction)
+                                        {
+                                            if (okAction != null)
+                                            {
+                                                $requestCompleteDialog.dialog('option', 'buttons', {
+                                                    'OK': function()   {
+                                                                            $requestCompleteDialog.dialog("close");
+                                                                            okAction();
+                                                                        }
+                                                     
+                                                });
+                                            }
+                                            if (text != null) $(this)[0].innerHTML = text
+                                            $requestCompleteDialog.dialog('open');
+                                        };
+                });var $errorDialog;
+                $(document).ready(function()
+                {
+                    $errorDialog = $("#errorDialog").dialog({
+                        title: 'Error',
+                        modal : true,
+                        width: 450,
+                        autoOpen : false,
+                        resizable : false,
+                        buttons : {
+                                'OK' : function() { 
+                                    $errorDialog.dialog("close"); 
+                                     }
+                                 
+                            }
+                        ,
+                        draggable : false,
+                        dialogClass: 'show-titlebar no-close',
+                        closeOnEscape: true
+                    });
+                    $("#errorDialog").siblings('.ui-dialog-titlebar').prepend("<span class='dialog-error-icon'></span>");
+
+                    $("#errorDialog")[0].showDialog = function(text, okAction, cancelAction)
+                                        {
+                                            if (okAction != null)
+                                            {
+                                                $errorDialog.dialog('option', 'buttons', {
+                                                    'OK': function()   {
+                                                                            $errorDialog.dialog("close");
+                                                                            okAction();
+                                                                        }
+                                                     
+                                                });
+                                            }
+                                            if (text != null) $(this)[0].innerHTML = text
+                                            $errorDialog.dialog('open');
+                                        };
+                });var $warningDialog;
+                $(document).ready(function()
+                {
+                    $warningDialog = $("#warningDialog").dialog({
+                        title: 'Warning',
+                        modal : true,
+                        width: 450,
+                        autoOpen : false,
+                        resizable : false,
+                        buttons : {
+                                'OK' : function() { 
+                                    $warningDialog.dialog("close"); 
+                                     }
+                                 ,'Cancel': function() { $(this).dialog("close");  }
+                            }
+                        ,
+                        draggable : false,
+                        dialogClass: 'show-titlebar no-close',
+                        closeOnEscape: true
+                    });
+                    $("#warningDialog").siblings('.ui-dialog-titlebar').prepend("<span class='dialog-warning-icon'></span>");
+
+                    $("#warningDialog")[0].showDialog = function(text, okAction, cancelAction)
+                                        {
+                                            if (okAction != null)
+                                            {
+                                                $warningDialog.dialog('option', 'buttons', {
+                                                    'OK': function()   {
+                                                                            $warningDialog.dialog("close");
+                                                                            okAction();
+                                                                        }
+                                                     ,'Cancel': function() { $(this).dialog("close"); if (cancelAction != null) { cancelAction(); } }
+                                                });
+                                            }
+                                            if (text != null) $(this)[0].innerHTML = text
+                                            $warningDialog.dialog('open');
+                                        };
+                });//]]>
+</script>
+
+<div>
+
+	<input type="hidden" name="__VIEWSTATEGENERATOR" id="__VIEWSTATEGENERATOR" value="742CEF20" />
+	<input type="hidden" name="__SCROLLPOSITIONX" id="__SCROLLPOSITIONX" value="0" />
+	<input type="hidden" name="__SCROLLPOSITIONY" id="__SCROLLPOSITIONY" value="0" />
+	<input type="hidden" name="__EVENTVALIDATION" id="__EVENTVALIDATION" value="eAFhhCymrN4gXpmRv3xAeb5ClV+zsGydpEp22O58jPMRc0wncWp2V4W4eWmBBW3u1S+zqHZ9LvcCR30/1jSu/2EtKAYJ98Z4NcWvUhKS1ORCcRhC9QsEWvFvllotilKnLtx1ua+827RutcI8F9ohwCE/atxtyA6bEx4522mRAjfrhbGJEf0dEHr5NoiTNC7xK1I2SXzEUBEtOK7JcslT8ReNfugdEYltLR/ZGXOHLTgN2ZlFXAjtgmgkAlIgq8eC/pXlJg==" />
+</div>
+        
+        
+        <div id="MainBodyPanel">
+	
+        <div class="topheader" id="TopOfPage">
+            <h3>
+                <span id="pageTitle">Details for Manuscript Number: JREP-D-16-00046 &quot;Review of _Pulse of the People_&quot;</span>
+            </h3>
+        </div>
+        <div class="buttonAlign">
+            <input type="button" name="btnCancel" value="Cancel" onclick="javascript:window.close();__doPostBack(&#39;btnCancel&#39;,&#39;&#39;)" id="btnCancel" />
+            <input type="button" name="btnSave1" value="Save" onclick="return validatePage(&#39;btnSave1&#39;);__doPostBack(&#39;btnSave1&#39;,&#39;&#39;)" id="btnSave1" />
+            <input type="button" name="btnSaveAndClose1" value="Save and Close" onclick="return validatePage(&#39;btnSaveAndClose1&#39;);__doPostBack(&#39;btnSaveAndClose1&#39;,&#39;&#39;)" id="btnSaveAndClose1" />
+        </div>
+        <div id="links" class="fieldset_nolegend" style="padding-top:10px;margin-top:10px;text-align:center;">
+			<table id="topLinkTable" align="Center" border="0">
+		<tr id="topLinkRow">
+			<td id="topLinkCell"><a href="#Manuscript Notes">Manuscript Notes</a>&nbsp;&nbsp;&nbsp;&nbsp;<a href="#Editors">Editors</a>&nbsp;&nbsp;&nbsp;&nbsp;<a href="#Reviewers">Reviewers</a>&nbsp;&nbsp;&nbsp;&nbsp;<a href="#Alternate Reviewers">Alternate Reviewers</a>&nbsp;&nbsp;&nbsp;&nbsp;</td>
+		</tr>
+	</table>
+		</div>
+       
+        <div class="fieldset_nolegend" style="margin-top:10px">
+            <table id="MainDataTable" class="datatable" border="0">
+		<tr>
+			<td class="leftWidth" style="font-weight:bold;"><span>Corresponding Author:</span></td><td><a href="javascript:if(intFormHasChanged == 0){popupReviewerInfoEMDetails(96303, 3523,&#39;jrep&#39;, 0)}else{popupReviewerInfoEMDetails(96303, 3523,&#39;jrep&#39;, 1)}">Candis Watts Smith</a><span class="js-custompeopleflags-96303"> <span class="flag peopleFlag " style="font-size:100% !Important;cursor: help; color: #000000;" onmouseover="showtip(this,event,'Set Flags');" onmouseout="hidetip();" onclick="popupCustomFlags('jrep', 96303, 'People');"><img src='/jrep/img/setFlagIcon2.gif' height='10' width='10' /></span></span><br/>UNITED STATES&nbsp;&nbsp;<a class="proxy" href="javascript:DoProxyLogin(&#39;https://www.editorialmanager.com/jrep/LoginAction.ashx?arg=WEko8X5nFSrMRDEy8kBwKJQvpR0SChy2F/zCym4Iu5Ikk+lQKuFbD33dXoKwHxRPqsEtMbVp075CS+fRHeuaeA==&#39;);window.close();">[Proxy]</a></td>
+		</tr><tr>
+			<td class="leftWidth" style="font-weight:bold;"><span>Corresponding Author E-Mail:</span></td><td><a href="mailto:candisws@email.unc.edu">candisws@email.unc.edu</a></td>
+		</tr><tr>
+			<td class="leftWidth" style="font-weight:bold;"><span>All Authors:</span></td><td><a href="javascript:if(intFormHasChanged == 0){popupReviewerInfoEMDetails(96303, 3523,&#39;jrep&#39;, 0)}else{popupReviewerInfoEMDetails(96303, 3523,&#39;jrep&#39;, 1)}">Candis Watts Smith</a>&nbsp;&nbsp;<span class="js-custompeopleflags-96303"> <span class="flag peopleFlag " style="font-size:100% !Important;cursor: help; color: #000000;" onmouseover="showtip(this,event,'Set Flags');" onmouseout="hidetip();" onclick="popupCustomFlags('jrep', 96303, 'People');"><img src='/jrep/img/setFlagIcon2.gif' height='10' width='10' /></span></span>&nbsp;&nbsp;<a class="proxy" href="javascript:DoProxyLogin(&#39;https://www.editorialmanager.com/jrep/LoginAction.ashx?arg=WEko8X5nFSrMRDEy8kBwKJQvpR0SChy2F/zCym4Iu5Ikk+lQKuFbD33dXoKwHxRPqsEtMbVp075CS+fRHeuaeA==&#39;);window.close();">[Proxy]</a><br/><br/><br/></td>
+		</tr><tr>
+			<td class="leftWidth" style="font-weight:bold;"><span>Classifications:</span></td><td><span>This manuscript does not have any Classifications.</span></td>
+		</tr><tr>
+			<td class="leftWidth" style="font-weight:bold;"><span>Initial Date Submitted:</span></td><td><span>23 Mar 2016</span></td>
+		</tr><tr>
+			<td class="leftWidth" style="font-weight:bold;"><span>Current Editorial Status:</span></td><td><span>Accepted on Submission</span></td>
+		</tr><tr>
+			<td class="leftWidth" style="font-weight:bold;"><span>Editorial Status Date:</span></td><td><span>13 May 2016</span></td>
+		</tr><tr>
+			<td class="leftWidth" style="font-weight:bold;"><span>Final Disposition Term:</span></td><td><span>Accepted on Submission</span></td>
+		</tr><tr style="background-color:#EEEEEE;">
+			<td colspan="2"><table cellspacing="0" cellpadding="0" border="0" style="width:100%;border-collapse:collapse;">
+				<tr>
+					<td class="leftWidth" style="border-style:None;font-weight:bold;"><div style="float:right;font-weight:normal;">
+						<a name="Manuscript Notes" href="#top">Top</a>
+					</div><span>Manuscript Notes:</span></td>
+				</tr><tr>
+					<td><input id="chkManuscriptNotesFlag" type="checkbox" name="chkManuscriptNotesFlag" /><span>Display Manuscript Notes Flag</span><span style="display:inline-block;width:100px;"></span><a class="em-insert-specialchars-link" href="javascript:" style="float:right;font-weight:normal;">Insert Special Character</a><textarea name="txtManuscriptNotes" rows="5" cols="20" id="txtManuscriptNotes" class="txtarea em-insert-specialchars-input" onkeydown="formChanged()">
+</textarea></td>
+				</tr>
+			</table></td>
+		</tr><tr>
+			<td class="shaded" align="center" colspan="2"><div style="float:right;font-weight:normal;">
+				<a name="Editors" href="#top">Top</a>
+			</div><span style="font-weight:bold;">Editors</span></td>
+		</tr><tr>
+			<td colspan="2" style="font-weight:bold;"><span>No Editors have been assigned to this manuscript.</span></td>
+		</tr><tr>
+			<td class="shaded" align="center" colspan="2"><div style="float:right;font-weight:normal;">
+				<a name="Reviewers" href="#top">Top</a>
+			</div><span style="font-weight:bold;">Reviewers</span></td>
+		</tr><tr>
+			<td colspan="2" style="font-weight:bold;"><span>No Reviewers have been assigned to this manuscript.</span></td>
+		</tr><tr>
+			<td class="shaded" align="center" colspan="2"><div style="float:right;font-weight:normal;">
+				<a name="Alternate Reviewers" href="#top">Top</a>
+			</div><span style="font-weight:bold;">Alternate Reviewers</span></td>
+		</tr><tr>
+			<td class="leftWidth" style="font-weight:bold;"><span>Alternate Reviewers:</span></td><td colspan="2" style="font-weight:bold;"><span>There are no Alternate Reviewers currently selected for this manuscript.</span></td>
+		</tr><tr>
+			<td class="leftWidth" style="font-weight:bold;"><span>Additional Manuscript Details:</span></td><td><a href="javascript:showAdditionalManuscriptDetailsEMDetails(3523)">Add/Edit Additional Manuscript Details</a></td>
+		</tr>
+	</table>
+        </div>
+        <div class="buttonAlign">
+            <input type="button" name="btnCancel1" value="Cancel" onclick="javascript:window.close();__doPostBack(&#39;btnCancel1&#39;,&#39;&#39;)" id="btnCancel1" />
+            <input type="button" name="btnSave2" value="Save" onclick="return validatePage(&#39;btnSave2&#39;);__doPostBack(&#39;btnSave2&#39;,&#39;&#39;)" id="btnSave2" />
+            <input type="button" name="btnSaveAndClose2" value="Save and Close" onclick="return validatePage(&#39;btnSaveAndClose2&#39;);__doPostBack(&#39;btnSaveAndClose2&#39;,&#39;&#39;)" id="btnSaveAndClose2" />  
+        </div>
+        <span id="lblDebug"></span>&nbsp;&nbsp;
+            
+     <div id="pageDialog" class="ui-front" title=""></div>     
+  
+ <script type="text/javascript" language="javascript">   
+	 var su_linkstyle = 0;
+	 var su_linktarget = "_blank";
+ </script>      
+
+  
+</div>
+  <script type="text/javascript">
+      jQuery( document ).ready( function ()
+      {
+          
+          // TT 25624, Fix for IE 8: target element: txtAbstract
+          // issue: IE8 has some bugs with max-width/height combined with overflow: auto/scroll. It renders page blank.
+          var $txtAbstract = jQuery( '#txtAbstract' );
+          if ( $txtAbstract.length )
+          {
+              if ( document.documentMode ) // only IE 8.0+ supports documentMode
+              {
+                  if ( document.documentMode == 8 )
+                  {
+                      if ( $txtAbstract.height() > 280 )
+                          $txtAbstract.css( 'height', '280px' );
+
+                      // maintain proposed max height while resizing the window
+                      jQuery( window ).resize( function ( event )
+                      {
+                          $txtAbstract.css( 'height', 'auto' );
+                          if ( $txtAbstract.height() > 280 )
+                              $txtAbstract.css( 'height', '280px' );
+                      } );
+
+                  } else
+                  { // all IE > IE 8.0
+                      $txtAbstract.css( 'max-height', '280px' );
+                  }
+              } else
+              { // all non-IE, & IE < IE 8.0
+                  $txtAbstract.css( 'max-height', '280px' );
+              }
+          }
+
+          // assign window.focus to handler
+          $(window).focus(WindowFocusEvent);
+
+          jQuery( function ()
+          {
+              var link = jQuery( 'a#FundingInfoLink' );
+
+              link.hover( function ()
+              {
+                  // put the hover div back to its default position
+                  resetFundingHoverLink();
+
+                  var fundingHoverDiv = jQuery( 'div#FundingHover' );
+                  var fundingInfoLink = jQuery( 'a#FundingInfoLink' );
+
+                  // if the hover div will go off the bottom of the screen, put it on the bottom of the screen.
+                  if ( fundingInfoLink.offset().top + fundingHoverDiv.innerHeight() > jQuery(document).height() )
+                  {
+                      fundingHoverDiv.css( "top", "auto" );
+                      fundingHoverDiv.css( "bottom", 1 );
+                      fundingHoverDiv.css( "position", "fixed" );
+                  }
+                  fundingHoverDiv.show();
+              }, function ()
+              {
+                  jQuery( 'div#FundingHover' ).hide();
+              } );
+
+              resetFundingHoverLink();
+          } );
+
+          function resetFundingHoverLink()
+          {
+              var link = jQuery( 'a#FundingInfoLink' );
+
+              if (link.length > 0) {    // bugfix 27206 20140619 BBD 
+                  jQuery('div#FundingHover').css({
+                      left: link.position().left + link.width() + 10,
+                      top: link.position().top - 10,
+                      bottom: "auto",
+                      position: "absolute"
+                  });
+              }
+          }
+      } );
+      //Bugfix 30368 WP 20160804
+      // TT#31416 20170516 VP, corrected jQuery selection by Id
+      function checkSavedState(id) {
+          var $hdnAmdWasChecked = $('#hdnAMDWasChecked_' + id);
+          if ($hdnAmdWasChecked.val() === 'True') {
+              return;
+          }
+          
+          if($hdnAmdWasChecked.val() === 'Save'){
+              $hdnAmdWasChecked.val('');
+          } else {
+              $hdnAmdWasChecked.val('Save');
+          }
+      }
+
+      // 14.0-10 2016-09-19 MattM
+      function validatePage(target)
+      {
+          if (typeof Page_ClientValidate == "function")
+          {
+              Page_ClientValidate();
+              if (!Page_IsValid)
+              {
+                  var message = "";
+                  for (i = 0; i < Page_Validators.length; i++)
+                  {
+                      if (!Page_Validators[i].isvalid)
+                      {
+                          message += "- " + Page_Validators[i].errormessage + "<br/>";
+                      }
+                  }
+                  $("#errorDialog")[0].showDialog(message);
+                  return false;
+              }
+          }
+
+          var pageValid = true;
+
+          if (typeof validateGlobalMSID == 'function')
+          {
+              pageValid = validateGlobalMSID(target);
+          }
+
+          if (typeof validateDOI == 'function')
+          {
+              pageValid = pageValid && validateDOI(target);
+          }
+
+          if (pageValid)
+          {
+              __doPostBack(target);
+              jQuery('#btnSave1, #btnSave2, #btnSaveAndClose1, #btnSaveAndClose2').prop("disabled", true);
+          }
+
+          return false;
+      }
+  </script>
+    
+
+<script type="text/javascript">
+//<![CDATA[
+
+theForm.oldSubmit = theForm.submit;
+theForm.submit = WebForm_SaveScrollPositionSubmit;
+
+theForm.oldOnSubmit = theForm.onsubmit;
+theForm.onsubmit = WebForm_SaveScrollPositionOnSubmit;
+//]]>
+</script>
+</form>
+	<script type="text/javascript" >
+		if (typeof pageDataTracker !== 'undefined') {
+			RetrieveAnalyticsData();
+		}
+	</script>
+
+</body>
+</html>
