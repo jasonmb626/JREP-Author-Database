@@ -1,0 +1,997 @@
+
+
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+<head>
+	<title>History Details</title>
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+
+    <link rel="stylesheet" type="text/css" href="cssSiteStyle.aspx" />
+    <link rel="stylesheet" type="text/css" href="cssJQueryDialog.aspx" />
+
+	<style type="text/css">
+		.centered table
+		{
+			margin: 0 auto;
+		}
+        .activeSubFlagHistory
+        {
+            color: red;
+        }
+	</style>
+
+    <script type="text/javascript">
+//<![CDATA[
+
+function FormatString(stringToFormat, replacementValues)
+{
+	return stringToFormat.replace(/{([0-9]+)}/g, function(wholematch, firstmatch)
+		  { var i = +firstmatch; return i < replacementValues.length ? replacementValues[i] : wholematch; }
+		);
+}
+
+
+
+function EscapeAttributeValue(value) 
+{
+
+        return value.replace(/&/g, '&amp;')
+                    .replace(/'/g, "&apos;")
+                    .replace(/"/g, '&quot;')
+                    .replace(/</g, '&lt;')
+                    .replace(/>/g, '&gt;');
+}
+
+//]]>
+</script>
+
+<script type="text/javascript" src="/jrep/WebUserControls/ClientJScript/translatedClientutil.aspx?lang=en%2DUS"></script>
+<script type="text/javascript" src="/jrep/ClientScript/clientutil.aspx"></script>
+
+<script src="/jrep/ClientScript/jquery.js" type="text/javascript"></script>
+<script src="/jrep/ClientScript/jquery-ui.js" type="text/javascript"></script>   
+
+
+
+    <script type="text/javascript" src="ClientScript/MSPFunctions.js"></script>
+
+	<script type="text/javascript">
+		/***********************************************************************
+		* 7.0-39	TimH	20090424
+		* Navigate to the Add External Correspondence Page, providing
+		* info needed to add a new External Correspondence record.
+		***********************************************************************/
+		function AddExternalCorrespondence(externalCorrespType)
+		{
+			var hdnExternalCorrespondenceType = document.getElementById("hdnExternalCorrespondenceType");
+			hdnExternalCorrespondenceType.value = "" + externalCorrespType;
+
+			var hdnLetterSecurityID = document.getElementById("hdnLetterSecurityID");
+			hdnLetterSecurityID.value = "";
+
+			document.frmDocHistory.submit();
+		}
+
+		/***********************************************************************
+		* 7.0-39	TimH	20090424
+		* Edit or Remove the External Correspondence specified by the
+		* Edit or Remove hyperlink clicked by the user.
+		***********************************************************************/
+		function EditExternalCorrespondence(externalCorrespondenceID, externalCorrespType, remove, letterSecurityID)
+		{
+			var hdnExternalCorrespondenceID = document.getElementById("hdnExternalCorrespondenceID");
+			hdnExternalCorrespondenceID.value = "" + externalCorrespondenceID;
+
+			var hdnExternalCorrespondenceType = document.getElementById("hdnExternalCorrespondenceType");
+			hdnExternalCorrespondenceType.value = "" + externalCorrespType;
+
+			var hdnLetterSecurityID = document.getElementById("hdnLetterSecurityID");
+			hdnLetterSecurityID.value = letterSecurityID;
+
+			var hdnRemove = document.getElementById("hdnRemove");
+			hdnRemove.value = remove;
+
+			if(hdnRemove.value == "1")
+			{
+                var okAction = function ()
+                {
+					document.frmDocHistory.submit();	
+                }
+                $("#warningDialog")[0].showDialog('Removing the correspondence cannot be undone.\x0a\x3cbr\x2f\x3e\x3cbr\x2f\x3e\x0aClick Cancel to return to the History page without deleting the correspondence.\x0a\x3cbr\x2f\x3eClick OK to remove this item of correspondence.', okAction);
+                return;
+			}
+			else if(hdnRemove.value == "0")
+			{
+				document.frmDocHistory.submit();
+			}
+		}
+
+		/***********************************************************************
+		* 7.0-39	TimH	20090424
+		* In a new popup, View a read only version of the External Correspondence specified by the
+		* External Correspondence Description hyperlink clicked by the user.
+		***********************************************************************/
+		function ViewExternalCorrespondence(externalCorrespondenceID, externalCorrespType, letterSecurityID)
+		{
+			var sNavUrl = "DotNetPopUps/ViewExternalCorrespondence.aspx";
+			sNavUrl += "?hdnExternalCorrespondenceID=" + externalCorrespondenceID;
+			sNavUrl += "&hdnExternalCorrespondenceType=" + externalCorrespType;
+			sNavUrl += "&hdnLetterSecurityID=" + letterSecurityID;
+			sNavUrl += "&hdnAssociatedEntityType=" + EXT_CORRES_ASSOC_TYPE_SUBMISSION;
+
+			openCenterWin(sNavUrl, 'ViewExternalCorrespondence', 1, 1, 0, 0, 0, 0);
+		}
+
+		function resendEditorialStatus(statHistID, notLatest)
+		{
+            if (notLatest)
+            {
+                var okAction = function ()
+                {
+					resendStatus(statHistID);	
+                }
+                $("#warningDialog")[0].showDialog('The Status you are attempting to resend is not the most recent status. Do you want to continue\x3f', okAction);
+                return;
+            }
+            else
+            {
+                resendStatus(statHistID);
+            }
+        }
+        function resendStatus(statHistID)
+        {
+            // Resend status
+		    var documentID = "4857";
+		    var exportType = 4;
+		    var operatorID = "217520";
+		    var proxyOperatorID = "";
+		    if (proxyOperatorID != "")
+		    {
+		        operatorID = proxyOperatorID;
+		    }
+		    resendMSPEditorialStatus(documentID, exportType, operatorID, statHistID, "");
+        }
+
+		function displayOverlay(text) {
+		    $("#modalDiv").text(text);
+		    $("#modalDiv").dialog({
+	            title: '',
+	            resizable: true, modal: true, buttons: [{ text: 'OK',
+	                click: function () { $(this).dialog("close"); }
+	            }], closeText: '',
+
+	            open: function ()
+	            {
+	                $(this).dialog('widget').find(".ui-dialog-titlebar-close").hide();
+	                $(this).dialog({ position: 'center' });
+	            }
+
+	        });
+
+	        return false;
+		}
+	</script>
+    
+</head>
+<body>
+
+	<form name="frmDocHistory" method="post" id="frmDocHistory" action="DotNetPopUps/AddEditExternalCorrespondence.aspx">
+	<div class="centered">
+	    <input type="hidden" id="hdnAssociatedEntityID" name="hdnAssociatedEntityID" value="4857" />
+	    <input type="hidden" id="hdnLetterSecurityID" name="hdnLetterSecurityID" value="" />
+	    <input type="hidden" id="hdnAssociatedEntityType" name="hdnAssociatedEntityType" value="1" />
+	    <input type="hidden" id="hdnExternalCorrespondenceID" name="hdnExternalCorrespondenceID" value="" />
+	    <input type="hidden" id="hdnExternalCorrespondenceType" name="hdnExternalCorrespondenceType" value=""/>
+	    <input type="hidden" id="hdnRemove" name="hdnRemove" value="" />
+	    <input type="hidden" id="hdnReturnPage" name="hdnReturnPage" value="doc_history.asp" />
+	    <input type="hidden" id="hdnAttachmentGroupID" name="hdnAttachmentGroupID" value="" />
+		<h3>
+			History for Manuscript Number: JREP-D-19-00073 &quot;Allies, Antagonists, or Ambivalent? Exploring Latino Attitudes about the Black Lives Matter Movement&quot;
+		</h3>
+		<a href="#status">Status History</a>&nbsp;&nbsp;&nbsp;<a href="#correspondence">Correspondence History</a>&nbsp;&nbsp;&nbsp;
+
+
+		<br /><br /><a href="docHistoryStatusTypeView.asp?docid=4857">Switch to Status Type View</a>
+
+		
+		<br /><br /><input type="button" name="close" value="Close" onclick="window.close();" />
+	</div>
+
+	<div>
+		<br /><br />
+		
+			<fieldset>
+				<legend><a name="status"></a>STATUS HISTORY</legend>
+				
+					<table border="0" cellpadding="0" cellspacing="0" width="97%" class="datatable">
+						<tr>
+							<th>Status Date</th>
+							<th>Document Status</th>
+							
+							<th>Status Days</th>
+							<th>Role Family</th>
+							<th>Revision </th>
+							<th>Operator</th>
+						</tr>
+
+						
+							<tr>
+								
+								<td>Jul  8 2019  1:36PM</td>
+
+								
+								<td>
+									Completed Reject
+								</td>
+
+								
+								<td>----</td>
+
+								
+								<td>
+									EDITOR
+								</td>
+
+								
+								<td>0</td>
+
+								
+								<td>Alexandra Filindra
+								</td>
+							</tr>
+							
+							<tr>
+								
+								<td>Jul  8 2019  1:36PM</td>
+
+								
+								<td>
+									Reject
+								</td>
+
+								
+								<td>----</td>
+
+								
+								<td>
+									NOBODY
+								</td>
+
+								
+								<td>0</td>
+
+								
+								<td>Alexandra Filindra
+								</td>
+							</tr>
+							
+							<tr>
+								
+								<td>Jul  8 2019  1:35PM</td>
+
+								
+								<td>
+									Decision in Process
+								</td>
+
+								
+								<td>----</td>
+
+								
+								<td>
+									EDITOR
+								</td>
+
+								
+								<td>0</td>
+
+								
+								<td>Alexandra Filindra
+								</td>
+							</tr>
+							
+							<tr>
+								
+								<td>Jun 18 2019  5:40PM</td>
+
+								
+								<td>
+									With Editor
+								</td>
+
+								
+								<td>19</td>
+
+								
+								<td>
+									EDITOR
+								</td>
+
+								
+								<td>0</td>
+
+								
+								<td>Maureen Heffern Ponicki
+								</td>
+							</tr>
+							
+							<tr>
+								
+								<td>Jun 11 2019  3:58PM</td>
+
+								
+								<td>
+									Manuscript Submitted
+								</td>
+
+								
+								<td>7</td>
+
+								
+								<td>
+									EDITOR
+								</td>
+
+								
+								<td>0</td>
+
+								
+								<td>Alvaro Jose Corral, Ph.D.
+								</td>
+							</tr>
+							
+							<tr>
+								
+								<td>Jun 11 2019  3:57PM</td>
+
+								
+								<td>
+									Needs Approval
+								</td>
+
+								
+								<td>----</td>
+
+								
+								<td>
+									AUTHOR
+								</td>
+
+								
+								<td>0</td>
+
+								
+								<td>Alvaro Jose Corral, Ph.D.
+								</td>
+							</tr>
+							
+							<tr>
+								
+								<td>Jun 11 2019  3:56PM</td>
+
+								
+								<td>
+									Building PDF
+								</td>
+
+								
+								<td>----</td>
+
+								
+								<td>
+									AUTHOR
+								</td>
+
+								
+								<td>0</td>
+
+								
+								<td>Alvaro Jose Corral, Ph.D.
+								</td>
+							</tr>
+							
+							<tr>
+								
+								<td>Jun 11 2019  3:54PM</td>
+
+								
+								<td>
+									Incomplete
+								</td>
+
+								
+								<td>----</td>
+
+								
+								<td>
+									AUTHOR
+								</td>
+
+								
+								<td>0</td>
+
+								
+								<td>Alvaro Jose Corral, Ph.D.
+								</td>
+							</tr>
+							
+							<tr>
+								
+								<td>Jun 11 2019  2:19PM</td>
+
+								
+								<td>
+									Sent Back to Author
+								</td>
+
+								
+								<td>----</td>
+
+								
+								<td>
+									AUTHOR
+								</td>
+
+								
+								<td>0</td>
+
+								
+								<td>Maureen Heffern Ponicki
+								</td>
+							</tr>
+							
+							<tr>
+								
+								<td>Jun  4 2019  3:28PM</td>
+
+								
+								<td>
+									Manuscript Submitted
+								</td>
+
+								
+								<td>7</td>
+
+								
+								<td>
+									EDITOR
+								</td>
+
+								
+								<td>0</td>
+
+								
+								<td>Alvaro Jose Corral, Ph.D.
+								</td>
+							</tr>
+							
+							<tr>
+								
+								<td>Jun  4 2019  3:23PM</td>
+
+								
+								<td>
+									Needs Approval
+								</td>
+
+								
+								<td>----</td>
+
+								
+								<td>
+									AUTHOR
+								</td>
+
+								
+								<td>0</td>
+
+								
+								<td>Alvaro Jose Corral, Ph.D.
+								</td>
+							</tr>
+							
+							<tr>
+								
+								<td>Jun  4 2019  3:23PM</td>
+
+								
+								<td>
+									Building PDF
+								</td>
+
+								
+								<td>----</td>
+
+								
+								<td>
+									AUTHOR
+								</td>
+
+								
+								<td>0</td>
+
+								
+								<td>Alvaro Jose Corral, Ph.D.
+								</td>
+							</tr>
+							
+							<tr>
+								
+								<td>Jun  4 2019  3:22PM</td>
+
+								
+								<td>
+									Incomplete
+								</td>
+
+								
+								<td>----</td>
+
+								
+								<td>
+									AUTHOR
+								</td>
+
+								
+								<td>0</td>
+
+								
+								<td>Alvaro Jose Corral, Ph.D.
+								</td>
+							</tr>
+							
+							<tr>
+								
+								<td>Jun  4 2019  3:20PM</td>
+
+								
+								<td>
+									Needs Approval
+								</td>
+
+								
+								<td>----</td>
+
+								
+								<td>
+									AUTHOR
+								</td>
+
+								
+								<td>0</td>
+
+								
+								<td>Alvaro Jose Corral, Ph.D.
+								</td>
+							</tr>
+							
+							<tr>
+								
+								<td>Jun  4 2019  3:20PM</td>
+
+								
+								<td>
+									Building PDF
+								</td>
+
+								
+								<td>----</td>
+
+								
+								<td>
+									
+								</td>
+
+								
+								<td>0</td>
+
+								
+								<td>Alvaro Jose Corral, Ph.D.
+								</td>
+							</tr>
+							
+					</table>
+					
+			</fieldset>
+			<br />
+			<br />
+		
+			<fieldset>
+				<legend><a name="correspondence"></a>CORRESPONDENCE HISTORY</legend>
+				
+						<div class="buttonAlign" style="padding-bottom:4px;">
+							<input type="button" name="btnAddExtEditorialCorrespondence" value="Add&#32;Editorial&#32;Correspondence" onclick="AddExternalCorrespondence(1);" />
+							
+						</div>
+					
+					<table border="0" cellpadding="0" cellspacing="0" width="97%" class="datatable">
+						<tr>
+							<th>Correspondence Date</th>
+							<th>Letter</th>
+							<th>Recipient</th>
+							<th>Status</th>
+                            
+							<th>Revision</th>
+							<th>Operator</th>
+						</tr>
+
+						
+							<tr>
+								
+								<td>08 Jul 2019</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(110970, '{9B72D821-2ECF-4133-A095-F3F5A79B5953}')" title="Your Submission to JREP">Editor Decision - Reject</a></td><td>Alvaro Jose Corral, Ph.D.</td>
+								<td>
+									Reject
+
+								</td>
+
+                                
+								<td>
+									0
+								</td>
+
+								
+								<td>Alexandra Filindra
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>08 Jul 2019</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(110969, '{02E8D584-1FE7-4CE3-9B64-306270C617A9}')" title="To assist. Editor: Decision Notification">Journal Office Notice Editor Decision Notification</a></td><td>Maureen Heffern Ponicki</td>
+								<td>
+									Decision in Process
+
+								</td>
+
+                                
+								<td>
+									0
+								</td>
+
+								
+								<td>Alexandra Filindra
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>18 Jun 2019</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(110710, '{017E22C8-699A-4A3E-9493-41607EC9EABE}')" title="You have a new Editor Assignment for JREP">Editor Assignment</a></td><td>Alexandra Filindra</td>
+								<td>
+									With Editor
+
+								</td>
+
+                                
+								<td>
+									0
+								</td>
+
+								
+								<td>Maureen Heffern Ponicki
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>11 Jun 2019</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(110658, '{2FC46FCB-5990-4D75-A8FF-681C384FE8BB}')" title="Your JREP Submission">Author Notice Technical Check Failed</a></td><td>Alvaro Jose Corral, Ph.D.</td>
+								<td>
+									Sent Back to Author
+
+								</td>
+
+                                
+								<td>
+									0
+								</td>
+
+								
+								<td>Maureen Heffern Ponicki
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>04 Jun 2019</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(110601, '{1AB2DDDD-FDE8-4AF7-9014-AF9D127C2ED2}')" title="REP: New Manuscript Submission ">Journal Office Notice New Submission</a></td><td>Maureen Heffern Ponicki</td>
+								<td>
+									Manuscript Submitted
+
+								</td>
+
+                                
+								<td>
+									0
+								</td>
+
+								
+								<td>Alvaro Jose Corral, Ph.D.
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>04 Jun 2019</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(110600, '{259F9D9A-B7B0-44B4-B156-BA2F474C7F85}')" title="REP: New Manuscript Submission ">Journal Office Notice New Submission</a></td><td>Beyza Buyuker</td>
+								<td>
+									Manuscript Submitted
+
+								</td>
+
+                                
+								<td>
+									0
+								</td>
+
+								
+								<td>Alvaro Jose Corral, Ph.D.
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>04 Jun 2019</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(110599, '{DEA70392-1F4A-4E88-9A70-5743CDD946EB}')" title="REP: New Manuscript Submission ">Journal Office Notice New Submission</a></td><td>Nhat-Dang Do</td>
+								<td>
+									Manuscript Submitted
+
+								</td>
+
+                                
+								<td>
+									0
+								</td>
+
+								
+								<td>Alvaro Jose Corral, Ph.D.
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>04 Jun 2019</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(110598, '{5C459CD9-025F-4038-BED3-02B05EDDA981}')" title="REP: New Manuscript Submission ">Journal Office Notice New Submission</a></td><td>Dan Gibson</td>
+								<td>
+									Manuscript Submitted
+
+								</td>
+
+                                
+								<td>
+									0
+								</td>
+
+								
+								<td>Alvaro Jose Corral, Ph.D.
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>04 Jun 2019</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(110597, '{654CAA79-4DB9-4A57-B0BB-6B09BBD1880A}')" title="REP: New Manuscript Submission ">Journal Office Notice New Submission</a></td><td>Allan Colbern, Ph.D.</td>
+								<td>
+									Manuscript Submitted
+
+								</td>
+
+                                
+								<td>
+									0
+								</td>
+
+								
+								<td>Alvaro Jose Corral, Ph.D.
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>04 Jun 2019</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(110596, '{855A3FE2-3344-4201-B368-D54BC8A8295B}')" title="REP: New Manuscript Submission ">Journal Office Notice New Submission</a></td><td>Allan Colbern, Ph.D.</td>
+								<td>
+									Manuscript Submitted
+
+								</td>
+
+                                
+								<td>
+									0
+								</td>
+
+								
+								<td>Alvaro Jose Corral, Ph.D.
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>04 Jun 2019</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(110595, '{15FD556A-079A-484E-B0FD-5E78ADFDEBAC}')" title="REP: New Manuscript Submission ">Journal Office Notice New Submission</a></td><td>Alexandra Filindra</td>
+								<td>
+									Manuscript Submitted
+
+								</td>
+
+                                
+								<td>
+									0
+								</td>
+
+								
+								<td>Alvaro Jose Corral, Ph.D.
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>04 Jun 2019</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(110594, '{83CC8F63-7B9C-44B4-B152-E3DE1C6C7E7E}')" title="REP: New Manuscript Submission ">Journal Office Notice New Submission</a></td><td>S. Karthick Ramakrishnan</td>
+								<td>
+									Manuscript Submitted
+
+								</td>
+
+                                
+								<td>
+									0
+								</td>
+
+								
+								<td>Alvaro Jose Corral, Ph.D.
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>04 Jun 2019</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(110593, '{B58C3D3F-81E2-46E4-96C8-25760524DE4E}')" title="REP: New Manuscript Submission ">Journal Office Notice New Submission</a></td><td>Marisa Abrajano</td>
+								<td>
+									Manuscript Submitted
+
+								</td>
+
+                                
+								<td>
+									0
+								</td>
+
+								
+								<td>Alvaro Jose Corral, Ph.D.
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>04 Jun 2019</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(110592, '{8686BC92-F785-49CC-8899-88445C97B673}')" title="REP: New Manuscript Submission ">Journal Office Notice New Submission</a></td><td>Jane Y. Junn, PHD</td>
+								<td>
+									Manuscript Submitted
+
+								</td>
+
+                                
+								<td>
+									0
+								</td>
+
+								
+								<td>Alvaro Jose Corral, Ph.D.
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>04 Jun 2019</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(110591, '{239D88CF-6045-4030-897D-C83A747E65EE}')" title="Submission Confirmation for JREP">Author Submits New Manuscript Confirmation</a></td><td>Alvaro Jose Corral, Ph.D.</td>
+								<td>
+									Manuscript Submitted
+
+								</td>
+
+                                
+								<td>
+									0
+								</td>
+
+								
+								<td>Alvaro Jose Corral, Ph.D.
+								</td>
+
+							
+							</tr>
+							
+					</table>
+					
+			</fieldset>
+			
+	</div>
+	<div class="centered">
+		
+		<br /><br /><input type="button" name="close" value="Close" onclick="window.close();" />
+		<br /><br />
+		<a href="#status">Status History</a>&nbsp;&nbsp;&nbsp;<a href="#correspondence">Correspondence History</a>&nbsp;&nbsp;&nbsp;
+		<br /><br /><a href="docHistoryStatusTypeView.asp?docid=4857">Switch to Status Type View</a>
+	</div>
+
+    <div id="modalDiv" style="display:none"></div>
+
+</form>
+
+<script type="text/javascript">
+    if (typeof pageDataTracker !== 'undefined') {
+        RetrieveAnalyticsData();
+    }
+</script>
+    <script type="text/javascript">
+        $(document).ready(function() 
+	    {
+	        url = 'ajax/RenderControlToPage.ashx?control=DialogWidgetControl&id=warningDialog&titleResourceId=Common.Text.Warning&titleBarIcon=warning&showTitleBar=true&showTitleBarClose=false&dialogStyle=confirm&width=400';
+	        $.get(url, function (data) 
+	        {
+	            $('body').append(data);
+	        });
+        });
+    </script>
+</body>
+</html>

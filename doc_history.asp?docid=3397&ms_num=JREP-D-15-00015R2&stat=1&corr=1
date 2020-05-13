@@ -1,0 +1,1525 @@
+
+
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+<head>
+	<title>History Details</title>
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+
+    <link rel="stylesheet" type="text/css" href="cssSiteStyle.aspx" />
+    <link rel="stylesheet" type="text/css" href="cssJQueryDialog.aspx" />
+
+	<style type="text/css">
+		.centered table
+		{
+			margin: 0 auto;
+		}
+        .activeSubFlagHistory
+        {
+            color: red;
+        }
+	</style>
+
+    <script type="text/javascript">
+//<![CDATA[
+
+function FormatString(stringToFormat, replacementValues)
+{
+	return stringToFormat.replace(/{([0-9]+)}/g, function(wholematch, firstmatch)
+		  { var i = +firstmatch; return i < replacementValues.length ? replacementValues[i] : wholematch; }
+		);
+}
+
+
+
+function EscapeAttributeValue(value) 
+{
+
+        return value.replace(/&/g, '&amp;')
+                    .replace(/'/g, "&apos;")
+                    .replace(/"/g, '&quot;')
+                    .replace(/</g, '&lt;')
+                    .replace(/>/g, '&gt;');
+}
+
+//]]>
+</script>
+
+<script type="text/javascript" src="/jrep/WebUserControls/ClientJScript/translatedClientutil.aspx?lang=en%2DUS"></script>
+<script type="text/javascript" src="/jrep/ClientScript/clientutil.aspx"></script>
+
+<script src="/jrep/ClientScript/jquery.js" type="text/javascript"></script>
+<script src="/jrep/ClientScript/jquery-ui.js" type="text/javascript"></script>   
+
+
+
+    <script type="text/javascript" src="ClientScript/MSPFunctions.js"></script>
+
+	<script type="text/javascript">
+		/***********************************************************************
+		* 7.0-39	TimH	20090424
+		* Navigate to the Add External Correspondence Page, providing
+		* info needed to add a new External Correspondence record.
+		***********************************************************************/
+		function AddExternalCorrespondence(externalCorrespType)
+		{
+			var hdnExternalCorrespondenceType = document.getElementById("hdnExternalCorrespondenceType");
+			hdnExternalCorrespondenceType.value = "" + externalCorrespType;
+
+			var hdnLetterSecurityID = document.getElementById("hdnLetterSecurityID");
+			hdnLetterSecurityID.value = "";
+
+			document.frmDocHistory.submit();
+		}
+
+		/***********************************************************************
+		* 7.0-39	TimH	20090424
+		* Edit or Remove the External Correspondence specified by the
+		* Edit or Remove hyperlink clicked by the user.
+		***********************************************************************/
+		function EditExternalCorrespondence(externalCorrespondenceID, externalCorrespType, remove, letterSecurityID)
+		{
+			var hdnExternalCorrespondenceID = document.getElementById("hdnExternalCorrespondenceID");
+			hdnExternalCorrespondenceID.value = "" + externalCorrespondenceID;
+
+			var hdnExternalCorrespondenceType = document.getElementById("hdnExternalCorrespondenceType");
+			hdnExternalCorrespondenceType.value = "" + externalCorrespType;
+
+			var hdnLetterSecurityID = document.getElementById("hdnLetterSecurityID");
+			hdnLetterSecurityID.value = letterSecurityID;
+
+			var hdnRemove = document.getElementById("hdnRemove");
+			hdnRemove.value = remove;
+
+			if(hdnRemove.value == "1")
+			{
+                var okAction = function ()
+                {
+					document.frmDocHistory.submit();	
+                }
+                $("#warningDialog")[0].showDialog('Removing the correspondence cannot be undone.\x0a\x3cbr\x2f\x3e\x3cbr\x2f\x3e\x0aClick Cancel to return to the History page without deleting the correspondence.\x0a\x3cbr\x2f\x3eClick OK to remove this item of correspondence.', okAction);
+                return;
+			}
+			else if(hdnRemove.value == "0")
+			{
+				document.frmDocHistory.submit();
+			}
+		}
+
+		/***********************************************************************
+		* 7.0-39	TimH	20090424
+		* In a new popup, View a read only version of the External Correspondence specified by the
+		* External Correspondence Description hyperlink clicked by the user.
+		***********************************************************************/
+		function ViewExternalCorrespondence(externalCorrespondenceID, externalCorrespType, letterSecurityID)
+		{
+			var sNavUrl = "DotNetPopUps/ViewExternalCorrespondence.aspx";
+			sNavUrl += "?hdnExternalCorrespondenceID=" + externalCorrespondenceID;
+			sNavUrl += "&hdnExternalCorrespondenceType=" + externalCorrespType;
+			sNavUrl += "&hdnLetterSecurityID=" + letterSecurityID;
+			sNavUrl += "&hdnAssociatedEntityType=" + EXT_CORRES_ASSOC_TYPE_SUBMISSION;
+
+			openCenterWin(sNavUrl, 'ViewExternalCorrespondence', 1, 1, 0, 0, 0, 0);
+		}
+
+		function resendEditorialStatus(statHistID, notLatest)
+		{
+            if (notLatest)
+            {
+                var okAction = function ()
+                {
+					resendStatus(statHistID);	
+                }
+                $("#warningDialog")[0].showDialog('The Status you are attempting to resend is not the most recent status. Do you want to continue\x3f', okAction);
+                return;
+            }
+            else
+            {
+                resendStatus(statHistID);
+            }
+        }
+        function resendStatus(statHistID)
+        {
+            // Resend status
+		    var documentID = "3397";
+		    var exportType = 4;
+		    var operatorID = "217520";
+		    var proxyOperatorID = "";
+		    if (proxyOperatorID != "")
+		    {
+		        operatorID = proxyOperatorID;
+		    }
+		    resendMSPEditorialStatus(documentID, exportType, operatorID, statHistID, "");
+        }
+
+		function displayOverlay(text) {
+		    $("#modalDiv").text(text);
+		    $("#modalDiv").dialog({
+	            title: '',
+	            resizable: true, modal: true, buttons: [{ text: 'OK',
+	                click: function () { $(this).dialog("close"); }
+	            }], closeText: '',
+
+	            open: function ()
+	            {
+	                $(this).dialog('widget').find(".ui-dialog-titlebar-close").hide();
+	                $(this).dialog({ position: 'center' });
+	            }
+
+	        });
+
+	        return false;
+		}
+	</script>
+    
+</head>
+<body>
+
+	<form name="frmDocHistory" method="post" id="frmDocHistory" action="DotNetPopUps/AddEditExternalCorrespondence.aspx">
+	<div class="centered">
+	    <input type="hidden" id="hdnAssociatedEntityID" name="hdnAssociatedEntityID" value="3397" />
+	    <input type="hidden" id="hdnLetterSecurityID" name="hdnLetterSecurityID" value="" />
+	    <input type="hidden" id="hdnAssociatedEntityType" name="hdnAssociatedEntityType" value="1" />
+	    <input type="hidden" id="hdnExternalCorrespondenceID" name="hdnExternalCorrespondenceID" value="" />
+	    <input type="hidden" id="hdnExternalCorrespondenceType" name="hdnExternalCorrespondenceType" value=""/>
+	    <input type="hidden" id="hdnRemove" name="hdnRemove" value="" />
+	    <input type="hidden" id="hdnReturnPage" name="hdnReturnPage" value="doc_history.asp" />
+	    <input type="hidden" id="hdnAttachmentGroupID" name="hdnAttachmentGroupID" value="" />
+		<h3>
+			History for Manuscript Number: JREP-D-15-00015R2 &quot;Troubled taxonomies and the calculating state: &quot;Everyday&quot; categorizing and &quot;race-ethnicity&quot;&#8212; the Netherlands case&quot;
+		</h3>
+		<a href="#status">Status History</a>&nbsp;&nbsp;&nbsp;<a href="#correspondence">Correspondence History</a>&nbsp;&nbsp;&nbsp;
+
+
+		<br /><br /><a href="docHistoryStatusTypeView.asp?docid=3397">Switch to Status Type View</a>
+
+		
+		<br /><br /><input type="button" name="close" value="Close" onclick="window.close();" />
+	</div>
+
+	<div>
+		<br /><br />
+		
+			<fieldset>
+				<legend><a name="status"></a>STATUS HISTORY</legend>
+				
+					<table border="0" cellpadding="0" cellspacing="0" width="97%" class="datatable">
+						<tr>
+							<th>Status Date</th>
+							<th>Document Status</th>
+							
+							<th>Status Days</th>
+							<th>Role Family</th>
+							<th>Revision </th>
+							<th>Operator</th>
+						</tr>
+
+						
+							<tr>
+								
+								<td>Mar 21 2016 10:52PM</td>
+
+								
+								<td>
+									Completed Accept
+								</td>
+
+								
+								<td>----</td>
+
+								
+								<td>
+									EDITOR
+								</td>
+
+								
+								<td>2</td>
+
+								
+								<td>S. Karthick Ramakrishnan
+								</td>
+							</tr>
+							
+							<tr>
+								
+								<td>Mar 21 2016 10:51PM</td>
+
+								
+								<td>
+									Accept
+								</td>
+
+								
+								<td>----</td>
+
+								
+								<td>
+									EDITOR
+								</td>
+
+								
+								<td>2</td>
+
+								
+								<td>S. Karthick Ramakrishnan
+								</td>
+							</tr>
+							
+							<tr>
+								
+								<td>Mar 21 2016 10:51PM</td>
+
+								
+								<td>
+									Decision in Process
+								</td>
+
+								
+								<td>----</td>
+
+								
+								<td>
+									EDITOR
+								</td>
+
+								
+								<td>2</td>
+
+								
+								<td>S. Karthick Ramakrishnan
+								</td>
+							</tr>
+							
+							<tr>
+								
+								<td>Mar 21 2016 10:47PM</td>
+
+								
+								<td>
+									With Editor
+								</td>
+
+								
+								<td>----</td>
+
+								
+								<td>
+									EDITOR
+								</td>
+
+								
+								<td>2</td>
+
+								
+								<td>Allan Colbern, Ph.D.<br /><span class="proxy">[Proxied by S. Karthick Ramakrishnan]</span>
+								</td>
+							</tr>
+							
+							<tr>
+								
+								<td>Mar 21 2016  8:36AM</td>
+
+								
+								<td>
+									Revised Manuscript Submitted
+								</td>
+
+								
+								<td>----</td>
+
+								
+								<td>
+									EDITOR
+								</td>
+
+								
+								<td>2</td>
+
+								
+								<td>Dvora Yanow<br /><span class="proxy">[Proxied by S. Karthick Ramakrishnan]</span>
+								</td>
+							</tr>
+							
+							<tr>
+								
+								<td>Mar 21 2016  8:35AM</td>
+
+								
+								<td>
+									Revision Needs Approval
+								</td>
+
+								
+								<td>----</td>
+
+								
+								<td>
+									AUTHOR
+								</td>
+
+								
+								<td>2</td>
+
+								
+								<td>Dvora Yanow<br /><span class="proxy">[Proxied by S. Karthick Ramakrishnan]</span>
+								</td>
+							</tr>
+							
+							<tr>
+								
+								<td>Mar 21 2016  8:35AM</td>
+
+								
+								<td>
+									Building PDF
+								</td>
+
+								
+								<td>----</td>
+
+								
+								<td>
+									AUTHOR
+								</td>
+
+								
+								<td>2</td>
+
+								
+								<td>Dvora Yanow<br /><span class="proxy">[Proxied by S. Karthick Ramakrishnan]</span>
+								</td>
+							</tr>
+							
+							<tr>
+								
+								<td>Mar 21 2016  8:25AM</td>
+
+								
+								<td>
+									Incomplete
+								</td>
+
+								
+								<td>----</td>
+
+								
+								<td>
+									AUTHOR
+								</td>
+
+								
+								<td>2</td>
+
+								
+								<td>Dvora Yanow<br /><span class="proxy">[Proxied by S. Karthick Ramakrishnan]</span>
+								</td>
+							</tr>
+							
+							<tr>
+								
+								<td>Dec 26 2015  9:31PM</td>
+
+								
+								<td>
+									Revise
+								</td>
+
+								
+								<td>86</td>
+
+								
+								<td>
+									AUTHOR
+								</td>
+
+								
+								<td>1</td>
+
+								
+								<td>S. Karthick Ramakrishnan
+								</td>
+							</tr>
+							
+							<tr>
+								
+								<td>Dec 26 2015  9:31PM</td>
+
+								
+								<td>
+									Decision in Process
+								</td>
+
+								
+								<td>----</td>
+
+								
+								<td>
+									EDITOR
+								</td>
+
+								
+								<td>1</td>
+
+								
+								<td>S. Karthick Ramakrishnan
+								</td>
+							</tr>
+							
+							<tr>
+								
+								<td>Aug 27 2015 12:35PM</td>
+
+								
+								<td>
+									With Editor
+								</td>
+
+								
+								<td>121</td>
+
+								
+								<td>
+									EDITOR
+								</td>
+
+								
+								<td>1</td>
+
+								
+								<td>Allan Colbern, Ph.D.
+								</td>
+							</tr>
+							
+							<tr>
+								
+								<td>Aug 26 2015  9:42AM</td>
+
+								
+								<td>
+									Revised Manuscript Submitted
+								</td>
+
+								
+								<td>1</td>
+
+								
+								<td>
+									EDITOR
+								</td>
+
+								
+								<td>1</td>
+
+								
+								<td>Dvora Yanow
+								</td>
+							</tr>
+							
+							<tr>
+								
+								<td>Aug 26 2015  9:39AM</td>
+
+								
+								<td>
+									Revision Needs Approval
+								</td>
+
+								
+								<td>----</td>
+
+								
+								<td>
+									AUTHOR
+								</td>
+
+								
+								<td>1</td>
+
+								
+								<td>Dvora Yanow
+								</td>
+							</tr>
+							
+							<tr>
+								
+								<td>Aug 26 2015  9:39AM</td>
+
+								
+								<td>
+									Building PDF
+								</td>
+
+								
+								<td>----</td>
+
+								
+								<td>
+									AUTHOR
+								</td>
+
+								
+								<td>1</td>
+
+								
+								<td>Dvora Yanow
+								</td>
+							</tr>
+							
+							<tr>
+								
+								<td>Aug 26 2015  9:38AM</td>
+
+								
+								<td>
+									Incomplete
+								</td>
+
+								
+								<td>----</td>
+
+								
+								<td>
+									AUTHOR
+								</td>
+
+								
+								<td>1</td>
+
+								
+								<td>Dvora Yanow
+								</td>
+							</tr>
+							
+							<tr>
+								
+								<td>Aug 26 2015  9:35AM</td>
+
+								
+								<td>
+									Revision Needs Approval
+								</td>
+
+								
+								<td>----</td>
+
+								
+								<td>
+									AUTHOR
+								</td>
+
+								
+								<td>1</td>
+
+								
+								<td>Dvora Yanow
+								</td>
+							</tr>
+							
+							<tr>
+								
+								<td>Aug 26 2015  9:35AM</td>
+
+								
+								<td>
+									Building PDF
+								</td>
+
+								
+								<td>----</td>
+
+								
+								<td>
+									AUTHOR
+								</td>
+
+								
+								<td>1</td>
+
+								
+								<td>Dvora Yanow
+								</td>
+							</tr>
+							
+							<tr>
+								
+								<td>Aug 26 2015  9:00AM</td>
+
+								
+								<td>
+									Incomplete
+								</td>
+
+								
+								<td>----</td>
+
+								
+								<td>
+									AUTHOR
+								</td>
+
+								
+								<td>1</td>
+
+								
+								<td>Dvora Yanow
+								</td>
+							</tr>
+							
+							<tr>
+								
+								<td>Jul  8 2015  4:28PM</td>
+
+								
+								<td>
+									Revise
+								</td>
+
+								
+								<td>49</td>
+
+								
+								<td>
+									AUTHOR
+								</td>
+
+								
+								<td>0</td>
+
+								
+								<td>S. Karthick Ramakrishnan
+								</td>
+							</tr>
+							
+							<tr>
+								
+								<td>Jul  8 2015  4:28PM</td>
+
+								
+								<td>
+									Decision in Process
+								</td>
+
+								
+								<td>----</td>
+
+								
+								<td>
+									REVIEWER
+								</td>
+
+								
+								<td>0</td>
+
+								
+								<td>S. Karthick Ramakrishnan
+								</td>
+							</tr>
+							
+							<tr>
+								
+								<td>Feb 12 2015  9:15AM</td>
+
+								
+								<td>
+									Under Review
+								</td>
+
+								
+								<td>146</td>
+
+								
+								<td>
+									REVIEWER
+								</td>
+
+								
+								<td>0</td>
+
+								
+								<td>S. Karthick Ramakrishnan
+								</td>
+							</tr>
+							
+							<tr>
+								
+								<td>Feb  7 2015  3:12AM</td>
+
+								
+								<td>
+									With Editor
+								</td>
+
+								
+								<td>5</td>
+
+								
+								<td>
+									EDITOR
+								</td>
+
+								
+								<td>0</td>
+
+								
+								<td>Andrea Silva, PhD
+								</td>
+							</tr>
+							
+							<tr>
+								
+								<td>Feb  5 2015 12:48PM</td>
+
+								
+								<td>
+									Manuscript Submitted
+								</td>
+
+								
+								<td>1</td>
+
+								
+								<td>
+									EDITOR
+								</td>
+
+								
+								<td>0</td>
+
+								
+								<td>Dvora Yanow
+								</td>
+							</tr>
+							
+							<tr>
+								
+								<td>Feb  5 2015 12:46PM</td>
+
+								
+								<td>
+									Needs Approval
+								</td>
+
+								
+								<td>----</td>
+
+								
+								<td>
+									AUTHOR
+								</td>
+
+								
+								<td>0</td>
+
+								
+								<td>Dvora Yanow
+								</td>
+							</tr>
+							
+							<tr>
+								
+								<td>Feb  5 2015 12:45PM</td>
+
+								
+								<td>
+									Building PDF
+								</td>
+
+								
+								<td>----</td>
+
+								
+								<td>
+									AUTHOR
+								</td>
+
+								
+								<td>0</td>
+
+								
+								<td>Dvora Yanow
+								</td>
+							</tr>
+							
+							<tr>
+								
+								<td>Feb  5 2015 12:25PM</td>
+
+								
+								<td>
+									Incomplete
+								</td>
+
+								
+								<td>----</td>
+
+								
+								<td>
+									AUTHOR
+								</td>
+
+								
+								<td>0</td>
+
+								
+								<td>Dvora Yanow
+								</td>
+							</tr>
+							
+					</table>
+					
+			</fieldset>
+			<br />
+			<br />
+		
+			<fieldset>
+				<legend><a name="correspondence"></a>CORRESPONDENCE HISTORY</legend>
+				
+						<div class="buttonAlign" style="padding-bottom:4px;">
+							<input type="button" name="btnAddExtEditorialCorrespondence" value="Add&#32;Editorial&#32;Correspondence" onclick="AddExternalCorrespondence(1);" />
+							
+						</div>
+					
+					<table border="0" cellpadding="0" cellspacing="0" width="97%" class="datatable">
+						<tr>
+							<th>Correspondence Date</th>
+							<th>Letter</th>
+							<th>Recipient</th>
+							<th>Status</th>
+                            
+							<th>Revision</th>
+							<th>Operator</th>
+						</tr>
+
+						
+							<tr>
+								
+								<td>21 Mar 2016</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(100652, '{1845BD3A-713B-4D69-A86F-8C1369801EA2}')" title="JREP %MS_NUMBER% is Accepted for Publication">Publisher Notification of Accepted Manuscript</a></td><td>Jon Samuel Geffner</td>
+								<td>
+									Completed Accept
+
+								</td>
+
+                                
+								<td>
+									2
+								</td>
+
+								
+								<td>S. Karthick Ramakrishnan
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>21 Mar 2016</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(100651, '{122DEB4D-C92F-49F6-BD0A-127466A24A29}')" title="JREP %MS_NUMBER% is Accepted for Publication">Publisher Notification of Accepted Manuscript</a></td><td>Cambridge Production</td>
+								<td>
+									Completed Accept
+
+								</td>
+
+                                
+								<td>
+									2
+								</td>
+
+								
+								<td>S. Karthick Ramakrishnan
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>21 Mar 2016</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(100649, '{A6F5B6D0-ACFD-41EB-8B71-05336C2A69A1}')" title="Your Submission to JREP">Editor Decision - Accept</a></td><td>Dvora Yanow</td>
+								<td>
+									Accept
+
+								</td>
+
+                                
+								<td>
+									2
+								</td>
+
+								
+								<td>S. Karthick Ramakrishnan
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>21 Mar 2016</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(100644, '{CA94A513-7F16-4549-8E4E-0A1FAD12C41F}')" title="You have a new Editor Assignment for JREP">Editor Assignment</a></td><td>S. Karthick Ramakrishnan</td>
+								<td>
+									With Editor
+
+								</td>
+
+                                
+								<td>
+									2
+								</td>
+
+								
+								<td>Allan Colbern, Ph.D.<br /><span class="proxy">[Proxied by S. Karthick Ramakrishnan]</span>
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>21 Mar 2016</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(100633, '{A1C22669-BEAC-4B44-9561-A35378E829DE}')" title="Revision Confirmation for JREP">Author Submits Revision Confirmation</a></td><td>Dvora Yanow</td>
+								<td>
+									Revised Manuscript Submitted
+
+								</td>
+
+                                
+								<td>
+									2
+								</td>
+
+								
+								<td>Dvora Yanow<br /><span class="proxy">[Proxied by S. Karthick Ramakrishnan]</span>
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>26 Dec 2015</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(100237, '{004D28A5-65BB-4908-A2B3-93A45B0BC933}')" title="Conditional accept: Your JREP Submission">Editor Decision - Conditional Accept</a></td><td>Dvora Yanow</td>
+								<td>
+									Revise
+
+								</td>
+
+                                
+								<td>
+									1
+								</td>
+
+								
+								<td>S. Karthick Ramakrishnan
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>27 Aug 2015</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(99922, '{1499A5DB-440D-4E91-B67F-8C4B4853F600}')" title="You have a new Editor Assignment for JREP">Editor Assignment</a></td><td>S. Karthick Ramakrishnan</td>
+								<td>
+									With Editor
+
+								</td>
+
+                                
+								<td>
+									1
+								</td>
+
+								
+								<td>Allan Colbern, Ph.D.
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>26 Aug 2015</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(99917, '{72B31D11-383F-432A-AD6C-815534D7E604}')" title="Revision Confirmation for JREP">Author Submits Revision Confirmation</a></td><td>Dvora Yanow</td>
+								<td>
+									Revised Manuscript Submitted
+
+								</td>
+
+                                
+								<td>
+									1
+								</td>
+
+								
+								<td>Dvora Yanow
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>08 Jul 2015</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(99748, '{42597A75-714E-49AB-839C-912E4F21B88F}')" title="Your JREP Submission">Editor Decision - Revise</a></td><td>Dvora Yanow</td>
+								<td>
+									Revise
+
+								</td>
+
+                                
+								<td>
+									0
+								</td>
+
+								
+								<td>S. Karthick Ramakrishnan
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>08 Jul 2015</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(99747, '{3D9964B5-23B8-4D5D-8236-469FE1FA76DC}')" title="Thank you for the review for JREP">Reviewer Thank You</a></td><td>Daniel Sabbagh, LAWPHD</td>
+								<td>
+									Under Review
+
+								</td>
+
+                                
+								<td>
+									0
+								</td>
+
+								
+								<td>Daniel Sabbagh, LAWPHD<br /><span class="proxy">[Proxied by S. Karthick Ramakrishnan]</span>
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>15 Apr 2015</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(99598, '{1D5E1481-C11F-4570-BC4A-541E7E1A49A7}')" title="Second Reminder of Late Review for %ARTICLE_TITLE%">Reviewer - Second Late Reminder</a></td><td>Daniel Sabbagh, LAWPHD</td>
+								<td>
+									Under Review
+
+								</td>
+
+                                
+								<td>
+									0
+								</td>
+
+								
+								<td>S. Karthick Ramakrishnan
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>10 Apr 2015</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(99580, '{B41B4D2B-071F-4455-8B3E-180FE25AEF59}')" title="Reminder of Late Review for JREP">Reviewer - First Late Reminder</a></td><td>Daniel Sabbagh, LAWPHD</td>
+								<td>
+									Under Review
+
+								</td>
+
+                                
+								<td>
+									0
+								</td>
+
+								
+								<td>S. Karthick Ramakrishnan
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>08 Apr 2015</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(99576, '{B23E4177-A429-41FD-AEF4-A54219AA3965}')" title="Thank you for the review for JREP">Reviewer Thank You</a></td><td>Amy Cabrera Rasmussen, PHD</td>
+								<td>
+									Under Review
+
+								</td>
+
+                                
+								<td>
+									0
+								</td>
+
+								
+								<td>Amy Cabrera Rasmussen, PHD
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>03 Apr 2015</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(99568, '{CB780C33-3568-47C1-B52B-F5D7E32D35BA}')" title="JREP Reminder: Review assignment is due soon">Reviewer Reminder - Before Due Date</a></td><td>Daniel Sabbagh, LAWPHD</td>
+								<td>
+									Under Review
+
+								</td>
+
+                                
+								<td>
+									0
+								</td>
+
+								
+								<td>S. Karthick Ramakrishnan
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>02 Apr 2015</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(99566, '{3EB1FE65-2DAB-4266-966E-59EB26F55CD5}')" title="JREP Reminder: Review assignment is due soon">Reviewer Reminder - Before Due Date</a></td><td>Amy Cabrera Rasmussen, PHD</td>
+								<td>
+									Under Review
+
+								</td>
+
+                                
+								<td>
+									0
+								</td>
+
+								
+								<td>S. Karthick Ramakrishnan
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>26 Mar 2015</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(99555, '{884A667B-7F8C-43C1-820E-06501BFA2017}')" title="Second Reminder of Late Review for %ARTICLE_TITLE%">Reviewer - Second Late Reminder</a></td><td>Patrick Simon</td>
+								<td>
+									Under Review
+
+								</td>
+
+                                
+								<td>
+									0
+								</td>
+
+								
+								<td>S. Karthick Ramakrishnan
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>21 Mar 2015</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(99523, '{AE49006C-2A9F-4E63-A7C8-92B5F71D6AFB}')" title="Reminder of Late Review for JREP">Reviewer - First Late Reminder</a></td><td>Patrick Simon</td>
+								<td>
+									Under Review
+
+								</td>
+
+                                
+								<td>
+									0
+								</td>
+
+								
+								<td>S. Karthick Ramakrishnan
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>14 Mar 2015</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(99500, '{953BB46C-E5A9-435D-9691-F8BAD61FE686}')" title="JREP Reminder: Review assignment is due soon">Reviewer Reminder - Before Due Date</a></td><td>Patrick Simon</td>
+								<td>
+									Under Review
+
+								</td>
+
+                                
+								<td>
+									0
+								</td>
+
+								
+								<td>S. Karthick Ramakrishnan
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>04 Mar 2015</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(99428, '{548FE816-7AC2-4B6E-8E2C-06532207C852}')" title="JREP: Thank you for agreeing to review">Reviewer Instructions and Due Date</a>&nbsp;<img style="vertical-align:middle;margin-top:4px" src="img/paperclip_icon.gif" alt=""/></td><td>Daniel Sabbagh, LAWPHD</td>
+								<td>
+									Under Review
+
+								</td>
+
+                                
+								<td>
+									0
+								</td>
+
+								
+								<td>Daniel Sabbagh, LAWPHD
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>03 Mar 2015</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(99422, '{5F2614D6-DE81-4607-ACAF-341583F6B966}')" title="JREP: Thank you for agreeing to review">Reviewer Instructions and Due Date</a>&nbsp;<img style="vertical-align:middle;margin-top:4px" src="img/paperclip_icon.gif" alt=""/></td><td>Amy Cabrera Rasmussen, PHD</td>
+								<td>
+									Under Review
+
+								</td>
+
+                                
+								<td>
+									0
+								</td>
+
+								
+								<td>Amy Cabrera Rasmussen, PHD
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>02 Mar 2015</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(99420, '{76983208-3DC5-4C64-8CFC-81813B5A5888}')" title="Reviewer Invitation for JREP">Reviewer Invitation</a></td><td>Daniel Sabbagh, LAWPHD</td>
+								<td>
+									Under Review
+
+								</td>
+
+                                
+								<td>
+									0
+								</td>
+
+								
+								<td>S. Karthick Ramakrishnan
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>02 Mar 2015</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(99419, '{858293FB-E02C-40D7-A04F-73EE5F1627BC}')" title="Reviewer Invitation for JREP">Reviewer Invitation</a></td><td>Amy Cabrera Rasmussen, PHD</td>
+								<td>
+									Under Review
+
+								</td>
+
+                                
+								<td>
+									0
+								</td>
+
+								
+								<td>S. Karthick Ramakrishnan
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>12 Feb 2015</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(99343, '{3EAF300B-763C-45A1-B071-58CA99C77041}')" title="JREP: Thank you for agreeing to review">Reviewer Instructions and Due Date</a>&nbsp;<img style="vertical-align:middle;margin-top:4px" src="img/paperclip_icon.gif" alt=""/></td><td>Patrick Simon</td>
+								<td>
+									Under Review
+
+								</td>
+
+                                
+								<td>
+									0
+								</td>
+
+								
+								<td>Patrick Simon
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>12 Feb 2015</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(99330, '{0DBE23FA-9ADE-4D76-B6D7-E527E9D6078F}')" title="Here is the manuscript">Reviewer Invitation</a></td><td>Patrick Simon</td>
+								<td>
+									Under Review
+
+								</td>
+
+                                
+								<td>
+									0
+								</td>
+
+								
+								<td>S. Karthick Ramakrishnan
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>07 Feb 2015</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(99296, '{02EA271A-A055-4509-ABF7-E12C15924BB5}')" title="You have a new Editor Assignment for JREP">Editor Assignment</a></td><td>S. Karthick Ramakrishnan</td>
+								<td>
+									With Editor
+
+								</td>
+
+                                
+								<td>
+									0
+								</td>
+
+								
+								<td>Andrea Silva, PhD
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>05 Feb 2015</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(99283, '{18EB85B5-A779-4CE3-80EC-D532BAB21111}')" title="Submission Confirmation for JREP">Author Submits New Manuscript Confirmation</a></td><td>Dvora Yanow</td>
+								<td>
+									Manuscript Submitted
+
+								</td>
+
+                                
+								<td>
+									0
+								</td>
+
+								
+								<td>Dvora Yanow
+								</td>
+
+							
+							</tr>
+							
+					</table>
+					
+			</fieldset>
+			
+	</div>
+	<div class="centered">
+		
+		<br /><br /><input type="button" name="close" value="Close" onclick="window.close();" />
+		<br /><br />
+		<a href="#status">Status History</a>&nbsp;&nbsp;&nbsp;<a href="#correspondence">Correspondence History</a>&nbsp;&nbsp;&nbsp;
+		<br /><br /><a href="docHistoryStatusTypeView.asp?docid=3397">Switch to Status Type View</a>
+	</div>
+
+    <div id="modalDiv" style="display:none"></div>
+
+</form>
+
+<script type="text/javascript">
+    if (typeof pageDataTracker !== 'undefined') {
+        RetrieveAnalyticsData();
+    }
+</script>
+    <script type="text/javascript">
+        $(document).ready(function() 
+	    {
+	        url = 'ajax/RenderControlToPage.ashx?control=DialogWidgetControl&id=warningDialog&titleResourceId=Common.Text.Warning&titleBarIcon=warning&showTitleBar=true&showTitleBarClose=false&dialogStyle=confirm&width=400';
+	        $.get(url, function (data) 
+	        {
+	            $('body').append(data);
+	        });
+        });
+    </script>
+</body>
+</html>

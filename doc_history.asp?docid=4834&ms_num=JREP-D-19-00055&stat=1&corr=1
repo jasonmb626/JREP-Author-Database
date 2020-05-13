@@ -1,0 +1,676 @@
+
+
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+<head>
+	<title>History Details</title>
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+
+    <link rel="stylesheet" type="text/css" href="cssSiteStyle.aspx" />
+    <link rel="stylesheet" type="text/css" href="cssJQueryDialog.aspx" />
+
+	<style type="text/css">
+		.centered table
+		{
+			margin: 0 auto;
+		}
+        .activeSubFlagHistory
+        {
+            color: red;
+        }
+	</style>
+
+    <script type="text/javascript">
+//<![CDATA[
+
+function FormatString(stringToFormat, replacementValues)
+{
+	return stringToFormat.replace(/{([0-9]+)}/g, function(wholematch, firstmatch)
+		  { var i = +firstmatch; return i < replacementValues.length ? replacementValues[i] : wholematch; }
+		);
+}
+
+
+
+function EscapeAttributeValue(value) 
+{
+
+        return value.replace(/&/g, '&amp;')
+                    .replace(/'/g, "&apos;")
+                    .replace(/"/g, '&quot;')
+                    .replace(/</g, '&lt;')
+                    .replace(/>/g, '&gt;');
+}
+
+//]]>
+</script>
+
+<script type="text/javascript" src="/jrep/WebUserControls/ClientJScript/translatedClientutil.aspx?lang=en%2DUS"></script>
+<script type="text/javascript" src="/jrep/ClientScript/clientutil.aspx"></script>
+
+<script src="/jrep/ClientScript/jquery.js" type="text/javascript"></script>
+<script src="/jrep/ClientScript/jquery-ui.js" type="text/javascript"></script>   
+
+
+
+    <script type="text/javascript" src="ClientScript/MSPFunctions.js"></script>
+
+	<script type="text/javascript">
+		/***********************************************************************
+		* 7.0-39	TimH	20090424
+		* Navigate to the Add External Correspondence Page, providing
+		* info needed to add a new External Correspondence record.
+		***********************************************************************/
+		function AddExternalCorrespondence(externalCorrespType)
+		{
+			var hdnExternalCorrespondenceType = document.getElementById("hdnExternalCorrespondenceType");
+			hdnExternalCorrespondenceType.value = "" + externalCorrespType;
+
+			var hdnLetterSecurityID = document.getElementById("hdnLetterSecurityID");
+			hdnLetterSecurityID.value = "";
+
+			document.frmDocHistory.submit();
+		}
+
+		/***********************************************************************
+		* 7.0-39	TimH	20090424
+		* Edit or Remove the External Correspondence specified by the
+		* Edit or Remove hyperlink clicked by the user.
+		***********************************************************************/
+		function EditExternalCorrespondence(externalCorrespondenceID, externalCorrespType, remove, letterSecurityID)
+		{
+			var hdnExternalCorrespondenceID = document.getElementById("hdnExternalCorrespondenceID");
+			hdnExternalCorrespondenceID.value = "" + externalCorrespondenceID;
+
+			var hdnExternalCorrespondenceType = document.getElementById("hdnExternalCorrespondenceType");
+			hdnExternalCorrespondenceType.value = "" + externalCorrespType;
+
+			var hdnLetterSecurityID = document.getElementById("hdnLetterSecurityID");
+			hdnLetterSecurityID.value = letterSecurityID;
+
+			var hdnRemove = document.getElementById("hdnRemove");
+			hdnRemove.value = remove;
+
+			if(hdnRemove.value == "1")
+			{
+                var okAction = function ()
+                {
+					document.frmDocHistory.submit();	
+                }
+                $("#warningDialog")[0].showDialog('Removing the correspondence cannot be undone.\x0a\x3cbr\x2f\x3e\x3cbr\x2f\x3e\x0aClick Cancel to return to the History page without deleting the correspondence.\x0a\x3cbr\x2f\x3eClick OK to remove this item of correspondence.', okAction);
+                return;
+			}
+			else if(hdnRemove.value == "0")
+			{
+				document.frmDocHistory.submit();
+			}
+		}
+
+		/***********************************************************************
+		* 7.0-39	TimH	20090424
+		* In a new popup, View a read only version of the External Correspondence specified by the
+		* External Correspondence Description hyperlink clicked by the user.
+		***********************************************************************/
+		function ViewExternalCorrespondence(externalCorrespondenceID, externalCorrespType, letterSecurityID)
+		{
+			var sNavUrl = "DotNetPopUps/ViewExternalCorrespondence.aspx";
+			sNavUrl += "?hdnExternalCorrespondenceID=" + externalCorrespondenceID;
+			sNavUrl += "&hdnExternalCorrespondenceType=" + externalCorrespType;
+			sNavUrl += "&hdnLetterSecurityID=" + letterSecurityID;
+			sNavUrl += "&hdnAssociatedEntityType=" + EXT_CORRES_ASSOC_TYPE_SUBMISSION;
+
+			openCenterWin(sNavUrl, 'ViewExternalCorrespondence', 1, 1, 0, 0, 0, 0);
+		}
+
+		function resendEditorialStatus(statHistID, notLatest)
+		{
+            if (notLatest)
+            {
+                var okAction = function ()
+                {
+					resendStatus(statHistID);	
+                }
+                $("#warningDialog")[0].showDialog('The Status you are attempting to resend is not the most recent status. Do you want to continue\x3f', okAction);
+                return;
+            }
+            else
+            {
+                resendStatus(statHistID);
+            }
+        }
+        function resendStatus(statHistID)
+        {
+            // Resend status
+		    var documentID = "4834";
+		    var exportType = 4;
+		    var operatorID = "217520";
+		    var proxyOperatorID = "";
+		    if (proxyOperatorID != "")
+		    {
+		        operatorID = proxyOperatorID;
+		    }
+		    resendMSPEditorialStatus(documentID, exportType, operatorID, statHistID, "");
+        }
+
+		function displayOverlay(text) {
+		    $("#modalDiv").text(text);
+		    $("#modalDiv").dialog({
+	            title: '',
+	            resizable: true, modal: true, buttons: [{ text: 'OK',
+	                click: function () { $(this).dialog("close"); }
+	            }], closeText: '',
+
+	            open: function ()
+	            {
+	                $(this).dialog('widget').find(".ui-dialog-titlebar-close").hide();
+	                $(this).dialog({ position: 'center' });
+	            }
+
+	        });
+
+	        return false;
+		}
+	</script>
+    
+</head>
+<body>
+
+	<form name="frmDocHistory" method="post" id="frmDocHistory" action="DotNetPopUps/AddEditExternalCorrespondence.aspx">
+	<div class="centered">
+	    <input type="hidden" id="hdnAssociatedEntityID" name="hdnAssociatedEntityID" value="4834" />
+	    <input type="hidden" id="hdnLetterSecurityID" name="hdnLetterSecurityID" value="" />
+	    <input type="hidden" id="hdnAssociatedEntityType" name="hdnAssociatedEntityType" value="1" />
+	    <input type="hidden" id="hdnExternalCorrespondenceID" name="hdnExternalCorrespondenceID" value="" />
+	    <input type="hidden" id="hdnExternalCorrespondenceType" name="hdnExternalCorrespondenceType" value=""/>
+	    <input type="hidden" id="hdnRemove" name="hdnRemove" value="" />
+	    <input type="hidden" id="hdnReturnPage" name="hdnReturnPage" value="doc_history.asp" />
+	    <input type="hidden" id="hdnAttachmentGroupID" name="hdnAttachmentGroupID" value="" />
+		<h3>
+			History for Manuscript Number: JREP-D-19-00055 &quot;Swedish Xenophobia or Racism? &#13;&#10;Unpackaging Sweden&#8217;s &#8220;colorblind&#8221; approach to eliminating extremism&quot;
+		</h3>
+		<a href="#status">Status History</a>&nbsp;&nbsp;&nbsp;<a href="#correspondence">Correspondence History</a>&nbsp;&nbsp;&nbsp;
+
+
+		<br /><br /><a href="docHistoryStatusTypeView.asp?docid=4834">Switch to Status Type View</a>
+
+		
+		<br /><br /><input type="button" name="close" value="Close" onclick="window.close();" />
+	</div>
+
+	<div>
+		<br /><br />
+		
+			<fieldset>
+				<legend><a name="status"></a>STATUS HISTORY</legend>
+				
+					<table border="0" cellpadding="0" cellspacing="0" width="97%" class="datatable">
+						<tr>
+							<th>Status Date</th>
+							<th>Document Status</th>
+							
+							<th>Status Days</th>
+							<th>Role Family</th>
+							<th>Revision </th>
+							<th>Operator</th>
+						</tr>
+
+						
+							<tr>
+								
+								<td>May  6 2019  1:48PM</td>
+
+								
+								<td>
+									Sent Back to Author
+								</td>
+
+								
+								<td>----</td>
+
+								
+								<td>
+									AUTHOR
+								</td>
+
+								
+								<td>0</td>
+
+								
+								<td>Maureen Heffern Ponicki
+								</td>
+							</tr>
+							
+							<tr>
+								
+								<td>May  2 2019  1:44AM</td>
+
+								
+								<td>
+									Manuscript Submitted
+								</td>
+
+								
+								<td>4</td>
+
+								
+								<td>
+									EDITOR
+								</td>
+
+								
+								<td>0</td>
+
+								
+								<td>Iyin Battle
+								</td>
+							</tr>
+							
+							<tr>
+								
+								<td>May  2 2019  1:41AM</td>
+
+								
+								<td>
+									Needs Approval
+								</td>
+
+								
+								<td>----</td>
+
+								
+								<td>
+									AUTHOR
+								</td>
+
+								
+								<td>0</td>
+
+								
+								<td>Iyin Battle
+								</td>
+							</tr>
+							
+							<tr>
+								
+								<td>May  2 2019  1:40AM</td>
+
+								
+								<td>
+									Building PDF
+								</td>
+
+								
+								<td>----</td>
+
+								
+								<td>
+									
+								</td>
+
+								
+								<td>0</td>
+
+								
+								<td>Iyin Battle
+								</td>
+							</tr>
+							
+					</table>
+					
+			</fieldset>
+			<br />
+			<br />
+		
+			<fieldset>
+				<legend><a name="correspondence"></a>CORRESPONDENCE HISTORY</legend>
+				
+						<div class="buttonAlign" style="padding-bottom:4px;">
+							<input type="button" name="btnAddExtEditorialCorrespondence" value="Add&#32;Editorial&#32;Correspondence" onclick="AddExternalCorrespondence(1);" />
+							
+						</div>
+					
+					<table border="0" cellpadding="0" cellspacing="0" width="97%" class="datatable">
+						<tr>
+							<th>Correspondence Date</th>
+							<th>Letter</th>
+							<th>Recipient</th>
+							<th>Status</th>
+                            
+							<th>Revision</th>
+							<th>Operator</th>
+						</tr>
+
+						
+							<tr>
+								
+								<td>13 May 2019</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(110263, '{E7383641-56B2-40A9-AD4B-5DEF901CC271}')" title="Author Reminder - Incomplete Submission">Author Reminder - Incomplete Submission</a></td><td>Iyin Battle</td>
+								<td>
+									Sent Back to Author
+
+								</td>
+
+                                
+								<td>
+									0
+								</td>
+
+								
+								<td>Nick Michal, B.A.
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>06 May 2019</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(110181, '{ECA3BD2C-FE95-41BD-9453-7388E1EB3A06}')" title="Your JREP Submission">Author Notice Technical Check Failed</a></td><td>Iyin Battle</td>
+								<td>
+									Sent Back to Author
+
+								</td>
+
+                                
+								<td>
+									0
+								</td>
+
+								
+								<td>Maureen Heffern Ponicki
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>02 May 2019</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(110116, '{A5BB2A4E-A082-404D-A348-AB01735811E8}')" title="REP: New Manuscript Submission ">Journal Office Notice New Submission</a></td><td>Maureen Heffern Ponicki</td>
+								<td>
+									Manuscript Submitted
+
+								</td>
+
+                                
+								<td>
+									0
+								</td>
+
+								
+								<td>Iyin Battle
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>02 May 2019</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(110115, '{A29756BA-BC9E-4A9A-94ED-740FF09C15B3}')" title="REP: New Manuscript Submission ">Journal Office Notice New Submission</a></td><td>Beyza Buyuker</td>
+								<td>
+									Manuscript Submitted
+
+								</td>
+
+                                
+								<td>
+									0
+								</td>
+
+								
+								<td>Iyin Battle
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>02 May 2019</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(110114, '{516C8C24-18ED-479C-83B2-94A2A782B340}')" title="REP: New Manuscript Submission ">Journal Office Notice New Submission</a></td><td>Nhat-Dang Do</td>
+								<td>
+									Manuscript Submitted
+
+								</td>
+
+                                
+								<td>
+									0
+								</td>
+
+								
+								<td>Iyin Battle
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>02 May 2019</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(110113, '{0F29BBDD-7CFE-4437-90E6-48831B016D5A}')" title="REP: New Manuscript Submission ">Journal Office Notice New Submission</a></td><td>Dan Gibson</td>
+								<td>
+									Manuscript Submitted
+
+								</td>
+
+                                
+								<td>
+									0
+								</td>
+
+								
+								<td>Iyin Battle
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>02 May 2019</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(110112, '{97882864-D241-4D50-9CDE-D9FFA4B14184}')" title="REP: New Manuscript Submission ">Journal Office Notice New Submission</a></td><td>Allan Colbern, Ph.D.</td>
+								<td>
+									Manuscript Submitted
+
+								</td>
+
+                                
+								<td>
+									0
+								</td>
+
+								
+								<td>Iyin Battle
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>02 May 2019</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(110111, '{5B9A12E8-54F4-4599-8902-99F16396556D}')" title="REP: New Manuscript Submission ">Journal Office Notice New Submission</a></td><td>Allan Colbern, Ph.D.</td>
+								<td>
+									Manuscript Submitted
+
+								</td>
+
+                                
+								<td>
+									0
+								</td>
+
+								
+								<td>Iyin Battle
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>02 May 2019</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(110110, '{FBDBBCA7-5A4F-4EF5-8EA0-124ABB845509}')" title="REP: New Manuscript Submission ">Journal Office Notice New Submission</a></td><td>Alexandra Filindra</td>
+								<td>
+									Manuscript Submitted
+
+								</td>
+
+                                
+								<td>
+									0
+								</td>
+
+								
+								<td>Iyin Battle
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>02 May 2019</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(110109, '{AD9FE9BA-9CF9-4423-A984-FB8E73BB6D43}')" title="REP: New Manuscript Submission ">Journal Office Notice New Submission</a></td><td>S. Karthick Ramakrishnan</td>
+								<td>
+									Manuscript Submitted
+
+								</td>
+
+                                
+								<td>
+									0
+								</td>
+
+								
+								<td>Iyin Battle
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>02 May 2019</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(110108, '{9D7CE416-9F90-4713-B370-B67B9098FCDB}')" title="REP: New Manuscript Submission ">Journal Office Notice New Submission</a></td><td>Marisa Abrajano</td>
+								<td>
+									Manuscript Submitted
+
+								</td>
+
+                                
+								<td>
+									0
+								</td>
+
+								
+								<td>Iyin Battle
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>02 May 2019</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(110107, '{FA900EE4-0D1B-4EE8-A68B-3068188F8BD6}')" title="REP: New Manuscript Submission ">Journal Office Notice New Submission</a></td><td>Jane Y. Junn, PHD</td>
+								<td>
+									Manuscript Submitted
+
+								</td>
+
+                                
+								<td>
+									0
+								</td>
+
+								
+								<td>Iyin Battle
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>02 May 2019</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(110106, '{62936419-84C4-4FF3-A862-1B42C2A35169}')" title="Submission Confirmation for JREP">Author Submits New Manuscript Confirmation</a></td><td>Iyin Battle</td>
+								<td>
+									Manuscript Submitted
+
+								</td>
+
+                                
+								<td>
+									0
+								</td>
+
+								
+								<td>Iyin Battle
+								</td>
+
+							
+							</tr>
+							
+					</table>
+					
+			</fieldset>
+			
+	</div>
+	<div class="centered">
+		
+		<br /><br /><input type="button" name="close" value="Close" onclick="window.close();" />
+		<br /><br />
+		<a href="#status">Status History</a>&nbsp;&nbsp;&nbsp;<a href="#correspondence">Correspondence History</a>&nbsp;&nbsp;&nbsp;
+		<br /><br /><a href="docHistoryStatusTypeView.asp?docid=4834">Switch to Status Type View</a>
+	</div>
+
+    <div id="modalDiv" style="display:none"></div>
+
+</form>
+
+<script type="text/javascript">
+    if (typeof pageDataTracker !== 'undefined') {
+        RetrieveAnalyticsData();
+    }
+</script>
+    <script type="text/javascript">
+        $(document).ready(function() 
+	    {
+	        url = 'ajax/RenderControlToPage.ashx?control=DialogWidgetControl&id=warningDialog&titleResourceId=Common.Text.Warning&titleBarIcon=warning&showTitleBar=true&showTitleBarClose=false&dialogStyle=confirm&width=400';
+	        $.get(url, function (data) 
+	        {
+	            $('body').append(data);
+	        });
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,1363 @@
+
+
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+<head>
+	<title>History Details</title>
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+
+    <link rel="stylesheet" type="text/css" href="cssSiteStyle.aspx" />
+    <link rel="stylesheet" type="text/css" href="cssJQueryDialog.aspx" />
+
+	<style type="text/css">
+		.centered table
+		{
+			margin: 0 auto;
+		}
+        .activeSubFlagHistory
+        {
+            color: red;
+        }
+	</style>
+
+    <script type="text/javascript">
+//<![CDATA[
+
+function FormatString(stringToFormat, replacementValues)
+{
+	return stringToFormat.replace(/{([0-9]+)}/g, function(wholematch, firstmatch)
+		  { var i = +firstmatch; return i < replacementValues.length ? replacementValues[i] : wholematch; }
+		);
+}
+
+
+
+function EscapeAttributeValue(value) 
+{
+
+        return value.replace(/&/g, '&amp;')
+                    .replace(/'/g, "&apos;")
+                    .replace(/"/g, '&quot;')
+                    .replace(/</g, '&lt;')
+                    .replace(/>/g, '&gt;');
+}
+
+//]]>
+</script>
+
+<script type="text/javascript" src="/jrep/WebUserControls/ClientJScript/translatedClientutil.aspx?lang=en%2DUS"></script>
+<script type="text/javascript" src="/jrep/ClientScript/clientutil.aspx"></script>
+
+<script src="/jrep/ClientScript/jquery.js" type="text/javascript"></script>
+<script src="/jrep/ClientScript/jquery-ui.js" type="text/javascript"></script>   
+
+
+
+    <script type="text/javascript" src="ClientScript/MSPFunctions.js"></script>
+
+	<script type="text/javascript">
+		/***********************************************************************
+		* 7.0-39	TimH	20090424
+		* Navigate to the Add External Correspondence Page, providing
+		* info needed to add a new External Correspondence record.
+		***********************************************************************/
+		function AddExternalCorrespondence(externalCorrespType)
+		{
+			var hdnExternalCorrespondenceType = document.getElementById("hdnExternalCorrespondenceType");
+			hdnExternalCorrespondenceType.value = "" + externalCorrespType;
+
+			var hdnLetterSecurityID = document.getElementById("hdnLetterSecurityID");
+			hdnLetterSecurityID.value = "";
+
+			document.frmDocHistory.submit();
+		}
+
+		/***********************************************************************
+		* 7.0-39	TimH	20090424
+		* Edit or Remove the External Correspondence specified by the
+		* Edit or Remove hyperlink clicked by the user.
+		***********************************************************************/
+		function EditExternalCorrespondence(externalCorrespondenceID, externalCorrespType, remove, letterSecurityID)
+		{
+			var hdnExternalCorrespondenceID = document.getElementById("hdnExternalCorrespondenceID");
+			hdnExternalCorrespondenceID.value = "" + externalCorrespondenceID;
+
+			var hdnExternalCorrespondenceType = document.getElementById("hdnExternalCorrespondenceType");
+			hdnExternalCorrespondenceType.value = "" + externalCorrespType;
+
+			var hdnLetterSecurityID = document.getElementById("hdnLetterSecurityID");
+			hdnLetterSecurityID.value = letterSecurityID;
+
+			var hdnRemove = document.getElementById("hdnRemove");
+			hdnRemove.value = remove;
+
+			if(hdnRemove.value == "1")
+			{
+                var okAction = function ()
+                {
+					document.frmDocHistory.submit();	
+                }
+                $("#warningDialog")[0].showDialog('Removing the correspondence cannot be undone.\x0a\x3cbr\x2f\x3e\x3cbr\x2f\x3e\x0aClick Cancel to return to the History page without deleting the correspondence.\x0a\x3cbr\x2f\x3eClick OK to remove this item of correspondence.', okAction);
+                return;
+			}
+			else if(hdnRemove.value == "0")
+			{
+				document.frmDocHistory.submit();
+			}
+		}
+
+		/***********************************************************************
+		* 7.0-39	TimH	20090424
+		* In a new popup, View a read only version of the External Correspondence specified by the
+		* External Correspondence Description hyperlink clicked by the user.
+		***********************************************************************/
+		function ViewExternalCorrespondence(externalCorrespondenceID, externalCorrespType, letterSecurityID)
+		{
+			var sNavUrl = "DotNetPopUps/ViewExternalCorrespondence.aspx";
+			sNavUrl += "?hdnExternalCorrespondenceID=" + externalCorrespondenceID;
+			sNavUrl += "&hdnExternalCorrespondenceType=" + externalCorrespType;
+			sNavUrl += "&hdnLetterSecurityID=" + letterSecurityID;
+			sNavUrl += "&hdnAssociatedEntityType=" + EXT_CORRES_ASSOC_TYPE_SUBMISSION;
+
+			openCenterWin(sNavUrl, 'ViewExternalCorrespondence', 1, 1, 0, 0, 0, 0);
+		}
+
+		function resendEditorialStatus(statHistID, notLatest)
+		{
+            if (notLatest)
+            {
+                var okAction = function ()
+                {
+					resendStatus(statHistID);	
+                }
+                $("#warningDialog")[0].showDialog('The Status you are attempting to resend is not the most recent status. Do you want to continue\x3f', okAction);
+                return;
+            }
+            else
+            {
+                resendStatus(statHistID);
+            }
+        }
+        function resendStatus(statHistID)
+        {
+            // Resend status
+		    var documentID = "3649";
+		    var exportType = 4;
+		    var operatorID = "217520";
+		    var proxyOperatorID = "";
+		    if (proxyOperatorID != "")
+		    {
+		        operatorID = proxyOperatorID;
+		    }
+		    resendMSPEditorialStatus(documentID, exportType, operatorID, statHistID, "");
+        }
+
+		function displayOverlay(text) {
+		    $("#modalDiv").text(text);
+		    $("#modalDiv").dialog({
+	            title: '',
+	            resizable: true, modal: true, buttons: [{ text: 'OK',
+	                click: function () { $(this).dialog("close"); }
+	            }], closeText: '',
+
+	            open: function ()
+	            {
+	                $(this).dialog('widget').find(".ui-dialog-titlebar-close").hide();
+	                $(this).dialog({ position: 'center' });
+	            }
+
+	        });
+
+	        return false;
+		}
+	</script>
+    
+</head>
+<body>
+
+	<form name="frmDocHistory" method="post" id="frmDocHistory" action="DotNetPopUps/AddEditExternalCorrespondence.aspx">
+	<div class="centered">
+	    <input type="hidden" id="hdnAssociatedEntityID" name="hdnAssociatedEntityID" value="3649" />
+	    <input type="hidden" id="hdnLetterSecurityID" name="hdnLetterSecurityID" value="" />
+	    <input type="hidden" id="hdnAssociatedEntityType" name="hdnAssociatedEntityType" value="1" />
+	    <input type="hidden" id="hdnExternalCorrespondenceID" name="hdnExternalCorrespondenceID" value="" />
+	    <input type="hidden" id="hdnExternalCorrespondenceType" name="hdnExternalCorrespondenceType" value=""/>
+	    <input type="hidden" id="hdnRemove" name="hdnRemove" value="" />
+	    <input type="hidden" id="hdnReturnPage" name="hdnReturnPage" value="doc_history.asp" />
+	    <input type="hidden" id="hdnAttachmentGroupID" name="hdnAttachmentGroupID" value="" />
+		<h3>
+			History for Manuscript Number: JREP-D-17-00063 &quot;Diversity is Good, Discrimination is Bad: Public Spending in the U.S.&quot;
+		</h3>
+		<a href="#status">Status History</a>&nbsp;&nbsp;&nbsp;<a href="#correspondence">Correspondence History</a>&nbsp;&nbsp;&nbsp;
+
+
+		<br /><br /><a href="docHistoryStatusTypeView.asp?docid=3649">Switch to Status Type View</a>
+
+		
+		<br /><br /><input type="button" name="close" value="Close" onclick="window.close();" />
+	</div>
+
+	<div>
+		<br /><br />
+		
+			<fieldset>
+				<legend><a name="status"></a>STATUS HISTORY</legend>
+				
+					<table border="0" cellpadding="0" cellspacing="0" width="97%" class="datatable">
+						<tr>
+							<th>Status Date</th>
+							<th>Document Status</th>
+							
+							<th>Status Days</th>
+							<th>Role Family</th>
+							<th>Revision </th>
+							<th>Operator</th>
+						</tr>
+
+						
+							<tr>
+								
+								<td>Mar 15 2018  2:11PM</td>
+
+								
+								<td>
+									Completed Reject
+								</td>
+
+								
+								<td>----</td>
+
+								
+								<td>
+									EDITOR
+								</td>
+
+								
+								<td>0</td>
+
+								
+								<td>Marisa Abrajano
+								</td>
+							</tr>
+							
+							<tr>
+								
+								<td>Mar 15 2018  2:11PM</td>
+
+								
+								<td>
+									Reject
+								</td>
+
+								
+								<td>----</td>
+
+								
+								<td>
+									NOBODY
+								</td>
+
+								
+								<td>0</td>
+
+								
+								<td>Marisa Abrajano
+								</td>
+							</tr>
+							
+							<tr>
+								
+								<td>Mar 15 2018  2:11PM</td>
+
+								
+								<td>
+									Decision in Process
+								</td>
+
+								
+								<td>----</td>
+
+								
+								<td>
+									REVIEWER
+								</td>
+
+								
+								<td>0</td>
+
+								
+								<td>Marisa Abrajano
+								</td>
+							</tr>
+							
+							<tr>
+								
+								<td>Dec  8 2017  1:33PM</td>
+
+								
+								<td>
+									Under Review
+								</td>
+
+								
+								<td>97</td>
+
+								
+								<td>
+									REVIEWER
+								</td>
+
+								
+								<td>0</td>
+
+								
+								<td>Marisa Abrajano
+								</td>
+							</tr>
+							
+							<tr>
+								
+								<td>Nov 28 2017  3:53PM</td>
+
+								
+								<td>
+									With Editor
+								</td>
+
+								
+								<td>9</td>
+
+								
+								<td>
+									EDITOR
+								</td>
+
+								
+								<td>0</td>
+
+								
+								<td>Nhat-Dang Do
+								</td>
+							</tr>
+							
+							<tr>
+								
+								<td>Nov  7 2017  5:09PM</td>
+
+								
+								<td>
+									Manuscript Submitted
+								</td>
+
+								
+								<td>20</td>
+
+								
+								<td>
+									EDITOR
+								</td>
+
+								
+								<td>0</td>
+
+								
+								<td>Neeraj Vimal Prasad, Ph.D. Candidate
+								</td>
+							</tr>
+							
+							<tr>
+								
+								<td>Nov  7 2017  5:09PM</td>
+
+								
+								<td>
+									Needs Approval
+								</td>
+
+								
+								<td>----</td>
+
+								
+								<td>
+									AUTHOR
+								</td>
+
+								
+								<td>0</td>
+
+								
+								<td>Neeraj Vimal Prasad, Ph.D. Candidate
+								</td>
+							</tr>
+							
+							<tr>
+								
+								<td>Nov  7 2017  5:09PM</td>
+
+								
+								<td>
+									Building PDF
+								</td>
+
+								
+								<td>----</td>
+
+								
+								<td>
+									AUTHOR
+								</td>
+
+								
+								<td>0</td>
+
+								
+								<td>Neeraj Vimal Prasad, Ph.D. Candidate
+								</td>
+							</tr>
+							
+							<tr>
+								
+								<td>Nov  7 2017  4:36PM</td>
+
+								
+								<td>
+									Incomplete
+								</td>
+
+								
+								<td>----</td>
+
+								
+								<td>
+									AUTHOR
+								</td>
+
+								
+								<td>0</td>
+
+								
+								<td>Neeraj Vimal Prasad, Ph.D. Candidate
+								</td>
+							</tr>
+							
+							<tr>
+								
+								<td>Nov  7 2017  3:54PM</td>
+
+								
+								<td>
+									Sent Back to Author
+								</td>
+
+								
+								<td>----</td>
+
+								
+								<td>
+									AUTHOR
+								</td>
+
+								
+								<td>0</td>
+
+								
+								<td>Nhat-Dang Do
+								</td>
+							</tr>
+							
+							<tr>
+								
+								<td>Oct 30 2017 11:25AM</td>
+
+								
+								<td>
+									Manuscript Submitted
+								</td>
+
+								
+								<td>8</td>
+
+								
+								<td>
+									EDITOR
+								</td>
+
+								
+								<td>0</td>
+
+								
+								<td>Neeraj Vimal Prasad, Ph.D. Candidate
+								</td>
+							</tr>
+							
+							<tr>
+								
+								<td>Oct 30 2017 11:24AM</td>
+
+								
+								<td>
+									Needs Approval
+								</td>
+
+								
+								<td>----</td>
+
+								
+								<td>
+									AUTHOR
+								</td>
+
+								
+								<td>0</td>
+
+								
+								<td>Neeraj Vimal Prasad, Ph.D. Candidate
+								</td>
+							</tr>
+							
+							<tr>
+								
+								<td>Oct 30 2017 11:24AM</td>
+
+								
+								<td>
+									Building PDF
+								</td>
+
+								
+								<td>----</td>
+
+								
+								<td>
+									AUTHOR
+								</td>
+
+								
+								<td>0</td>
+
+								
+								<td>Neeraj Vimal Prasad, Ph.D. Candidate
+								</td>
+							</tr>
+							
+							<tr>
+								
+								<td>Oct 30 2017 10:45AM</td>
+
+								
+								<td>
+									Incomplete
+								</td>
+
+								
+								<td>----</td>
+
+								
+								<td>
+									AUTHOR
+								</td>
+
+								
+								<td>0</td>
+
+								
+								<td>Neeraj Vimal Prasad, Ph.D. Candidate
+								</td>
+							</tr>
+							
+					</table>
+					
+			</fieldset>
+			<br />
+			<br />
+		
+			<fieldset>
+				<legend><a name="correspondence"></a>CORRESPONDENCE HISTORY</legend>
+				
+						<div class="buttonAlign" style="padding-bottom:4px;">
+							<input type="button" name="btnAddExtEditorialCorrespondence" value="Add&#32;Editorial&#32;Correspondence" onclick="AddExternalCorrespondence(1);" />
+							
+						</div>
+					
+					<table border="0" cellpadding="0" cellspacing="0" width="97%" class="datatable">
+						<tr>
+							<th>Correspondence Date</th>
+							<th>Letter</th>
+							<th>Recipient</th>
+							<th>Status</th>
+                            
+							<th>Revision</th>
+							<th>Operator</th>
+						</tr>
+
+						
+							<tr>
+								
+								<td>15 Mar 2018</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(106307, '{DC205FAF-7B3C-4EFB-97F6-BAAFEA2D94D5}')" title="Your Submission to JREP">Editor Decision - Reject</a></td><td>Neeraj Vimal Prasad, Ph.D. Candidate</td>
+								<td>
+									Reject
+
+								</td>
+
+                                
+								<td>
+									0
+								</td>
+
+								
+								<td>Marisa Abrajano
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>15 Mar 2018</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(106306, '{D24CAE70-4B7E-4E2D-9012-4DD2FD8CF306}')" title="To assist. Editor: Decision Notification">Journal Office Notice Editor Decision Notification</a></td><td>Nhat-Dang Do</td>
+								<td>
+									Decision in Process
+
+								</td>
+
+                                
+								<td>
+									0
+								</td>
+
+								
+								<td>Marisa Abrajano
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>06 Mar 2018</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(106246, '{E84CBD82-A351-4259-801F-8E8C46FE03A1}')" title="JREP will seek alternate reviewer">Reviewer Uninvited Notice</a></td><td>Caroline J. Tolbert, PHD</td>
+								<td>
+									Under Review
+
+								</td>
+
+                                
+								<td>
+									0
+								</td>
+
+								
+								<td>Marisa Abrajano
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>05 Mar 2018</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(106245, '{CF11C846-532E-4D36-BF19-3D3448F05ED2}')" title="Second Reminder of Late Review for Diversity is Good, Discrimination is Bad: Public Spending in the U.S.">Reviewer - Second Late Reminder</a></td><td>Maya Sen, PhD, JD</td>
+								<td>
+									Under Review
+
+								</td>
+
+                                
+								<td>
+									0
+								</td>
+
+								
+								<td>Marisa Abrajano
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>26 Feb 2018</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(105212, '{776F7FC3-20FB-4F94-B632-56623479E104}')" title="Second Reminder of Late Review for %ARTICLE_TITLE%">Reviewer - Second Late Reminder</a></td><td>Maya Sen, PhD, JD</td>
+								<td>
+									Under Review
+
+								</td>
+
+                                
+								<td>
+									0
+								</td>
+
+								
+								<td>Jane Y. Junn, PHD
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>21 Feb 2018</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(105186, '{7A1BD22F-70C1-4450-9BCD-162655950A96}')" title="Reminder of Late Review for JREP">Reviewer - First Late Reminder</a></td><td>Maya Sen, PhD, JD</td>
+								<td>
+									Under Review
+
+								</td>
+
+                                
+								<td>
+									0
+								</td>
+
+								
+								<td>Jane Y. Junn, PHD
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>14 Feb 2018</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(105134, '{EEEC15E8-BC08-4E4D-96D8-03471F20ED1F}')" title="JREP Reminder: Review assignment is due soon">Reviewer Reminder - Before Due Date</a></td><td>Maya Sen, PhD, JD</td>
+								<td>
+									Under Review
+
+								</td>
+
+                                
+								<td>
+									0
+								</td>
+
+								
+								<td>Jane Y. Junn, PHD
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>01 Feb 2018</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(105049, '{6C5B2D11-890C-416E-9233-39B93F66E2D8}')" title="JREP: Last invitation to review a manuscript">Review Invite last reminder before agree/decline</a></td><td>Caroline J. Tolbert, PHD</td>
+								<td>
+									Under Review
+
+								</td>
+
+                                
+								<td>
+									0
+								</td>
+
+								
+								<td>Marisa Abrajano
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>22 Jan 2018</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(104982, '{E6633419-0F3D-4500-8515-E8A6E75CB617}')" title="Reviewer agrees to review &quot;%ARTICLE_TITLE%&quot;">Editor Notice Reviewer Agrees to Review</a></td><td>Marisa Abrajano</td>
+								<td>
+									Under Review
+
+								</td>
+
+                                
+								<td>
+									0
+								</td>
+
+								
+								<td>Rodney E. Hero
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>21 Jan 2018</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(104976, '{AF3DA67E-D9DD-4F05-8A9C-E8D8BD6AA759}')" title="Invitation to review manuscript for JREP">Reviewer Reminder - Before Agree or Decline</a></td><td>Caroline J. Tolbert, PHD</td>
+								<td>
+									Under Review
+
+								</td>
+
+                                
+								<td>
+									0
+								</td>
+
+								
+								<td>Nhat-Dang Do
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>21 Jan 2018</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(104975, '{4B51B931-1F20-4013-B3D3-FA71A1BF3580}')" title="Invitation to review manuscript for JREP">Reviewer Reminder - Before Agree or Decline</a></td><td>Rodney E. Hero</td>
+								<td>
+									Under Review
+
+								</td>
+
+                                
+								<td>
+									0
+								</td>
+
+								
+								<td>Nhat-Dang Do
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>15 Jan 2018</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(104917, '{5A18D56B-6DBD-4B3D-AEAD-E988C388D451}')" title="Reviewer agrees to review &quot;%ARTICLE_TITLE%&quot;">Editor Notice Reviewer Agrees to Review</a></td><td>Marisa Abrajano</td>
+								<td>
+									Under Review
+
+								</td>
+
+                                
+								<td>
+									0
+								</td>
+
+								
+								<td>Maya Sen, PhD, JD
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>14 Jan 2018</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(104907, '{D595CB63-FF5E-410E-8969-BD3896698858}')" title="Reviewer Invitation for JREP">Reviewer Invitation</a></td><td>Maya Sen, PhD, JD</td>
+								<td>
+									Under Review
+
+								</td>
+
+                                
+								<td>
+									0
+								</td>
+
+								
+								<td>Marisa Abrajano
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>14 Jan 2018</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(104906, '{2428FD01-6775-4B4F-85BB-BDB505F420BD}')" title="Reviewer Invitation for JREP">Reviewer Invitation</a></td><td>Rodney E. Hero</td>
+								<td>
+									Under Review
+
+								</td>
+
+                                
+								<td>
+									0
+								</td>
+
+								
+								<td>Marisa Abrajano
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>14 Jan 2018</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(104905, '{14E80CBB-F764-4BB5-A914-91AD014E73BF}')" title="Reviewer Invitation for JREP">Reviewer Invitation</a></td><td>Caroline J. Tolbert, PHD</td>
+								<td>
+									Under Review
+
+								</td>
+
+                                
+								<td>
+									0
+								</td>
+
+								
+								<td>Marisa Abrajano
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>16 Dec 2017</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(104761, '{B865F249-4964-44E9-8C9D-62E7B1EA396B}')" title="JREP will seek alternate reviewer">Reviewer Uninvited Notice</a></td><td>Caroline J. Tolbert, PHD</td>
+								<td>
+									Under Review
+
+								</td>
+
+                                
+								<td>
+									0
+								</td>
+
+								
+								<td>Marisa Abrajano
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>15 Dec 2017</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(104750, '{D586FD0A-C187-47A7-B845-599019FEA5C2}')" title="Invitation to review manuscript for JREP">Reviewer Reminder - Before Agree or Decline</a></td><td>Maya Sen, PhD, JD</td>
+								<td>
+									Under Review
+
+								</td>
+
+                                
+								<td>
+									0
+								</td>
+
+								
+								<td>Nhat-Dang Do
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>15 Dec 2017</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(104749, '{548ABA08-C973-425C-BDA6-F9BF6FB21B2B}')" title="Invitation to review manuscript for JREP">Reviewer Reminder - Before Agree or Decline</a></td><td>Rodney E. Hero</td>
+								<td>
+									Under Review
+
+								</td>
+
+                                
+								<td>
+									0
+								</td>
+
+								
+								<td>Nhat-Dang Do
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>15 Dec 2017</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(104748, '{C110DCB6-DC66-4C92-9F1D-E43EFECE7D8F}')" title="Invitation to review manuscript for JREP">Reviewer Reminder - Before Agree or Decline</a></td><td>Caroline J. Tolbert, PHD</td>
+								<td>
+									Under Review
+
+								</td>
+
+                                
+								<td>
+									0
+								</td>
+
+								
+								<td>Nhat-Dang Do
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>08 Dec 2017</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(104622, '{307B0562-AF23-426D-8F99-FB617A9C473C}')" title="Reviewer Invitation for JREP">Reviewer Invitation</a></td><td>Maya Sen, PhD, JD</td>
+								<td>
+									Under Review
+
+								</td>
+
+                                
+								<td>
+									0
+								</td>
+
+								
+								<td>Marisa Abrajano
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>08 Dec 2017</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(104621, '{FCC426E1-A742-4568-8205-758A2C31964D}')" title="Reviewer Invitation for JREP">Reviewer Invitation</a></td><td>Rodney E. Hero</td>
+								<td>
+									Under Review
+
+								</td>
+
+                                
+								<td>
+									0
+								</td>
+
+								
+								<td>Marisa Abrajano
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>08 Dec 2017</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(104620, '{CDFCD69B-6A10-465D-B09F-8A240E09FF73}')" title="Reviewer Invitation for JREP">Reviewer Invitation</a></td><td>Caroline J. Tolbert, PHD</td>
+								<td>
+									Under Review
+
+								</td>
+
+                                
+								<td>
+									0
+								</td>
+
+								
+								<td>Marisa Abrajano
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>28 Nov 2017</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(104496, '{1F374509-F83A-4D83-8116-2FA3849391AD}')" title="You have a new Editor Assignment for JREP">Editor Assignment</a></td><td>Marisa Abrajano</td>
+								<td>
+									With Editor
+
+								</td>
+
+                                
+								<td>
+									0
+								</td>
+
+								
+								<td>Nhat-Dang Do
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>07 Nov 2017</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(104330, '{685B6D4F-9820-429A-850E-F94264EA8285}')" title="Your JREP Submission">Author Notice Technical Check Failed</a></td><td>Neeraj Vimal Prasad, Ph.D. Candidate</td>
+								<td>
+									Sent Back to Author
+
+								</td>
+
+                                
+								<td>
+									0
+								</td>
+
+								
+								<td>Nhat-Dang Do
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>30 Oct 2017</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(104270, '{3CA55D1E-697C-409B-BD74-FE05ADBF30BB}')" title="REP: New Manuscript Submission ">Journal Office Notice New Submission</a></td><td>Nhat-Dang Do</td>
+								<td>
+									Manuscript Submitted
+
+								</td>
+
+                                
+								<td>
+									0
+								</td>
+
+								
+								<td>Neeraj Vimal Prasad, Ph.D. Candidate
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>30 Oct 2017</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(104269, '{7FBD4410-9634-4BCD-8689-3D0B38D9982F}')" title="REP: New Manuscript Submission ">Journal Office Notice New Submission</a></td><td>Dan Gibson</td>
+								<td>
+									Manuscript Submitted
+
+								</td>
+
+                                
+								<td>
+									0
+								</td>
+
+								
+								<td>Neeraj Vimal Prasad, Ph.D. Candidate
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>30 Oct 2017</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(104268, '{9EB5FD81-0028-428D-AD50-21536F6CBA77}')" title="REP: New Manuscript Submission ">Journal Office Notice New Submission</a></td><td>Allan Colbern, Ph.D.</td>
+								<td>
+									Manuscript Submitted
+
+								</td>
+
+                                
+								<td>
+									0
+								</td>
+
+								
+								<td>Neeraj Vimal Prasad, Ph.D. Candidate
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>30 Oct 2017</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(104267, '{531E4B7C-5FC0-4770-8868-9177A562A8B3}')" title="REP: New Manuscript Submission ">Journal Office Notice New Submission</a></td><td>Allan Colbern, Ph.D.</td>
+								<td>
+									Manuscript Submitted
+
+								</td>
+
+                                
+								<td>
+									0
+								</td>
+
+								
+								<td>Neeraj Vimal Prasad, Ph.D. Candidate
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>30 Oct 2017</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(104266, '{927546BF-F9FE-4F72-AEDC-07CFF8349743}')" title="REP: New Manuscript Submission ">Journal Office Notice New Submission</a></td><td>S. Karthick Ramakrishnan</td>
+								<td>
+									Manuscript Submitted
+
+								</td>
+
+                                
+								<td>
+									0
+								</td>
+
+								
+								<td>Neeraj Vimal Prasad, Ph.D. Candidate
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>30 Oct 2017</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(104265, '{A806F81D-30CD-4251-9520-D775B4DE9033}')" title="REP: New Manuscript Submission ">Journal Office Notice New Submission</a></td><td>Marisa Abrajano</td>
+								<td>
+									Manuscript Submitted
+
+								</td>
+
+                                
+								<td>
+									0
+								</td>
+
+								
+								<td>Neeraj Vimal Prasad, Ph.D. Candidate
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>30 Oct 2017</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(104264, '{92084116-5347-46D4-A905-08177C97B9D6}')" title="REP: New Manuscript Submission ">Journal Office Notice New Submission</a></td><td>Jane Y. Junn, PHD</td>
+								<td>
+									Manuscript Submitted
+
+								</td>
+
+                                
+								<td>
+									0
+								</td>
+
+								
+								<td>Neeraj Vimal Prasad, Ph.D. Candidate
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>30 Oct 2017</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(104263, '{8F2DDB5E-EFCC-4744-9D7D-B4A675EC6786}')" title="Submission Confirmation for JREP">Author Submits New Manuscript Confirmation</a></td><td>Neeraj Vimal Prasad, Ph.D. Candidate</td>
+								<td>
+									Manuscript Submitted
+
+								</td>
+
+                                
+								<td>
+									0
+								</td>
+
+								
+								<td>Neeraj Vimal Prasad, Ph.D. Candidate
+								</td>
+
+							
+							</tr>
+							
+					</table>
+					
+			</fieldset>
+			
+	</div>
+	<div class="centered">
+		
+		<br /><br /><input type="button" name="close" value="Close" onclick="window.close();" />
+		<br /><br />
+		<a href="#status">Status History</a>&nbsp;&nbsp;&nbsp;<a href="#correspondence">Correspondence History</a>&nbsp;&nbsp;&nbsp;
+		<br /><br /><a href="docHistoryStatusTypeView.asp?docid=3649">Switch to Status Type View</a>
+	</div>
+
+    <div id="modalDiv" style="display:none"></div>
+
+</form>
+
+<script type="text/javascript">
+    if (typeof pageDataTracker !== 'undefined') {
+        RetrieveAnalyticsData();
+    }
+</script>
+    <script type="text/javascript">
+        $(document).ready(function() 
+	    {
+	        url = 'ajax/RenderControlToPage.ashx?control=DialogWidgetControl&id=warningDialog&titleResourceId=Common.Text.Warning&titleBarIcon=warning&showTitleBar=true&showTitleBarClose=false&dialogStyle=confirm&width=400';
+	        $.get(url, function (data) 
+	        {
+	            $('body').append(data);
+	        });
+        });
+    </script>
+</body>
+</html>

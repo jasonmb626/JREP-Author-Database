@@ -1,0 +1,2201 @@
+
+
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+<head>
+	<title>History Details</title>
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+
+    <link rel="stylesheet" type="text/css" href="cssSiteStyle.aspx" />
+    <link rel="stylesheet" type="text/css" href="cssJQueryDialog.aspx" />
+
+	<style type="text/css">
+		.centered table
+		{
+			margin: 0 auto;
+		}
+        .activeSubFlagHistory
+        {
+            color: red;
+        }
+	</style>
+
+    <script type="text/javascript">
+//<![CDATA[
+
+function FormatString(stringToFormat, replacementValues)
+{
+	return stringToFormat.replace(/{([0-9]+)}/g, function(wholematch, firstmatch)
+		  { var i = +firstmatch; return i < replacementValues.length ? replacementValues[i] : wholematch; }
+		);
+}
+
+
+
+function EscapeAttributeValue(value) 
+{
+
+        return value.replace(/&/g, '&amp;')
+                    .replace(/'/g, "&apos;")
+                    .replace(/"/g, '&quot;')
+                    .replace(/</g, '&lt;')
+                    .replace(/>/g, '&gt;');
+}
+
+//]]>
+</script>
+
+<script type="text/javascript" src="/jrep/WebUserControls/ClientJScript/translatedClientutil.aspx?lang=en%2DUS"></script>
+<script type="text/javascript" src="/jrep/ClientScript/clientutil.aspx"></script>
+
+<script src="/jrep/ClientScript/jquery.js" type="text/javascript"></script>
+<script src="/jrep/ClientScript/jquery-ui.js" type="text/javascript"></script>   
+
+
+
+    <script type="text/javascript" src="ClientScript/MSPFunctions.js"></script>
+
+	<script type="text/javascript">
+		/***********************************************************************
+		* 7.0-39	TimH	20090424
+		* Navigate to the Add External Correspondence Page, providing
+		* info needed to add a new External Correspondence record.
+		***********************************************************************/
+		function AddExternalCorrespondence(externalCorrespType)
+		{
+			var hdnExternalCorrespondenceType = document.getElementById("hdnExternalCorrespondenceType");
+			hdnExternalCorrespondenceType.value = "" + externalCorrespType;
+
+			var hdnLetterSecurityID = document.getElementById("hdnLetterSecurityID");
+			hdnLetterSecurityID.value = "";
+
+			document.frmDocHistory.submit();
+		}
+
+		/***********************************************************************
+		* 7.0-39	TimH	20090424
+		* Edit or Remove the External Correspondence specified by the
+		* Edit or Remove hyperlink clicked by the user.
+		***********************************************************************/
+		function EditExternalCorrespondence(externalCorrespondenceID, externalCorrespType, remove, letterSecurityID)
+		{
+			var hdnExternalCorrespondenceID = document.getElementById("hdnExternalCorrespondenceID");
+			hdnExternalCorrespondenceID.value = "" + externalCorrespondenceID;
+
+			var hdnExternalCorrespondenceType = document.getElementById("hdnExternalCorrespondenceType");
+			hdnExternalCorrespondenceType.value = "" + externalCorrespType;
+
+			var hdnLetterSecurityID = document.getElementById("hdnLetterSecurityID");
+			hdnLetterSecurityID.value = letterSecurityID;
+
+			var hdnRemove = document.getElementById("hdnRemove");
+			hdnRemove.value = remove;
+
+			if(hdnRemove.value == "1")
+			{
+                var okAction = function ()
+                {
+					document.frmDocHistory.submit();	
+                }
+                $("#warningDialog")[0].showDialog('Removing the correspondence cannot be undone.\x0a\x3cbr\x2f\x3e\x3cbr\x2f\x3e\x0aClick Cancel to return to the History page without deleting the correspondence.\x0a\x3cbr\x2f\x3eClick OK to remove this item of correspondence.', okAction);
+                return;
+			}
+			else if(hdnRemove.value == "0")
+			{
+				document.frmDocHistory.submit();
+			}
+		}
+
+		/***********************************************************************
+		* 7.0-39	TimH	20090424
+		* In a new popup, View a read only version of the External Correspondence specified by the
+		* External Correspondence Description hyperlink clicked by the user.
+		***********************************************************************/
+		function ViewExternalCorrespondence(externalCorrespondenceID, externalCorrespType, letterSecurityID)
+		{
+			var sNavUrl = "DotNetPopUps/ViewExternalCorrespondence.aspx";
+			sNavUrl += "?hdnExternalCorrespondenceID=" + externalCorrespondenceID;
+			sNavUrl += "&hdnExternalCorrespondenceType=" + externalCorrespType;
+			sNavUrl += "&hdnLetterSecurityID=" + letterSecurityID;
+			sNavUrl += "&hdnAssociatedEntityType=" + EXT_CORRES_ASSOC_TYPE_SUBMISSION;
+
+			openCenterWin(sNavUrl, 'ViewExternalCorrespondence', 1, 1, 0, 0, 0, 0);
+		}
+
+		function resendEditorialStatus(statHistID, notLatest)
+		{
+            if (notLatest)
+            {
+                var okAction = function ()
+                {
+					resendStatus(statHistID);	
+                }
+                $("#warningDialog")[0].showDialog('The Status you are attempting to resend is not the most recent status. Do you want to continue\x3f', okAction);
+                return;
+            }
+            else
+            {
+                resendStatus(statHistID);
+            }
+        }
+        function resendStatus(statHistID)
+        {
+            // Resend status
+		    var documentID = "3670";
+		    var exportType = 4;
+		    var operatorID = "217520";
+		    var proxyOperatorID = "";
+		    if (proxyOperatorID != "")
+		    {
+		        operatorID = proxyOperatorID;
+		    }
+		    resendMSPEditorialStatus(documentID, exportType, operatorID, statHistID, "");
+        }
+
+		function displayOverlay(text) {
+		    $("#modalDiv").text(text);
+		    $("#modalDiv").dialog({
+	            title: '',
+	            resizable: true, modal: true, buttons: [{ text: 'OK',
+	                click: function () { $(this).dialog("close"); }
+	            }], closeText: '',
+
+	            open: function ()
+	            {
+	                $(this).dialog('widget').find(".ui-dialog-titlebar-close").hide();
+	                $(this).dialog({ position: 'center' });
+	            }
+
+	        });
+
+	        return false;
+		}
+	</script>
+    
+</head>
+<body>
+
+	<form name="frmDocHistory" method="post" id="frmDocHistory" action="DotNetPopUps/AddEditExternalCorrespondence.aspx">
+	<div class="centered">
+	    <input type="hidden" id="hdnAssociatedEntityID" name="hdnAssociatedEntityID" value="3670" />
+	    <input type="hidden" id="hdnLetterSecurityID" name="hdnLetterSecurityID" value="" />
+	    <input type="hidden" id="hdnAssociatedEntityType" name="hdnAssociatedEntityType" value="1" />
+	    <input type="hidden" id="hdnExternalCorrespondenceID" name="hdnExternalCorrespondenceID" value="" />
+	    <input type="hidden" id="hdnExternalCorrespondenceType" name="hdnExternalCorrespondenceType" value=""/>
+	    <input type="hidden" id="hdnRemove" name="hdnRemove" value="" />
+	    <input type="hidden" id="hdnReturnPage" name="hdnReturnPage" value="doc_history.asp" />
+	    <input type="hidden" id="hdnAttachmentGroupID" name="hdnAttachmentGroupID" value="" />
+		<h3>
+			History for Manuscript Number: JREP-D-18-00009R1 &quot;From Barrios to Condos: The Effects of Gentrification on Minority Descriptive Representation&quot;
+		</h3>
+		<a href="#status">Status History</a>&nbsp;&nbsp;&nbsp;<a href="#correspondence">Correspondence History</a>&nbsp;&nbsp;&nbsp;
+
+
+		<br /><br /><a href="docHistoryStatusTypeView.asp?docid=3670">Switch to Status Type View</a>
+
+		
+		<br /><br /><input type="button" name="close" value="Close" onclick="window.close();" />
+	</div>
+
+	<div>
+		<br /><br />
+		
+			<fieldset>
+				<legend><a name="status"></a>STATUS HISTORY</legend>
+				
+					<table border="0" cellpadding="0" cellspacing="0" width="97%" class="datatable">
+						<tr>
+							<th>Status Date</th>
+							<th>Document Status</th>
+							
+							<th>Status Days</th>
+							<th>Role Family</th>
+							<th>Revision </th>
+							<th>Operator</th>
+						</tr>
+
+						
+							<tr>
+								
+								<td>Sep 26 2018  3:56PM</td>
+
+								
+								<td>
+									Completed Accept
+								</td>
+
+								
+								<td>----</td>
+
+								
+								<td>
+									EDITOR
+								</td>
+
+								
+								<td>1</td>
+
+								
+								<td>Marisa Abrajano
+								</td>
+							</tr>
+							
+							<tr>
+								
+								<td>Aug  2 2018  2:09PM</td>
+
+								
+								<td>
+									Accept
+								</td>
+
+								
+								<td>55</td>
+
+								
+								<td>
+									EDITOR
+								</td>
+
+								
+								<td>1</td>
+
+								
+								<td>Marisa Abrajano
+								</td>
+							</tr>
+							
+							<tr>
+								
+								<td>Aug  2 2018  2:09PM</td>
+
+								
+								<td>
+									Decision in Process
+								</td>
+
+								
+								<td>----</td>
+
+								
+								<td>
+									EDITOR
+								</td>
+
+								
+								<td>1</td>
+
+								
+								<td>Marisa Abrajano
+								</td>
+							</tr>
+							
+							<tr>
+								
+								<td>Aug  2 2018 11:24AM</td>
+
+								
+								<td>
+									Required Reviews Completed
+								</td>
+
+								
+								<td>----</td>
+
+								
+								<td>
+									EDITOR
+								</td>
+
+								
+								<td>1</td>
+
+								
+								<td>John Betancur
+								</td>
+							</tr>
+							
+							<tr>
+								
+								<td>Jun 25 2018  9:35PM</td>
+
+								
+								<td>
+									Under Review
+								</td>
+
+								
+								<td>37</td>
+
+								
+								<td>
+									REVIEWER
+								</td>
+
+								
+								<td>1</td>
+
+								
+								<td>Marisa Abrajano
+								</td>
+							</tr>
+							
+							<tr>
+								
+								<td>Jun  6 2018  4:21PM</td>
+
+								
+								<td>
+									With Editor
+								</td>
+
+								
+								<td>19</td>
+
+								
+								<td>
+									EDITOR
+								</td>
+
+								
+								<td>1</td>
+
+								
+								<td>Nhat-Dang Do
+								</td>
+							</tr>
+							
+							<tr>
+								
+								<td>Jun  6 2018  4:18PM</td>
+
+								
+								<td>
+									Revised Manuscript Submitted
+								</td>
+
+								
+								<td>----</td>
+
+								
+								<td>
+									EDITOR
+								</td>
+
+								
+								<td>1</td>
+
+								
+								<td>Markie McBrayer
+								</td>
+							</tr>
+							
+							<tr>
+								
+								<td>Jun  6 2018  4:10PM</td>
+
+								
+								<td>
+									Revision Needs Approval
+								</td>
+
+								
+								<td>----</td>
+
+								
+								<td>
+									AUTHOR
+								</td>
+
+								
+								<td>1</td>
+
+								
+								<td>Markie McBrayer
+								</td>
+							</tr>
+							
+							<tr>
+								
+								<td>Jun  6 2018  4:10PM</td>
+
+								
+								<td>
+									Building PDF
+								</td>
+
+								
+								<td>----</td>
+
+								
+								<td>
+									AUTHOR
+								</td>
+
+								
+								<td>1</td>
+
+								
+								<td>Markie McBrayer
+								</td>
+							</tr>
+							
+							<tr>
+								
+								<td>Jun  6 2018  1:43PM</td>
+
+								
+								<td>
+									Incomplete
+								</td>
+
+								
+								<td>----</td>
+
+								
+								<td>
+									AUTHOR
+								</td>
+
+								
+								<td>1</td>
+
+								
+								<td>Markie McBrayer
+								</td>
+							</tr>
+							
+							<tr>
+								
+								<td>Apr 13 2018  4:31PM</td>
+
+								
+								<td>
+									Revise
+								</td>
+
+								
+								<td>54</td>
+
+								
+								<td>
+									AUTHOR
+								</td>
+
+								
+								<td>0</td>
+
+								
+								<td>Marisa Abrajano
+								</td>
+							</tr>
+							
+							<tr>
+								
+								<td>Apr 13 2018  4:31PM</td>
+
+								
+								<td>
+									Decision in Process
+								</td>
+
+								
+								<td>----</td>
+
+								
+								<td>
+									EDITOR
+								</td>
+
+								
+								<td>0</td>
+
+								
+								<td>Marisa Abrajano
+								</td>
+							</tr>
+							
+							<tr>
+								
+								<td>Mar 30 2018 10:05AM</td>
+
+								
+								<td>
+									Required Reviews Completed
+								</td>
+
+								
+								<td>14</td>
+
+								
+								<td>
+									EDITOR
+								</td>
+
+								
+								<td>0</td>
+
+								
+								<td>Ayobami Laniyonu
+								</td>
+							</tr>
+							
+							<tr>
+								
+								<td>Feb 15 2018  2:12PM</td>
+
+								
+								<td>
+									Under Review
+								</td>
+
+								
+								<td>42</td>
+
+								
+								<td>
+									REVIEWER
+								</td>
+
+								
+								<td>0</td>
+
+								
+								<td>Marisa Abrajano
+								</td>
+							</tr>
+							
+							<tr>
+								
+								<td>Feb  7 2018  4:47PM</td>
+
+								
+								<td>
+									With Editor
+								</td>
+
+								
+								<td>7</td>
+
+								
+								<td>
+									EDITOR
+								</td>
+
+								
+								<td>0</td>
+
+								
+								<td>Nhat-Dang Do
+								</td>
+							</tr>
+							
+							<tr>
+								
+								<td>Feb  7 2018  2:09PM</td>
+
+								
+								<td>
+									Manuscript Submitted
+								</td>
+
+								
+								<td>----</td>
+
+								
+								<td>
+									EDITOR
+								</td>
+
+								
+								<td>0</td>
+
+								
+								<td>Markie McBrayer
+								</td>
+							</tr>
+							
+							<tr>
+								
+								<td>Feb  7 2018  2:06PM</td>
+
+								
+								<td>
+									Needs Approval
+								</td>
+
+								
+								<td>----</td>
+
+								
+								<td>
+									AUTHOR
+								</td>
+
+								
+								<td>0</td>
+
+								
+								<td>Markie McBrayer
+								</td>
+							</tr>
+							
+							<tr>
+								
+								<td>Feb  7 2018  2:06PM</td>
+
+								
+								<td>
+									Building PDF
+								</td>
+
+								
+								<td>----</td>
+
+								
+								<td>
+									AUTHOR
+								</td>
+
+								
+								<td>0</td>
+
+								
+								<td>Markie McBrayer
+								</td>
+							</tr>
+							
+							<tr>
+								
+								<td>Feb  3 2018 11:58AM</td>
+
+								
+								<td>
+									Incomplete
+								</td>
+
+								
+								<td>4</td>
+
+								
+								<td>
+									AUTHOR
+								</td>
+
+								
+								<td>0</td>
+
+								
+								<td>Markie McBrayer
+								</td>
+							</tr>
+							
+					</table>
+					
+			</fieldset>
+			<br />
+			<br />
+		
+			<fieldset>
+				<legend><a name="correspondence"></a>CORRESPONDENCE HISTORY</legend>
+				
+						<div class="buttonAlign" style="padding-bottom:4px;">
+							<input type="button" name="btnAddExtEditorialCorrespondence" value="Add&#32;Editorial&#32;Correspondence" onclick="AddExternalCorrespondence(1);" />
+							
+						</div>
+					
+					<table border="0" cellpadding="0" cellspacing="0" width="97%" class="datatable">
+						<tr>
+							<th>Correspondence Date</th>
+							<th>Letter</th>
+							<th>Recipient</th>
+							<th>Status</th>
+                            
+							<th>Revision</th>
+							<th>Operator</th>
+						</tr>
+
+						
+							<tr>
+								
+								<td>26 Sep 2018</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(107519, '{023CA50F-D9FB-4AE8-8EF3-F16113286481}')" title="JREP %MS_NUMBER% is Accepted for Publication">Publisher Notification of Accepted Manuscript</a></td><td>Jon Samuel Geffner</td>
+								<td>
+									Completed Accept
+
+								</td>
+
+                                
+								<td>
+									1
+								</td>
+
+								
+								<td>Marisa Abrajano
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>26 Sep 2018</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(107518, '{00D0CA8D-760F-465E-BFE2-6797B67CB595}')" title="JREP %MS_NUMBER% is Accepted for Publication">Publisher Notification of Accepted Manuscript</a></td><td>Cambridge Production</td>
+								<td>
+									Completed Accept
+
+								</td>
+
+                                
+								<td>
+									1
+								</td>
+
+								
+								<td>Marisa Abrajano
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>02 Aug 2018</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(107181, '{9A37C011-2EF3-4819-ACC9-A3D890D8C578}')" title="Your Submission to JREP">Editor Decision - Accept</a></td><td>Markie McBrayer</td>
+								<td>
+									Accept
+
+								</td>
+
+                                
+								<td>
+									1
+								</td>
+
+								
+								<td>Marisa Abrajano
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>02 Aug 2018</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(107180, '{DB8AD04D-6BDC-4528-ACEE-2A327323FE76}')" title="To assist. Editor: Decision Notification">Journal Office Notice Editor Decision Notification</a></td><td>Nhat-Dang Do</td>
+								<td>
+									Decision in Process
+
+								</td>
+
+                                
+								<td>
+									1
+								</td>
+
+								
+								<td>Marisa Abrajano
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>02 Aug 2018</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(107179, '{714A7483-5A60-4CE5-B6C0-A638C2E7B336}')" title="All Reviews Complete  for &quot;%ARTICLE_TITLE%&quot;">Journal Office Notice All Reviews Complete</a></td><td>Nhat-Dang Do</td>
+								<td>
+									Required Reviews Completed
+
+								</td>
+
+                                
+								<td>
+									1
+								</td>
+
+								
+								<td>John Betancur
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>02 Aug 2018</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(107178, '{EE5D0772-6E00-4ECC-9FF9-A387EF2AC016}')" title="JREP Completed Reviews for &quot;%ARTICLE_TITLE%&quot;">Editor Notice All Reviews Complete</a></td><td>Marisa Abrajano</td>
+								<td>
+									Required Reviews Completed
+
+								</td>
+
+                                
+								<td>
+									1
+								</td>
+
+								
+								<td>John Betancur
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>02 Aug 2018</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(107177, '{15124833-FF0F-4974-BED2-5A7B951E0272}')" title="Thank you for the review for JREP">Reviewer Thank You</a></td><td>John Betancur</td>
+								<td>
+									Under Review
+
+								</td>
+
+                                
+								<td>
+									1
+								</td>
+
+								
+								<td>John Betancur
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>02 Aug 2018</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(107166, '{DA13D34C-75D9-4D74-AE55-5F94695240D5}')" title="Reminder of Late Review for JREP">Reviewer - First Late Reminder</a></td><td>John Betancur</td>
+								<td>
+									Under Review
+
+								</td>
+
+                                
+								<td>
+									1
+								</td>
+
+								
+								<td>Jane Y. Junn, PHD
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>31 Jul 2018</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(107161, '{02DC1DEC-9BA3-401C-8370-AF906B2849D1}')" title="Thank you for the review for JREP">Reviewer Thank You</a></td><td>Ayobami Laniyonu</td>
+								<td>
+									Under Review
+
+								</td>
+
+                                
+								<td>
+									1
+								</td>
+
+								
+								<td>Ayobami Laniyonu
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>31 Jul 2018</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(107160, '{91C708B8-7EC4-4FD9-8A63-15490849F0C3}')" title="JREP Reminder: Review assignment is due soon">Reviewer Reminder - Before Due Date</a></td><td>Ayobami Laniyonu</td>
+								<td>
+									Under Review
+
+								</td>
+
+                                
+								<td>
+									1
+								</td>
+
+								
+								<td>Jane Y. Junn, PHD
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>30 Jul 2018</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(107159, '{9B8F2836-F635-482B-B87B-69FFC6901626}')" title="Thank you for the review for JREP">Reviewer Thank You</a></td><td>Yalidy Matos, Ph.D.</td>
+								<td>
+									Under Review
+
+								</td>
+
+                                
+								<td>
+									1
+								</td>
+
+								
+								<td>Yalidy Matos, Ph.D.
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>26 Jul 2018</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(107142, '{FAAEAF40-EC7F-4BA2-8A7D-91BCCF48C44E}')" title="JREP Reminder: Review assignment is due soon">Reviewer Reminder - Before Due Date</a></td><td>John Betancur</td>
+								<td>
+									Under Review
+
+								</td>
+
+                                
+								<td>
+									1
+								</td>
+
+								
+								<td>Jane Y. Junn, PHD
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>01 Jul 2018</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(106968, '{4A2D6758-1646-4672-B7DA-9FE4AE3BA460}')" title="JREP: Thank you for agreeing to review">Reviewer Instructions and Due Date</a>&nbsp;<img style="vertical-align:middle;margin-top:4px" src="img/paperclip_icon.gif" alt=""/></td><td>Ayobami Laniyonu</td>
+								<td>
+									Under Review
+
+								</td>
+
+                                
+								<td>
+									1
+								</td>
+
+								
+								<td>Ayobami Laniyonu
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>01 Jul 2018</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(106967, '{FC24C784-7A60-4DAD-AE1C-52D904179EC1}')" title="Reviewer agrees to review &quot;%ARTICLE_TITLE%&quot;">Editor Notice Reviewer Agrees to Review</a></td><td>Marisa Abrajano</td>
+								<td>
+									Under Review
+
+								</td>
+
+                                
+								<td>
+									1
+								</td>
+
+								
+								<td>Ayobami Laniyonu
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>01 Jul 2018</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(106966, '{29E51DBC-681B-4EB2-AE0F-336FD780578F}')" title="JREP: Thank you for agreeing to review">Reviewer Instructions and Due Date</a>&nbsp;<img style="vertical-align:middle;margin-top:4px" src="img/paperclip_icon.gif" alt=""/></td><td>Yalidy Matos, Ph.D.</td>
+								<td>
+									Under Review
+
+								</td>
+
+                                
+								<td>
+									1
+								</td>
+
+								
+								<td>Yalidy Matos, Ph.D.
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>01 Jul 2018</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(106965, '{D8A4F3F2-0745-4EEE-988D-82C708E8A73B}')" title="Reviewer agrees to review &quot;%ARTICLE_TITLE%&quot;">Editor Notice Reviewer Agrees to Review</a></td><td>Marisa Abrajano</td>
+								<td>
+									Under Review
+
+								</td>
+
+                                
+								<td>
+									1
+								</td>
+
+								
+								<td>Yalidy Matos, Ph.D.
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>26 Jun 2018</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(106924, '{13B5CE4C-C687-4EE1-AE00-ED1813BD2F79}')" title="JREP: Thank you for agreeing to review">Reviewer Instructions and Due Date</a>&nbsp;<img style="vertical-align:middle;margin-top:4px" src="img/paperclip_icon.gif" alt=""/></td><td>John Betancur</td>
+								<td>
+									Under Review
+
+								</td>
+
+                                
+								<td>
+									1
+								</td>
+
+								
+								<td>John Betancur
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>26 Jun 2018</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(106923, '{A658810E-77B3-4F9E-A16C-36DEC33844B4}')" title="Reviewer agrees to review &quot;%ARTICLE_TITLE%&quot;">Editor Notice Reviewer Agrees to Review</a></td><td>Marisa Abrajano</td>
+								<td>
+									Under Review
+
+								</td>
+
+                                
+								<td>
+									1
+								</td>
+
+								
+								<td>John Betancur
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>25 Jun 2018</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(106911, '{04BD332D-0790-4533-9487-7C6DD552C801}')" title="Reviewer Invitation for JREP Revision">Reviewer Invitation on Revision</a></td><td>John Betancur</td>
+								<td>
+									Under Review
+
+								</td>
+
+                                
+								<td>
+									1
+								</td>
+
+								
+								<td>Marisa Abrajano
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>25 Jun 2018</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(106910, '{EF126DBB-2823-455F-981D-DEF5C6371D30}')" title="Reviewer Invitation for JREP Revision">Reviewer Invitation on Revision</a></td><td>Ayobami Laniyonu</td>
+								<td>
+									Under Review
+
+								</td>
+
+                                
+								<td>
+									1
+								</td>
+
+								
+								<td>Marisa Abrajano
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>25 Jun 2018</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(106909, '{9A97D2D9-7D6C-4E03-AF70-B024BC372E14}')" title="Reviewer Invitation for JREP Revision">Reviewer Invitation on Revision</a></td><td>Yalidy Matos, Ph.D.</td>
+								<td>
+									Under Review
+
+								</td>
+
+                                
+								<td>
+									1
+								</td>
+
+								
+								<td>Marisa Abrajano
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>06 Jun 2018</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(106770, '{652939CE-A69A-4310-B455-407670DF94D6}')" title="You have a new Editor Assignment for JREP">Editor Assignment</a></td><td>Marisa Abrajano</td>
+								<td>
+									With Editor
+
+								</td>
+
+                                
+								<td>
+									1
+								</td>
+
+								
+								<td>Nhat-Dang Do
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>06 Jun 2018</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(106769, '{AB6C9AC9-90EB-43C6-B21D-D0D99E90B09A}')" title="REP notification: Revision Submitted for &quot;%ARTICLE_TITLE%&quot;">Journal Office Notice Revised Submission</a></td><td>Nhat-Dang Do</td>
+								<td>
+									Revised Manuscript Submitted
+
+								</td>
+
+                                
+								<td>
+									1
+								</td>
+
+								
+								<td>Markie McBrayer
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>06 Jun 2018</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(106768, '{6DDBECB6-A22A-4DBA-A5E1-054FC59720C2}')" title="REP notification: Revision Submitted for &quot;%ARTICLE_TITLE%&quot;">Journal Office Notice Revised Submission</a></td><td>Dan Gibson</td>
+								<td>
+									Revised Manuscript Submitted
+
+								</td>
+
+                                
+								<td>
+									1
+								</td>
+
+								
+								<td>Markie McBrayer
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>06 Jun 2018</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(106767, '{B127B7E1-A854-432A-8552-73351A75BE18}')" title="REP notification: Revision Submitted for &quot;%ARTICLE_TITLE%&quot;">Journal Office Notice Revised Submission</a></td><td>Allan Colbern, Ph.D.</td>
+								<td>
+									Revised Manuscript Submitted
+
+								</td>
+
+                                
+								<td>
+									1
+								</td>
+
+								
+								<td>Markie McBrayer
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>06 Jun 2018</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(106766, '{F64C923C-0D1B-4D3A-B3FE-D87C5D318946}')" title="REP notification: Revision Submitted for &quot;%ARTICLE_TITLE%&quot;">Journal Office Notice Revised Submission</a></td><td>Allan Colbern, Ph.D.</td>
+								<td>
+									Revised Manuscript Submitted
+
+								</td>
+
+                                
+								<td>
+									1
+								</td>
+
+								
+								<td>Markie McBrayer
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>06 Jun 2018</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(106765, '{67D56FB1-D4BA-4E78-94E4-EC7B87C2139E}')" title="REP notification: Revision Submitted for &quot;%ARTICLE_TITLE%&quot;">Journal Office Notice Revised Submission</a></td><td>S. Karthick Ramakrishnan</td>
+								<td>
+									Revised Manuscript Submitted
+
+								</td>
+
+                                
+								<td>
+									1
+								</td>
+
+								
+								<td>Markie McBrayer
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>06 Jun 2018</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(106764, '{9E165B0A-29B0-4AB7-8719-CE9729B986F8}')" title="REP notification: Revision Submitted for &quot;%ARTICLE_TITLE%&quot;">Journal Office Notice Revised Submission</a></td><td>Marisa Abrajano</td>
+								<td>
+									Revised Manuscript Submitted
+
+								</td>
+
+                                
+								<td>
+									1
+								</td>
+
+								
+								<td>Markie McBrayer
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>06 Jun 2018</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(106763, '{6E74B596-1554-4C3D-B981-9455C6700161}')" title="REP notification: Revision Submitted for &quot;%ARTICLE_TITLE%&quot;">Journal Office Notice Revised Submission</a></td><td>Jane Y. Junn, PHD</td>
+								<td>
+									Revised Manuscript Submitted
+
+								</td>
+
+                                
+								<td>
+									1
+								</td>
+
+								
+								<td>Markie McBrayer
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>06 Jun 2018</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(106762, '{3A475775-DF85-40BF-B7BF-C06450DD7DA1}')" title="Revision Confirmation for JREP">Author Submits Revision Confirmation</a></td><td>Markie McBrayer</td>
+								<td>
+									Revised Manuscript Submitted
+
+								</td>
+
+                                
+								<td>
+									1
+								</td>
+
+								
+								<td>Markie McBrayer
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>13 Apr 2018</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(106423, '{BAEDBD73-CA15-4027-BB63-F20C7F8ECD83}')" title="Your JREP Submission">Editor Decision - Revise</a></td><td>Markie McBrayer</td>
+								<td>
+									Revise
+
+								</td>
+
+                                
+								<td>
+									0
+								</td>
+
+								
+								<td>Marisa Abrajano
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>13 Apr 2018</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(106422, '{526B2A6B-C4BB-48DF-8CCA-4A77C8532C22}')" title="To assist. Editor: Decision Notification">Journal Office Notice Editor Decision Notification</a></td><td>Nhat-Dang Do</td>
+								<td>
+									Decision in Process
+
+								</td>
+
+                                
+								<td>
+									0
+								</td>
+
+								
+								<td>Marisa Abrajano
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>30 Mar 2018</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(106376, '{EA792709-9469-4FCB-A929-92754DF6E7F3}')" title="All Reviews Complete  for &quot;%ARTICLE_TITLE%&quot;">Journal Office Notice All Reviews Complete</a></td><td>Nhat-Dang Do</td>
+								<td>
+									Required Reviews Completed
+
+								</td>
+
+                                
+								<td>
+									0
+								</td>
+
+								
+								<td>Ayobami Laniyonu
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>30 Mar 2018</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(106375, '{A849F13E-B16B-4D0E-B5F1-7C1CDB5E1364}')" title="JREP Completed Reviews for &quot;%ARTICLE_TITLE%&quot;">Editor Notice All Reviews Complete</a></td><td>Marisa Abrajano</td>
+								<td>
+									Required Reviews Completed
+
+								</td>
+
+                                
+								<td>
+									0
+								</td>
+
+								
+								<td>Ayobami Laniyonu
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>30 Mar 2018</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(106374, '{DF539CDD-FF7D-44FD-A5D4-ADF3049F44EE}')" title="Thank you for the review for JREP">Reviewer Thank You</a></td><td>Ayobami Laniyonu</td>
+								<td>
+									Under Review
+
+								</td>
+
+                                
+								<td>
+									0
+								</td>
+
+								
+								<td>Ayobami Laniyonu
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>29 Mar 2018</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(106373, '{8E40CE15-399A-4652-B7B4-87A1F9513E05}')" title="Second Reminder of Late Review for %ARTICLE_TITLE%">Reviewer - Second Late Reminder</a></td><td>Ayobami Laniyonu</td>
+								<td>
+									Under Review
+
+								</td>
+
+                                
+								<td>
+									0
+								</td>
+
+								
+								<td>Jane Y. Junn, PHD
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>24 Mar 2018</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(106349, '{5A9F1538-F6A8-40F8-9017-A4705C08366E}')" title="Reminder of Late Review for JREP">Reviewer - First Late Reminder</a></td><td>Ayobami Laniyonu</td>
+								<td>
+									Under Review
+
+								</td>
+
+                                
+								<td>
+									0
+								</td>
+
+								
+								<td>Jane Y. Junn, PHD
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>17 Mar 2018</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(106327, '{553FEFBA-2F0F-4D2B-9009-A3352FD5FF21}')" title="Thank you for the review for JREP">Reviewer Thank You</a></td><td>Yalidy Matos, Ph.D.</td>
+								<td>
+									Under Review
+
+								</td>
+
+                                
+								<td>
+									0
+								</td>
+
+								
+								<td>Yalidy Matos, Ph.D.
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>17 Mar 2018</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(106326, '{320C467A-14A3-4484-AD3B-CF2E891EB956}')" title="JREP Reminder: Review assignment is due soon">Reviewer Reminder - Before Due Date</a></td><td>Yalidy Matos, Ph.D.</td>
+								<td>
+									Under Review
+
+								</td>
+
+                                
+								<td>
+									0
+								</td>
+
+								
+								<td>Jane Y. Junn, PHD
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>17 Mar 2018</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(106323, '{92BBA6B3-5BB5-4F3D-8AAC-9540C6719FEC}')" title="JREP Reminder: Review assignment is due soon">Reviewer Reminder - Before Due Date</a></td><td>Ayobami Laniyonu</td>
+								<td>
+									Under Review
+
+								</td>
+
+                                
+								<td>
+									0
+								</td>
+
+								
+								<td>Jane Y. Junn, PHD
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>09 Mar 2018</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(106281, '{956AD722-706F-4778-A902-6232E0DF8DBE}')" title="Thank you for the review for JREP">Reviewer Thank You</a></td><td>John Betancur</td>
+								<td>
+									Under Review
+
+								</td>
+
+                                
+								<td>
+									0
+								</td>
+
+								
+								<td>John Betancur
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>22 Feb 2018</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(105199, '{5235E95D-8520-41BF-AA3D-5C96DA834B84}')" title="Declined invitation for JREP">Reviewer Invitation Declined</a></td><td>Lance Freeman</td>
+								<td>
+									Under Review
+
+								</td>
+
+                                
+								<td>
+									0
+								</td>
+
+								
+								<td>Lance Freeman
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>22 Feb 2018</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(105198, '{68FD0750-827D-4B58-847A-89D7B52EF6B0}')" title="Reviewer declines to review &quot;%ARTICLE_TITLE%&quot;">Editor Notice Reviewer Declines to Review</a></td><td>Marisa Abrajano</td>
+								<td>
+									Under Review
+
+								</td>
+
+                                
+								<td>
+									0
+								</td>
+
+								
+								<td>Lance Freeman
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>22 Feb 2018</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(105193, '{A9EA495B-5F43-40D3-9C6C-8C79AD9255FB}')" title="Invitation to review manuscript for JREP">Reviewer Reminder - Before Agree or Decline</a></td><td>Lance Freeman</td>
+								<td>
+									Under Review
+
+								</td>
+
+                                
+								<td>
+									0
+								</td>
+
+								
+								<td>Nhat-Dang Do
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>15 Feb 2018</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(105171, '{D5679487-EBDD-4ABC-87ED-3CDAA4857F65}')" title="JREP: Thank you for agreeing to review">Reviewer Instructions and Due Date</a>&nbsp;<img style="vertical-align:middle;margin-top:4px" src="img/paperclip_icon.gif" alt=""/></td><td>Yalidy Matos, Ph.D.</td>
+								<td>
+									Under Review
+
+								</td>
+
+                                
+								<td>
+									0
+								</td>
+
+								
+								<td>Yalidy Matos, Ph.D.
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>15 Feb 2018</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(105170, '{1DF2AFCF-3010-4CC4-9439-7E17D4581414}')" title="Reviewer agrees to review &quot;%ARTICLE_TITLE%&quot;">Editor Notice Reviewer Agrees to Review</a></td><td>Marisa Abrajano</td>
+								<td>
+									Under Review
+
+								</td>
+
+                                
+								<td>
+									0
+								</td>
+
+								
+								<td>Yalidy Matos, Ph.D.
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>15 Feb 2018</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(105169, '{7401C7E7-4AAE-46EE-884A-A835EA8070EA}')" title="JREP: Thank you for agreeing to review">Reviewer Instructions and Due Date</a>&nbsp;<img style="vertical-align:middle;margin-top:4px" src="img/paperclip_icon.gif" alt=""/></td><td>John Betancur</td>
+								<td>
+									Under Review
+
+								</td>
+
+                                
+								<td>
+									0
+								</td>
+
+								
+								<td>John Betancur
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>15 Feb 2018</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(105168, '{139B83F2-E047-4569-A789-B3489D7D7941}')" title="Reviewer agrees to review &quot;%ARTICLE_TITLE%&quot;">Editor Notice Reviewer Agrees to Review</a></td><td>Marisa Abrajano</td>
+								<td>
+									Under Review
+
+								</td>
+
+                                
+								<td>
+									0
+								</td>
+
+								
+								<td>John Betancur
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>15 Feb 2018</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(105165, '{10493C72-5E95-4AE4-BB6F-EEF80BA65940}')" title="Reviewer Invitation for JREP">Reviewer Invitation</a></td><td>John Betancur</td>
+								<td>
+									Under Review
+
+								</td>
+
+                                
+								<td>
+									0
+								</td>
+
+								
+								<td>Marisa Abrajano
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>15 Feb 2018</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(105164, '{5E8E28B9-EA92-4CED-ACB7-67384A2FF03B}')" title="JREP: Thank you for agreeing to review">Reviewer Instructions and Due Date</a>&nbsp;<img style="vertical-align:middle;margin-top:4px" src="img/paperclip_icon.gif" alt=""/></td><td>Ayobami Laniyonu</td>
+								<td>
+									Under Review
+
+								</td>
+
+                                
+								<td>
+									0
+								</td>
+
+								
+								<td>Ayobami Laniyonu
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>15 Feb 2018</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(105163, '{5BB2CA2A-0EB8-4C2E-BD31-227539D7DD9C}')" title="Reviewer agrees to review &quot;%ARTICLE_TITLE%&quot;">Editor Notice Reviewer Agrees to Review</a></td><td>Marisa Abrajano</td>
+								<td>
+									Under Review
+
+								</td>
+
+                                
+								<td>
+									0
+								</td>
+
+								
+								<td>Ayobami Laniyonu
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>15 Feb 2018</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(105162, '{E946B818-3181-46FB-A4FE-BEBB36F7DBE1}')" title="Reviewer Invitation for JREP">Reviewer Invitation</a></td><td>Ayobami Laniyonu</td>
+								<td>
+									Under Review
+
+								</td>
+
+                                
+								<td>
+									0
+								</td>
+
+								
+								<td>Marisa Abrajano
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>15 Feb 2018</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(105161, '{1EFADE82-94E2-4B02-A296-CCEA8896D5BA}')" title="Reviewer Invitation for JREP">Reviewer Invitation</a></td><td>Yalidy Matos, Ph.D.</td>
+								<td>
+									Under Review
+
+								</td>
+
+                                
+								<td>
+									0
+								</td>
+
+								
+								<td>Marisa Abrajano
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>15 Feb 2018</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(105160, '{1150059B-923B-4E29-BA45-B227DC64EEC2}')" title="Reviewer Invitation for JREP">Reviewer Invitation</a></td><td>Lance Freeman</td>
+								<td>
+									Under Review
+
+								</td>
+
+                                
+								<td>
+									0
+								</td>
+
+								
+								<td>Marisa Abrajano
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>07 Feb 2018</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(105102, '{B1A02448-39BC-4C0A-8EA0-247B052DB033}')" title="You have a new Editor Assignment for JREP">Editor Assignment</a></td><td>Marisa Abrajano</td>
+								<td>
+									With Editor
+
+								</td>
+
+                                
+								<td>
+									0
+								</td>
+
+								
+								<td>Nhat-Dang Do
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>07 Feb 2018</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(105101, '{5E088D59-7DB9-4F69-AA59-72CEE930F6BE}')" title="REP: New Manuscript Submission ">Journal Office Notice New Submission</a></td><td>Nhat-Dang Do</td>
+								<td>
+									Manuscript Submitted
+
+								</td>
+
+                                
+								<td>
+									0
+								</td>
+
+								
+								<td>Markie McBrayer
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>07 Feb 2018</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(105100, '{B24584E7-91CD-4662-BBE7-0A97E3B8A4E0}')" title="REP: New Manuscript Submission ">Journal Office Notice New Submission</a></td><td>Dan Gibson</td>
+								<td>
+									Manuscript Submitted
+
+								</td>
+
+                                
+								<td>
+									0
+								</td>
+
+								
+								<td>Markie McBrayer
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>07 Feb 2018</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(105099, '{EC14DE10-EE94-487F-9AE7-ABA64333C5C8}')" title="REP: New Manuscript Submission ">Journal Office Notice New Submission</a></td><td>Allan Colbern, Ph.D.</td>
+								<td>
+									Manuscript Submitted
+
+								</td>
+
+                                
+								<td>
+									0
+								</td>
+
+								
+								<td>Markie McBrayer
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>07 Feb 2018</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(105098, '{CBEDBD1E-B6D1-41C9-A5A2-110E22E99B3D}')" title="REP: New Manuscript Submission ">Journal Office Notice New Submission</a></td><td>Allan Colbern, Ph.D.</td>
+								<td>
+									Manuscript Submitted
+
+								</td>
+
+                                
+								<td>
+									0
+								</td>
+
+								
+								<td>Markie McBrayer
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>07 Feb 2018</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(105097, '{D850F019-4C9E-4877-9358-4B623186D44B}')" title="REP: New Manuscript Submission ">Journal Office Notice New Submission</a></td><td>S. Karthick Ramakrishnan</td>
+								<td>
+									Manuscript Submitted
+
+								</td>
+
+                                
+								<td>
+									0
+								</td>
+
+								
+								<td>Markie McBrayer
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>07 Feb 2018</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(105096, '{0AAEF45F-F0C1-4D2D-A228-0984DDF8BD3E}')" title="REP: New Manuscript Submission ">Journal Office Notice New Submission</a></td><td>Marisa Abrajano</td>
+								<td>
+									Manuscript Submitted
+
+								</td>
+
+                                
+								<td>
+									0
+								</td>
+
+								
+								<td>Markie McBrayer
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>07 Feb 2018</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(105095, '{B409B3F9-2786-466F-A84A-CD6F018F0EA8}')" title="REP: New Manuscript Submission ">Journal Office Notice New Submission</a></td><td>Jane Y. Junn, PHD</td>
+								<td>
+									Manuscript Submitted
+
+								</td>
+
+                                
+								<td>
+									0
+								</td>
+
+								
+								<td>Markie McBrayer
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>07 Feb 2018</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(105094, '{38133040-6DB4-4211-BDA5-6F1D8D80F80B}')" title="Submission Confirmation for JREP">Author Submits New Manuscript Confirmation</a></td><td>Markie McBrayer</td>
+								<td>
+									Manuscript Submitted
+
+								</td>
+
+                                
+								<td>
+									0
+								</td>
+
+								
+								<td>Markie McBrayer
+								</td>
+
+							
+							</tr>
+							
+					</table>
+					
+			</fieldset>
+			
+	</div>
+	<div class="centered">
+		
+		<br /><br /><input type="button" name="close" value="Close" onclick="window.close();" />
+		<br /><br />
+		<a href="#status">Status History</a>&nbsp;&nbsp;&nbsp;<a href="#correspondence">Correspondence History</a>&nbsp;&nbsp;&nbsp;
+		<br /><br /><a href="docHistoryStatusTypeView.asp?docid=3670">Switch to Status Type View</a>
+	</div>
+
+    <div id="modalDiv" style="display:none"></div>
+
+</form>
+
+<script type="text/javascript">
+    if (typeof pageDataTracker !== 'undefined') {
+        RetrieveAnalyticsData();
+    }
+</script>
+    <script type="text/javascript">
+        $(document).ready(function() 
+	    {
+	        url = 'ajax/RenderControlToPage.ashx?control=DialogWidgetControl&id=warningDialog&titleResourceId=Common.Text.Warning&titleBarIcon=warning&showTitleBar=true&showTitleBarClose=false&dialogStyle=confirm&width=400';
+	        $.get(url, function (data) 
+	        {
+	            $('body').append(data);
+	        });
+        });
+    </script>
+</body>
+</html>

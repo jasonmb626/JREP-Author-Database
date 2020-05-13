@@ -1,0 +1,1930 @@
+
+
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+<head>
+	<title>History Details</title>
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+
+    <link rel="stylesheet" type="text/css" href="cssSiteStyle.aspx" />
+    <link rel="stylesheet" type="text/css" href="cssJQueryDialog.aspx" />
+
+	<style type="text/css">
+		.centered table
+		{
+			margin: 0 auto;
+		}
+        .activeSubFlagHistory
+        {
+            color: red;
+        }
+	</style>
+
+    <script type="text/javascript">
+//<![CDATA[
+
+function FormatString(stringToFormat, replacementValues)
+{
+	return stringToFormat.replace(/{([0-9]+)}/g, function(wholematch, firstmatch)
+		  { var i = +firstmatch; return i < replacementValues.length ? replacementValues[i] : wholematch; }
+		);
+}
+
+
+
+function EscapeAttributeValue(value) 
+{
+
+        return value.replace(/&/g, '&amp;')
+                    .replace(/'/g, "&apos;")
+                    .replace(/"/g, '&quot;')
+                    .replace(/</g, '&lt;')
+                    .replace(/>/g, '&gt;');
+}
+
+//]]>
+</script>
+
+<script type="text/javascript" src="/jrep/WebUserControls/ClientJScript/translatedClientutil.aspx?lang=en%2DUS"></script>
+<script type="text/javascript" src="/jrep/ClientScript/clientutil.aspx"></script>
+
+<script src="/jrep/ClientScript/jquery.js" type="text/javascript"></script>
+<script src="/jrep/ClientScript/jquery-ui.js" type="text/javascript"></script>   
+
+
+
+    <script type="text/javascript" src="ClientScript/MSPFunctions.js"></script>
+
+	<script type="text/javascript">
+		/***********************************************************************
+		* 7.0-39	TimH	20090424
+		* Navigate to the Add External Correspondence Page, providing
+		* info needed to add a new External Correspondence record.
+		***********************************************************************/
+		function AddExternalCorrespondence(externalCorrespType)
+		{
+			var hdnExternalCorrespondenceType = document.getElementById("hdnExternalCorrespondenceType");
+			hdnExternalCorrespondenceType.value = "" + externalCorrespType;
+
+			var hdnLetterSecurityID = document.getElementById("hdnLetterSecurityID");
+			hdnLetterSecurityID.value = "";
+
+			document.frmDocHistory.submit();
+		}
+
+		/***********************************************************************
+		* 7.0-39	TimH	20090424
+		* Edit or Remove the External Correspondence specified by the
+		* Edit or Remove hyperlink clicked by the user.
+		***********************************************************************/
+		function EditExternalCorrespondence(externalCorrespondenceID, externalCorrespType, remove, letterSecurityID)
+		{
+			var hdnExternalCorrespondenceID = document.getElementById("hdnExternalCorrespondenceID");
+			hdnExternalCorrespondenceID.value = "" + externalCorrespondenceID;
+
+			var hdnExternalCorrespondenceType = document.getElementById("hdnExternalCorrespondenceType");
+			hdnExternalCorrespondenceType.value = "" + externalCorrespType;
+
+			var hdnLetterSecurityID = document.getElementById("hdnLetterSecurityID");
+			hdnLetterSecurityID.value = letterSecurityID;
+
+			var hdnRemove = document.getElementById("hdnRemove");
+			hdnRemove.value = remove;
+
+			if(hdnRemove.value == "1")
+			{
+                var okAction = function ()
+                {
+					document.frmDocHistory.submit();	
+                }
+                $("#warningDialog")[0].showDialog('Removing the correspondence cannot be undone.\x0a\x3cbr\x2f\x3e\x3cbr\x2f\x3e\x0aClick Cancel to return to the History page without deleting the correspondence.\x0a\x3cbr\x2f\x3eClick OK to remove this item of correspondence.', okAction);
+                return;
+			}
+			else if(hdnRemove.value == "0")
+			{
+				document.frmDocHistory.submit();
+			}
+		}
+
+		/***********************************************************************
+		* 7.0-39	TimH	20090424
+		* In a new popup, View a read only version of the External Correspondence specified by the
+		* External Correspondence Description hyperlink clicked by the user.
+		***********************************************************************/
+		function ViewExternalCorrespondence(externalCorrespondenceID, externalCorrespType, letterSecurityID)
+		{
+			var sNavUrl = "DotNetPopUps/ViewExternalCorrespondence.aspx";
+			sNavUrl += "?hdnExternalCorrespondenceID=" + externalCorrespondenceID;
+			sNavUrl += "&hdnExternalCorrespondenceType=" + externalCorrespType;
+			sNavUrl += "&hdnLetterSecurityID=" + letterSecurityID;
+			sNavUrl += "&hdnAssociatedEntityType=" + EXT_CORRES_ASSOC_TYPE_SUBMISSION;
+
+			openCenterWin(sNavUrl, 'ViewExternalCorrespondence', 1, 1, 0, 0, 0, 0);
+		}
+
+		function resendEditorialStatus(statHistID, notLatest)
+		{
+            if (notLatest)
+            {
+                var okAction = function ()
+                {
+					resendStatus(statHistID);	
+                }
+                $("#warningDialog")[0].showDialog('The Status you are attempting to resend is not the most recent status. Do you want to continue\x3f', okAction);
+                return;
+            }
+            else
+            {
+                resendStatus(statHistID);
+            }
+        }
+        function resendStatus(statHistID)
+        {
+            // Resend status
+		    var documentID = "4896";
+		    var exportType = 4;
+		    var operatorID = "217520";
+		    var proxyOperatorID = "";
+		    if (proxyOperatorID != "")
+		    {
+		        operatorID = proxyOperatorID;
+		    }
+		    resendMSPEditorialStatus(documentID, exportType, operatorID, statHistID, "");
+        }
+
+		function displayOverlay(text) {
+		    $("#modalDiv").text(text);
+		    $("#modalDiv").dialog({
+	            title: '',
+	            resizable: true, modal: true, buttons: [{ text: 'OK',
+	                click: function () { $(this).dialog("close"); }
+	            }], closeText: '',
+
+	            open: function ()
+	            {
+	                $(this).dialog('widget').find(".ui-dialog-titlebar-close").hide();
+	                $(this).dialog({ position: 'center' });
+	            }
+
+	        });
+
+	        return false;
+		}
+	</script>
+    
+</head>
+<body>
+
+	<form name="frmDocHistory" method="post" id="frmDocHistory" action="DotNetPopUps/AddEditExternalCorrespondence.aspx">
+	<div class="centered">
+	    <input type="hidden" id="hdnAssociatedEntityID" name="hdnAssociatedEntityID" value="4896" />
+	    <input type="hidden" id="hdnLetterSecurityID" name="hdnLetterSecurityID" value="" />
+	    <input type="hidden" id="hdnAssociatedEntityType" name="hdnAssociatedEntityType" value="1" />
+	    <input type="hidden" id="hdnExternalCorrespondenceID" name="hdnExternalCorrespondenceID" value="" />
+	    <input type="hidden" id="hdnExternalCorrespondenceType" name="hdnExternalCorrespondenceType" value=""/>
+	    <input type="hidden" id="hdnRemove" name="hdnRemove" value="" />
+	    <input type="hidden" id="hdnReturnPage" name="hdnReturnPage" value="doc_history.asp" />
+	    <input type="hidden" id="hdnAttachmentGroupID" name="hdnAttachmentGroupID" value="" />
+		<h3>
+			History for Manuscript Number: JREP-D-19-00109 &quot;Can Internet Use Help Close the Racial Knowledge Gap?&quot;
+		</h3>
+		<a href="#status">Status History</a>&nbsp;&nbsp;&nbsp;<a href="#correspondence">Correspondence History</a>&nbsp;&nbsp;&nbsp;
+
+
+		<br /><br /><a href="docHistoryStatusTypeView.asp?docid=4896">Switch to Status Type View</a>
+
+		
+		<br /><br /><input type="button" name="close" value="Close" onclick="window.close();" />
+	</div>
+
+	<div>
+		<br /><br />
+		
+			<fieldset>
+				<legend><a name="status"></a>STATUS HISTORY</legend>
+				
+					<table border="0" cellpadding="0" cellspacing="0" width="97%" class="datatable">
+						<tr>
+							<th>Status Date</th>
+							<th>Document Status</th>
+							
+							<th>Status Days</th>
+							<th>Role Family</th>
+							<th>Revision </th>
+							<th>Operator</th>
+						</tr>
+
+						
+							<tr>
+								
+								<td>Jan 30 2020  8:07PM</td>
+
+								
+								<td>
+									Completed Reject
+								</td>
+
+								
+								<td>----</td>
+
+								
+								<td>
+									EDITOR
+								</td>
+
+								
+								<td>0</td>
+
+								
+								<td>Alexandra Filindra
+								</td>
+							</tr>
+							
+							<tr>
+								
+								<td>Jan 30 2020  8:07PM</td>
+
+								
+								<td>
+									Reject
+								</td>
+
+								
+								<td>----</td>
+
+								
+								<td>
+									NOBODY
+								</td>
+
+								
+								<td>0</td>
+
+								
+								<td>Alexandra Filindra
+								</td>
+							</tr>
+							
+							<tr>
+								
+								<td>Jan 30 2020  8:07PM</td>
+
+								
+								<td>
+									Decision in Process
+								</td>
+
+								
+								<td>----</td>
+
+								
+								<td>
+									EDITOR
+								</td>
+
+								
+								<td>0</td>
+
+								
+								<td>Alexandra Filindra
+								</td>
+							</tr>
+							
+							<tr>
+								
+								<td>Jan 30 2020  3:57PM</td>
+
+								
+								<td>
+									Required Reviews Completed
+								</td>
+
+								
+								<td>----</td>
+
+								
+								<td>
+									EDITOR
+								</td>
+
+								
+								<td>0</td>
+
+								
+								<td>Graham Wright, Ph.D.
+								</td>
+							</tr>
+							
+							<tr>
+								
+								<td>Aug 21 2019 10:18PM</td>
+
+								
+								<td>
+									Under Review
+								</td>
+
+								
+								<td>161</td>
+
+								
+								<td>
+									REVIEWER
+								</td>
+
+								
+								<td>0</td>
+
+								
+								<td>Alexandra Filindra
+								</td>
+							</tr>
+							
+							<tr>
+								
+								<td>Aug 20 2019 11:56PM</td>
+
+								
+								<td>
+									With Editor
+								</td>
+
+								
+								<td>----</td>
+
+								
+								<td>
+									EDITOR
+								</td>
+
+								
+								<td>0</td>
+
+								
+								<td>Beyza Buyuker
+								</td>
+							</tr>
+							
+							<tr>
+								
+								<td>Aug  9 2019 12:49PM</td>
+
+								
+								<td>
+									Manuscript Submitted
+								</td>
+
+								
+								<td>11</td>
+
+								
+								<td>
+									EDITOR
+								</td>
+
+								
+								<td>0</td>
+
+								
+								<td>Mona S. Kleinberg, Ph.D.
+								</td>
+							</tr>
+							
+							<tr>
+								
+								<td>Aug  9 2019 12:46PM</td>
+
+								
+								<td>
+									Needs Approval
+								</td>
+
+								
+								<td>----</td>
+
+								
+								<td>
+									AUTHOR
+								</td>
+
+								
+								<td>0</td>
+
+								
+								<td>Mona S. Kleinberg, Ph.D.
+								</td>
+							</tr>
+							
+							<tr>
+								
+								<td>Aug  9 2019 12:46PM</td>
+
+								
+								<td>
+									Building PDF
+								</td>
+
+								
+								<td>----</td>
+
+								
+								<td>
+									AUTHOR
+								</td>
+
+								
+								<td>0</td>
+
+								
+								<td>Mona S. Kleinberg, Ph.D.
+								</td>
+							</tr>
+							
+							<tr>
+								
+								<td>Aug  9 2019 12:44PM</td>
+
+								
+								<td>
+									Incomplete
+								</td>
+
+								
+								<td>----</td>
+
+								
+								<td>
+									AUTHOR
+								</td>
+
+								
+								<td>0</td>
+
+								
+								<td>Mona S. Kleinberg, Ph.D.
+								</td>
+							</tr>
+							
+					</table>
+					
+			</fieldset>
+			<br />
+			<br />
+		
+			<fieldset>
+				<legend><a name="correspondence"></a>CORRESPONDENCE HISTORY</legend>
+				
+						<div class="buttonAlign" style="padding-bottom:4px;">
+							<input type="button" name="btnAddExtEditorialCorrespondence" value="Add&#32;Editorial&#32;Correspondence" onclick="AddExternalCorrespondence(1);" />
+							
+						</div>
+					
+					<table border="0" cellpadding="0" cellspacing="0" width="97%" class="datatable">
+						<tr>
+							<th>Correspondence Date</th>
+							<th>Letter</th>
+							<th>Recipient</th>
+							<th>Status</th>
+                            
+							<th>Revision</th>
+							<th>Operator</th>
+						</tr>
+
+						
+							<tr>
+								
+								<td>30 Jan 2020</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(113445, '{B79576A5-0859-4355-BE42-4634244EB650}')" title="A decision has been made on %MS_NUMBER%">Reviewer Notification of Reject Decision</a></td><td>Graham Wright, Ph.D.</td>
+								<td>
+									Completed Reject
+
+								</td>
+
+                                
+								<td>
+									0
+								</td>
+
+								
+								<td>Alexandra Filindra
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>30 Jan 2020</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(113444, '{A3EA2923-60F8-4B1B-A4FD-7F67CF7E906E}')" title="A decision has been made on %MS_NUMBER%">Reviewer Notification of Reject Decision</a></td><td>Seth Goldman</td>
+								<td>
+									Completed Reject
+
+								</td>
+
+                                
+								<td>
+									0
+								</td>
+
+								
+								<td>Alexandra Filindra
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>30 Jan 2020</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(113443, '{A798F5D0-56AA-4872-84CE-78AB6B0D4F18}')" title="A decision has been made on %MS_NUMBER%">Reviewer Notification of Reject Decision</a></td><td>Bruce Bimber</td>
+								<td>
+									Completed Reject
+
+								</td>
+
+                                
+								<td>
+									0
+								</td>
+
+								
+								<td>Alexandra Filindra
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>30 Jan 2020</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(113442, '{04E87B2A-7D5E-441E-832E-78D7C4DC920F}')" title="Your Submission to JREP">Editor Decision - Reject</a></td><td>Mona S. Kleinberg, Ph.D.</td>
+								<td>
+									Reject
+
+								</td>
+
+                                
+								<td>
+									0
+								</td>
+
+								
+								<td>Alexandra Filindra
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>30 Jan 2020</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(113441, '{E4243676-FB81-4774-841E-2A8272D72E5A}')" title="To assist. Editor: Decision Notification">Journal Office Notice Editor Decision Notification</a></td><td>Beyza Buyuker</td>
+								<td>
+									Decision in Process
+
+								</td>
+
+                                
+								<td>
+									0
+								</td>
+
+								
+								<td>Alexandra Filindra
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>30 Jan 2020</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(113440, '{985801F1-D868-401B-8F64-B1CAE2141972}')" title="We have canceled your book review">Book Review Significantly Overdue - Cancellation</a>&nbsp;<img style="vertical-align:middle;margin-top:4px" src="img/paperclip_icon.gif" alt=""/></td><td>Kyu S. Hahn</td>
+								<td>
+									Required Reviews Completed
+
+								</td>
+
+                                
+								<td>
+									0
+								</td>
+
+								
+								<td>Alexandra Filindra
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>30 Jan 2020</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(113439, '{91321D25-25F3-47B8-939B-9507DC3B7ABB}')" title="All Reviews Complete  for &quot;%ARTICLE_TITLE%&quot;">Journal Office Notice All Reviews Complete</a></td><td>Beyza Buyuker</td>
+								<td>
+									Required Reviews Completed
+
+								</td>
+
+                                
+								<td>
+									0
+								</td>
+
+								
+								<td>Graham Wright, Ph.D.
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>30 Jan 2020</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(113438, '{5F6F4DEC-5DDB-40A7-83B2-76BFE43B2B59}')" title="JREP Completed Reviews for &quot;%ARTICLE_TITLE%&quot;">Editor Notice All Reviews Complete</a></td><td>Alexandra Filindra</td>
+								<td>
+									Required Reviews Completed
+
+								</td>
+
+                                
+								<td>
+									0
+								</td>
+
+								
+								<td>Graham Wright, Ph.D.
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>30 Jan 2020</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(113437, '{35EA7AB8-B166-4A40-84E2-482213383877}')" title="Thank you for the review for JREP">Reviewer Thank You</a></td><td>Graham Wright, Ph.D.</td>
+								<td>
+									Under Review
+
+								</td>
+
+                                
+								<td>
+									0
+								</td>
+
+								
+								<td>Graham Wright, Ph.D.
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>14 Jan 2020</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(113280, '{29B06064-B691-414F-8A6D-011453AB648A}')" title="Declined invitation for JREP">Reviewer Invitation Declined</a></td><td>Elizabeth Jordie Davies, MA</td>
+								<td>
+									Under Review
+
+								</td>
+
+                                
+								<td>
+									0
+								</td>
+
+								
+								<td>Elizabeth Jordie Davies, MA
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>14 Jan 2020</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(113279, '{25E5892A-CBBF-41A5-B99D-01828259559B}')" title="Reviewer declines to review &quot;%ARTICLE_TITLE%&quot;">Editor Notice Reviewer Declines to Review</a></td><td>Alexandra Filindra</td>
+								<td>
+									Under Review
+
+								</td>
+
+                                
+								<td>
+									0
+								</td>
+
+								
+								<td>Elizabeth Jordie Davies, MA
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>13 Jan 2020</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(113265, '{BE84693A-9853-4605-B56A-35DEB5396E8B}')" title="JREP: Thank you for agreeing to review">Reviewer Instructions and Due Date</a>&nbsp;<img style="vertical-align:middle;margin-top:4px" src="img/paperclip_icon.gif" alt=""/></td><td>Graham Wright, Ph.D.</td>
+								<td>
+									Under Review
+
+								</td>
+
+                                
+								<td>
+									0
+								</td>
+
+								
+								<td>Graham Wright, Ph.D.
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>13 Jan 2020</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(113264, '{417E871A-089B-410D-9644-8F174A9467A7}')" title="Reviewer agrees to review &quot;%ARTICLE_TITLE%&quot;">Editor Notice Reviewer Agrees to Review</a></td><td>Alexandra Filindra</td>
+								<td>
+									Under Review
+
+								</td>
+
+                                
+								<td>
+									0
+								</td>
+
+								
+								<td>Graham Wright, Ph.D.
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>12 Jan 2020</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(113252, '{4A547233-7FB0-4401-AAB5-C2170443DF70}')" title="Reviewer Invitation for JREP">Reviewer Invitation</a></td><td>Elizabeth Jordie Davies, MA</td>
+								<td>
+									Under Review
+
+								</td>
+
+                                
+								<td>
+									0
+								</td>
+
+								
+								<td>Alexandra Filindra
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>12 Jan 2020</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(113251, '{AC25782D-86B5-414F-82B2-B29E13E39BA8}')" title="Reviewer Invitation for JREP">Reviewer Invitation</a></td><td>Graham Wright, Ph.D.</td>
+								<td>
+									Under Review
+
+								</td>
+
+                                
+								<td>
+									0
+								</td>
+
+								
+								<td>Alexandra Filindra
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>23 Dec 2019</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(113076, '{26C219C0-C040-472C-BD72-05516D1AC037}')" title="Second Reminder of Late Review for %ARTICLE_TITLE%">Reviewer - Second Late Reminder</a></td><td>Kyu S. Hahn</td>
+								<td>
+									Under Review
+
+								</td>
+
+                                
+								<td>
+									0
+								</td>
+
+								
+								<td>Alexandra Filindra
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>15 Dec 2019</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(112961, '{E60D6062-1B11-4B61-8666-0271B825AEB6}')" title="Second Reminder of Late Review for %ARTICLE_TITLE%">Reviewer - Second Late Reminder</a></td><td>Kyu S. Hahn</td>
+								<td>
+									Under Review
+
+								</td>
+
+                                
+								<td>
+									0
+								</td>
+
+								
+								<td>Alexandra Filindra
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>10 Dec 2019</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(112879, '{ED97AF6D-9502-45AD-8CEB-0F5A70CA6B7F}')" title="Reminder of Late Review for JREP">Reviewer - First Late Reminder</a></td><td>Kyu S. Hahn</td>
+								<td>
+									Under Review
+
+								</td>
+
+                                
+								<td>
+									0
+								</td>
+
+								
+								<td>Alexandra Filindra
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>03 Dec 2019</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(112778, '{1A70541A-0392-4FBE-8456-BF5F8D6E8AC5}')" title="JREP Reminder: Review assignment is due soon">Reviewer Reminder - Before Due Date</a></td><td>Kyu S. Hahn</td>
+								<td>
+									Under Review
+
+								</td>
+
+                                
+								<td>
+									0
+								</td>
+
+								
+								<td>Alexandra Filindra
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>20 Nov 2019</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(112674, '{0BA86F79-1C61-414D-9ACA-50A95888E06F}')" title="JREP will seek alternate reviewer">Reviewer Uninvited Notice</a>&nbsp;<img style="vertical-align:middle;margin-top:4px" src="img/paperclip_icon.gif" alt=""/></td><td>Gabriel R. Sanchez, PHD</td>
+								<td>
+									Under Review
+
+								</td>
+
+                                
+								<td>
+									0
+								</td>
+
+								
+								<td>Alexandra Filindra
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>24 Oct 2019</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(112442, '{982677E0-DA26-4D85-8749-12DAE02756A8}')" title="JREP: Thank you for agreeing to review">Reviewer Instructions and Due Date</a>&nbsp;<img style="vertical-align:middle;margin-top:4px" src="img/paperclip_icon.gif" alt=""/></td><td>Kyu S. Hahn</td>
+								<td>
+									Under Review
+
+								</td>
+
+                                
+								<td>
+									0
+								</td>
+
+								
+								<td>Kyu S. Hahn
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>24 Oct 2019</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(112441, '{94095B98-938F-4BA1-B02C-1B6B8488CB2F}')" title="Reviewer agrees to review &quot;%ARTICLE_TITLE%&quot;">Editor Notice Reviewer Agrees to Review</a></td><td>Alexandra Filindra</td>
+								<td>
+									Under Review
+
+								</td>
+
+                                
+								<td>
+									0
+								</td>
+
+								
+								<td>Kyu S. Hahn
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>24 Oct 2019</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(112431, '{26FB7619-8477-4D43-851D-435C907A19DF}')" title="Invitation to review manuscript for JREP">Reviewer Reminder - Before Agree or Decline</a></td><td>Kyu S. Hahn</td>
+								<td>
+									Under Review
+
+								</td>
+
+                                
+								<td>
+									0
+								</td>
+
+								
+								<td>Nhat-Dang Do
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>22 Oct 2019</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(112414, '{D882B576-8A58-4C15-AB25-011653B978BD}')" title="Second Reminder of Late Review for %ARTICLE_TITLE%">Reviewer - Second Late Reminder</a></td><td>Gabriel R. Sanchez, PHD</td>
+								<td>
+									Under Review
+
+								</td>
+
+                                
+								<td>
+									0
+								</td>
+
+								
+								<td>Alexandra Filindra
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>17 Oct 2019</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(112369, '{63C4424F-1162-4255-AB80-15DB787639E2}')" title="Reviewer Invitation for JREP">Reviewer Invitation</a></td><td>Kyu S. Hahn</td>
+								<td>
+									Under Review
+
+								</td>
+
+                                
+								<td>
+									0
+								</td>
+
+								
+								<td>Alexandra Filindra
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>14 Oct 2019</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(112311, '{539688A1-6B35-4FC9-96D0-FDAADE61EDDD}')" title="Second Reminder of Late Review for %ARTICLE_TITLE%">Reviewer - Second Late Reminder</a></td><td>Gabriel R. Sanchez, PHD</td>
+								<td>
+									Under Review
+
+								</td>
+
+                                
+								<td>
+									0
+								</td>
+
+								
+								<td>Alexandra Filindra
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>09 Oct 2019</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(112277, '{08484FBE-6000-4D09-A7BD-94A04209845A}')" title="Reminder of Late Review for JREP">Reviewer - First Late Reminder</a></td><td>Gabriel R. Sanchez, PHD</td>
+								<td>
+									Under Review
+
+								</td>
+
+                                
+								<td>
+									0
+								</td>
+
+								
+								<td>Alexandra Filindra
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>02 Oct 2019</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(112209, '{4F59F8E1-3E2D-427B-A3D8-4CA1C6974AED}')" title="JREP Reminder: Review assignment is due soon">Reviewer Reminder - Before Due Date</a></td><td>Gabriel R. Sanchez, PHD</td>
+								<td>
+									Under Review
+
+								</td>
+
+                                
+								<td>
+									0
+								</td>
+
+								
+								<td>Alexandra Filindra
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>24 Sep 2019</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(112112, '{3D603D6D-0F47-423D-AEF4-D4D575B455E8}')" title="Thank you for the review for JREP">Reviewer Thank You</a></td><td>Bruce Bimber</td>
+								<td>
+									Under Review
+
+								</td>
+
+                                
+								<td>
+									0
+								</td>
+
+								
+								<td>Bruce Bimber
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>10 Sep 2019</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(111929, '{E516156D-3DA8-439D-A874-6A8346D58049}')" title="Reviewer agrees to review &quot;%ARTICLE_TITLE%&quot;">Editor Notice Reviewer Agrees to Review</a></td><td>Alexandra Filindra</td>
+								<td>
+									Under Review
+
+								</td>
+
+                                
+								<td>
+									0
+								</td>
+
+								
+								<td>Seth Goldman
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>06 Sep 2019</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(111911, '{B703A65E-4660-418E-838B-86D4E4BFD496}')" title="Reviewer Invitation for JREP">Reviewer Invitation</a></td><td>Seth Goldman</td>
+								<td>
+									Under Review
+
+								</td>
+
+                                
+								<td>
+									0
+								</td>
+
+								
+								<td>Alexandra Filindra
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>01 Sep 2019</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(111859, '{BD79D5E7-85C1-4731-8369-EBCE5B9406DA}')" title="JREP will seek alternate reviewer">Reviewer Uninvited Notice</a></td><td>Paul Goren, PHD</td>
+								<td>
+									Under Review
+
+								</td>
+
+                                
+								<td>
+									0
+								</td>
+
+								
+								<td>Alexandra Filindra
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>31 Aug 2019</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(111854, '{A2A0C770-54B7-460A-80C9-E6FD413F6842}')" title="Invitation to review manuscript for JREP">Reviewer Reminder - Before Agree or Decline</a></td><td>Paul Goren, PHD</td>
+								<td>
+									Under Review
+
+								</td>
+
+                                
+								<td>
+									0
+								</td>
+
+								
+								<td>Nhat-Dang Do
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>29 Aug 2019</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(111848, '{4195BF8A-31E7-4A41-A32C-4C2EF8078822}')" title="JREP will seek alternate reviewer">Reviewer Uninvited Notice</a></td><td>Mary R. Anderson, PHD</td>
+								<td>
+									Under Review
+
+								</td>
+
+                                
+								<td>
+									0
+								</td>
+
+								
+								<td>Alexandra Filindra
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>28 Aug 2019</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(111830, '{794CAA31-A80E-45B7-86E6-7CF8FDDC7EF7}')" title="JREP: Thank you for agreeing to review">Reviewer Instructions and Due Date</a>&nbsp;<img style="vertical-align:middle;margin-top:4px" src="img/paperclip_icon.gif" alt=""/></td><td>Bruce Bimber</td>
+								<td>
+									Under Review
+
+								</td>
+
+                                
+								<td>
+									0
+								</td>
+
+								
+								<td>Bruce Bimber
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>28 Aug 2019</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(111829, '{E08F3A88-A4F7-487A-8424-A280D4CEB573}')" title="Reviewer agrees to review &quot;%ARTICLE_TITLE%&quot;">Editor Notice Reviewer Agrees to Review</a></td><td>Alexandra Filindra</td>
+								<td>
+									Under Review
+
+								</td>
+
+                                
+								<td>
+									0
+								</td>
+
+								
+								<td>Bruce Bimber
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>28 Aug 2019</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(111827, '{CAD17C75-5B81-4866-BF6E-7BC6758A445F}')" title="Invitation to review manuscript for JREP">Reviewer Reminder - Before Agree or Decline</a></td><td>Mary R. Anderson, PHD</td>
+								<td>
+									Under Review
+
+								</td>
+
+                                
+								<td>
+									0
+								</td>
+
+								
+								<td>Nhat-Dang Do
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>27 Aug 2019</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(111819, '{9E1C3233-16BE-40B4-8FDA-E0BC9C02FDA8}')" title="Reviewer Invitation for JREP">Reviewer Invitation</a></td><td>Bruce Bimber</td>
+								<td>
+									Under Review
+
+								</td>
+
+                                
+								<td>
+									0
+								</td>
+
+								
+								<td>Alexandra Filindra
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>27 Aug 2019</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(111807, '{F581CD53-EC51-40E7-8B71-585ACFADEA6D}')" title="Declined invitation for JREP">Reviewer Invitation Declined</a></td><td>M. Kent Jennings, PHD</td>
+								<td>
+									Under Review
+
+								</td>
+
+                                
+								<td>
+									0
+								</td>
+
+								
+								<td>M. Kent Jennings, PHD
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>27 Aug 2019</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(111806, '{A2153047-2CEA-4DF0-B218-B80D73E82A5A}')" title="Reviewer declines to review &quot;%ARTICLE_TITLE%&quot;">Editor Notice Reviewer Declines to Review</a></td><td>Alexandra Filindra</td>
+								<td>
+									Under Review
+
+								</td>
+
+                                
+								<td>
+									0
+								</td>
+
+								
+								<td>M. Kent Jennings, PHD
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>27 Aug 2019</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(111803, '{904C179B-1E6E-4A7A-ABC6-C726A330E414}')" title="Reviewer Invitation for JREP">Reviewer Invitation</a></td><td>M. Kent Jennings, PHD</td>
+								<td>
+									Under Review
+
+								</td>
+
+                                
+								<td>
+									0
+								</td>
+
+								
+								<td>Alexandra Filindra
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>24 Aug 2019</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(111777, '{8D0B4320-F36A-49C7-86E7-0E8589797FEF}')" title="Reviewer Invitation for JREP">Reviewer Invitation</a></td><td>Paul Goren, PHD</td>
+								<td>
+									Under Review
+
+								</td>
+
+                                
+								<td>
+									0
+								</td>
+
+								
+								<td>Alexandra Filindra
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>23 Aug 2019</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(111749, '{697E40CF-EAD4-42B6-AF20-8942A4C6C212}')" title="JREP: Thank you for agreeing to review">Reviewer Instructions and Due Date</a>&nbsp;<img style="vertical-align:middle;margin-top:4px" src="img/paperclip_icon.gif" alt=""/></td><td>Gabriel R. Sanchez, PHD</td>
+								<td>
+									Under Review
+
+								</td>
+
+                                
+								<td>
+									0
+								</td>
+
+								
+								<td>Gabriel R. Sanchez, PHD
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>23 Aug 2019</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(111748, '{9C1172A5-B62E-445C-BE7B-6A6368792FA4}')" title="Reviewer agrees to review &quot;%ARTICLE_TITLE%&quot;">Editor Notice Reviewer Agrees to Review</a></td><td>Alexandra Filindra</td>
+								<td>
+									Under Review
+
+								</td>
+
+                                
+								<td>
+									0
+								</td>
+
+								
+								<td>Gabriel R. Sanchez, PHD
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>22 Aug 2019</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(111736, '{36884F55-7B02-402F-BC69-F9D110E93202}')" title="Declined invitation for JREP">Reviewer Invitation Declined</a></td><td>Markus Prior, PHD</td>
+								<td>
+									Under Review
+
+								</td>
+
+                                
+								<td>
+									0
+								</td>
+
+								
+								<td>Markus Prior, PHD
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>22 Aug 2019</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(111735, '{E7C41704-72CC-4D7F-B3C2-4F88ECD8EEEC}')" title="Reviewer declines to review &quot;%ARTICLE_TITLE%&quot;">Editor Notice Reviewer Declines to Review</a></td><td>Alexandra Filindra</td>
+								<td>
+									Under Review
+
+								</td>
+
+                                
+								<td>
+									0
+								</td>
+
+								
+								<td>Markus Prior, PHD
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>21 Aug 2019</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(111733, '{05C84CB6-8C0C-4B21-B8A1-4CE232AE7A4E}')" title="Reviewer Invitation for JREP">Reviewer Invitation</a></td><td>Mary R. Anderson, PHD</td>
+								<td>
+									Under Review
+
+								</td>
+
+                                
+								<td>
+									0
+								</td>
+
+								
+								<td>Alexandra Filindra
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>21 Aug 2019</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(111732, '{E9A2125F-D396-4C9B-BFFF-BE8DB23759BE}')" title="Reviewer Invitation for JREP">Reviewer Invitation</a></td><td>Markus Prior, PHD</td>
+								<td>
+									Under Review
+
+								</td>
+
+                                
+								<td>
+									0
+								</td>
+
+								
+								<td>Alexandra Filindra
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>21 Aug 2019</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(111731, '{5AA262B3-812C-4DA6-A83D-78C372FF1115}')" title="Reviewer Invitation for JREP">Reviewer Invitation</a></td><td>Gabriel R. Sanchez, PHD</td>
+								<td>
+									Under Review
+
+								</td>
+
+                                
+								<td>
+									0
+								</td>
+
+								
+								<td>Alexandra Filindra
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>20 Aug 2019</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(111691, '{15D1B2E7-E228-4EAD-B197-859FCF2EF282}')" title="You have a new Editor Assignment for JREP">Editor Assignment</a></td><td>Alexandra Filindra</td>
+								<td>
+									With Editor
+
+								</td>
+
+                                
+								<td>
+									0
+								</td>
+
+								
+								<td>Beyza Buyuker
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>09 Aug 2019</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(111460, '{D3373ADE-F856-4817-9186-A1F708E0F9A5}')" title="REP: New Manuscript Submission ">Journal Office Notice New Submission</a></td><td>Maureen Heffern Ponicki</td>
+								<td>
+									Manuscript Submitted
+
+								</td>
+
+                                
+								<td>
+									0
+								</td>
+
+								
+								<td>Mona S. Kleinberg, Ph.D.
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>09 Aug 2019</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(111459, '{53A718FF-AD71-4CF7-B441-85A1730D4381}')" title="REP: New Manuscript Submission ">Journal Office Notice New Submission</a></td><td>Beyza Buyuker</td>
+								<td>
+									Manuscript Submitted
+
+								</td>
+
+                                
+								<td>
+									0
+								</td>
+
+								
+								<td>Mona S. Kleinberg, Ph.D.
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>09 Aug 2019</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(111458, '{8E33C624-64F4-44A7-B488-AA7581CC7EDA}')" title="REP: New Manuscript Submission ">Journal Office Notice New Submission</a></td><td>Nhat-Dang Do</td>
+								<td>
+									Manuscript Submitted
+
+								</td>
+
+                                
+								<td>
+									0
+								</td>
+
+								
+								<td>Mona S. Kleinberg, Ph.D.
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>09 Aug 2019</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(111457, '{A92917D6-3D99-429B-8FDB-92B6A712D85A}')" title="REP: New Manuscript Submission ">Journal Office Notice New Submission</a></td><td>Dan Gibson</td>
+								<td>
+									Manuscript Submitted
+
+								</td>
+
+                                
+								<td>
+									0
+								</td>
+
+								
+								<td>Mona S. Kleinberg, Ph.D.
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>09 Aug 2019</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(111456, '{E0BC2B0F-A8D6-466A-8829-6D015557AF83}')" title="REP: New Manuscript Submission ">Journal Office Notice New Submission</a></td><td>Allan Colbern, Ph.D.</td>
+								<td>
+									Manuscript Submitted
+
+								</td>
+
+                                
+								<td>
+									0
+								</td>
+
+								
+								<td>Mona S. Kleinberg, Ph.D.
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>09 Aug 2019</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(111455, '{B3C978E7-5581-4240-A030-8F3E1178F900}')" title="REP: New Manuscript Submission ">Journal Office Notice New Submission</a></td><td>Allan Colbern, Ph.D.</td>
+								<td>
+									Manuscript Submitted
+
+								</td>
+
+                                
+								<td>
+									0
+								</td>
+
+								
+								<td>Mona S. Kleinberg, Ph.D.
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>09 Aug 2019</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(111454, '{82E50B4B-DE2E-400C-B612-E9273F59721F}')" title="REP: New Manuscript Submission ">Journal Office Notice New Submission</a></td><td>Alexandra Filindra</td>
+								<td>
+									Manuscript Submitted
+
+								</td>
+
+                                
+								<td>
+									0
+								</td>
+
+								
+								<td>Mona S. Kleinberg, Ph.D.
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>09 Aug 2019</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(111453, '{EE7B96DE-9956-4C8C-B99C-2894B70609AE}')" title="REP: New Manuscript Submission ">Journal Office Notice New Submission</a></td><td>S. Karthick Ramakrishnan</td>
+								<td>
+									Manuscript Submitted
+
+								</td>
+
+                                
+								<td>
+									0
+								</td>
+
+								
+								<td>Mona S. Kleinberg, Ph.D.
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>09 Aug 2019</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(111452, '{A8C24023-EC37-42FA-A2A5-D8AEAC8E04A8}')" title="REP: New Manuscript Submission ">Journal Office Notice New Submission</a></td><td>Marisa Abrajano</td>
+								<td>
+									Manuscript Submitted
+
+								</td>
+
+                                
+								<td>
+									0
+								</td>
+
+								
+								<td>Mona S. Kleinberg, Ph.D.
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>09 Aug 2019</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(111451, '{14360C96-52F1-4CF0-BB28-4E94D7A1B079}')" title="REP: New Manuscript Submission ">Journal Office Notice New Submission</a></td><td>Jane Y. Junn, PHD</td>
+								<td>
+									Manuscript Submitted
+
+								</td>
+
+                                
+								<td>
+									0
+								</td>
+
+								
+								<td>Mona S. Kleinberg, Ph.D.
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>09 Aug 2019</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(111450, '{425C9078-6BA2-496A-87A9-307474416E34}')" title="Submission Confirmation for JREP">Author Submits New Manuscript Confirmation</a></td><td>Mona S. Kleinberg, Ph.D.</td>
+								<td>
+									Manuscript Submitted
+
+								</td>
+
+                                
+								<td>
+									0
+								</td>
+
+								
+								<td>Mona S. Kleinberg, Ph.D.
+								</td>
+
+							
+							</tr>
+							
+					</table>
+					
+			</fieldset>
+			
+	</div>
+	<div class="centered">
+		
+		<br /><br /><input type="button" name="close" value="Close" onclick="window.close();" />
+		<br /><br />
+		<a href="#status">Status History</a>&nbsp;&nbsp;&nbsp;<a href="#correspondence">Correspondence History</a>&nbsp;&nbsp;&nbsp;
+		<br /><br /><a href="docHistoryStatusTypeView.asp?docid=4896">Switch to Status Type View</a>
+	</div>
+
+    <div id="modalDiv" style="display:none"></div>
+
+</form>
+
+<script type="text/javascript">
+    if (typeof pageDataTracker !== 'undefined') {
+        RetrieveAnalyticsData();
+    }
+</script>
+    <script type="text/javascript">
+        $(document).ready(function() 
+	    {
+	        url = 'ajax/RenderControlToPage.ashx?control=DialogWidgetControl&id=warningDialog&titleResourceId=Common.Text.Warning&titleBarIcon=warning&showTitleBar=true&showTitleBarClose=false&dialogStyle=confirm&width=400';
+	        $.get(url, function (data) 
+	        {
+	            $('body').append(data);
+	        });
+        });
+    </script>
+</body>
+</html>

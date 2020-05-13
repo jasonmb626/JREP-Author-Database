@@ -1,0 +1,2262 @@
+
+
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+<head>
+	<title>History Details</title>
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+
+    <link rel="stylesheet" type="text/css" href="cssSiteStyle.aspx" />
+    <link rel="stylesheet" type="text/css" href="cssJQueryDialog.aspx" />
+
+	<style type="text/css">
+		.centered table
+		{
+			margin: 0 auto;
+		}
+        .activeSubFlagHistory
+        {
+            color: red;
+        }
+	</style>
+
+    <script type="text/javascript">
+//<![CDATA[
+
+function FormatString(stringToFormat, replacementValues)
+{
+	return stringToFormat.replace(/{([0-9]+)}/g, function(wholematch, firstmatch)
+		  { var i = +firstmatch; return i < replacementValues.length ? replacementValues[i] : wholematch; }
+		);
+}
+
+
+
+function EscapeAttributeValue(value) 
+{
+
+        return value.replace(/&/g, '&amp;')
+                    .replace(/'/g, "&apos;")
+                    .replace(/"/g, '&quot;')
+                    .replace(/</g, '&lt;')
+                    .replace(/>/g, '&gt;');
+}
+
+//]]>
+</script>
+
+<script type="text/javascript" src="/jrep/WebUserControls/ClientJScript/translatedClientutil.aspx?lang=en%2DUS"></script>
+<script type="text/javascript" src="/jrep/ClientScript/clientutil.aspx"></script>
+
+<script src="/jrep/ClientScript/jquery.js" type="text/javascript"></script>
+<script src="/jrep/ClientScript/jquery-ui.js" type="text/javascript"></script>   
+
+
+
+    <script type="text/javascript" src="ClientScript/MSPFunctions.js"></script>
+
+	<script type="text/javascript">
+		/***********************************************************************
+		* 7.0-39	TimH	20090424
+		* Navigate to the Add External Correspondence Page, providing
+		* info needed to add a new External Correspondence record.
+		***********************************************************************/
+		function AddExternalCorrespondence(externalCorrespType)
+		{
+			var hdnExternalCorrespondenceType = document.getElementById("hdnExternalCorrespondenceType");
+			hdnExternalCorrespondenceType.value = "" + externalCorrespType;
+
+			var hdnLetterSecurityID = document.getElementById("hdnLetterSecurityID");
+			hdnLetterSecurityID.value = "";
+
+			document.frmDocHistory.submit();
+		}
+
+		/***********************************************************************
+		* 7.0-39	TimH	20090424
+		* Edit or Remove the External Correspondence specified by the
+		* Edit or Remove hyperlink clicked by the user.
+		***********************************************************************/
+		function EditExternalCorrespondence(externalCorrespondenceID, externalCorrespType, remove, letterSecurityID)
+		{
+			var hdnExternalCorrespondenceID = document.getElementById("hdnExternalCorrespondenceID");
+			hdnExternalCorrespondenceID.value = "" + externalCorrespondenceID;
+
+			var hdnExternalCorrespondenceType = document.getElementById("hdnExternalCorrespondenceType");
+			hdnExternalCorrespondenceType.value = "" + externalCorrespType;
+
+			var hdnLetterSecurityID = document.getElementById("hdnLetterSecurityID");
+			hdnLetterSecurityID.value = letterSecurityID;
+
+			var hdnRemove = document.getElementById("hdnRemove");
+			hdnRemove.value = remove;
+
+			if(hdnRemove.value == "1")
+			{
+                var okAction = function ()
+                {
+					document.frmDocHistory.submit();	
+                }
+                $("#warningDialog")[0].showDialog('Removing the correspondence cannot be undone.\x0a\x3cbr\x2f\x3e\x3cbr\x2f\x3e\x0aClick Cancel to return to the History page without deleting the correspondence.\x0a\x3cbr\x2f\x3eClick OK to remove this item of correspondence.', okAction);
+                return;
+			}
+			else if(hdnRemove.value == "0")
+			{
+				document.frmDocHistory.submit();
+			}
+		}
+
+		/***********************************************************************
+		* 7.0-39	TimH	20090424
+		* In a new popup, View a read only version of the External Correspondence specified by the
+		* External Correspondence Description hyperlink clicked by the user.
+		***********************************************************************/
+		function ViewExternalCorrespondence(externalCorrespondenceID, externalCorrespType, letterSecurityID)
+		{
+			var sNavUrl = "DotNetPopUps/ViewExternalCorrespondence.aspx";
+			sNavUrl += "?hdnExternalCorrespondenceID=" + externalCorrespondenceID;
+			sNavUrl += "&hdnExternalCorrespondenceType=" + externalCorrespType;
+			sNavUrl += "&hdnLetterSecurityID=" + letterSecurityID;
+			sNavUrl += "&hdnAssociatedEntityType=" + EXT_CORRES_ASSOC_TYPE_SUBMISSION;
+
+			openCenterWin(sNavUrl, 'ViewExternalCorrespondence', 1, 1, 0, 0, 0, 0);
+		}
+
+		function resendEditorialStatus(statHistID, notLatest)
+		{
+            if (notLatest)
+            {
+                var okAction = function ()
+                {
+					resendStatus(statHistID);	
+                }
+                $("#warningDialog")[0].showDialog('The Status you are attempting to resend is not the most recent status. Do you want to continue\x3f', okAction);
+                return;
+            }
+            else
+            {
+                resendStatus(statHistID);
+            }
+        }
+        function resendStatus(statHistID)
+        {
+            // Resend status
+		    var documentID = "3375";
+		    var exportType = 4;
+		    var operatorID = "217520";
+		    var proxyOperatorID = "";
+		    if (proxyOperatorID != "")
+		    {
+		        operatorID = proxyOperatorID;
+		    }
+		    resendMSPEditorialStatus(documentID, exportType, operatorID, statHistID, "");
+        }
+
+		function displayOverlay(text) {
+		    $("#modalDiv").text(text);
+		    $("#modalDiv").dialog({
+	            title: '',
+	            resizable: true, modal: true, buttons: [{ text: 'OK',
+	                click: function () { $(this).dialog("close"); }
+	            }], closeText: '',
+
+	            open: function ()
+	            {
+	                $(this).dialog('widget').find(".ui-dialog-titlebar-close").hide();
+	                $(this).dialog({ position: 'center' });
+	            }
+
+	        });
+
+	        return false;
+		}
+	</script>
+    
+</head>
+<body>
+
+	<form name="frmDocHistory" method="post" id="frmDocHistory" action="DotNetPopUps/AddEditExternalCorrespondence.aspx">
+	<div class="centered">
+	    <input type="hidden" id="hdnAssociatedEntityID" name="hdnAssociatedEntityID" value="3375" />
+	    <input type="hidden" id="hdnLetterSecurityID" name="hdnLetterSecurityID" value="" />
+	    <input type="hidden" id="hdnAssociatedEntityType" name="hdnAssociatedEntityType" value="1" />
+	    <input type="hidden" id="hdnExternalCorrespondenceID" name="hdnExternalCorrespondenceID" value="" />
+	    <input type="hidden" id="hdnExternalCorrespondenceType" name="hdnExternalCorrespondenceType" value=""/>
+	    <input type="hidden" id="hdnRemove" name="hdnRemove" value="" />
+	    <input type="hidden" id="hdnReturnPage" name="hdnReturnPage" value="doc_history.asp" />
+	    <input type="hidden" id="hdnAttachmentGroupID" name="hdnAttachmentGroupID" value="" />
+		<h3>
+			History for Manuscript Number: JREP-D-14-00010R2 &quot;Settler Colonial Power, Knowledge, and Nation: Genocide and the Canadian Museum for Human Rights&quot;
+		</h3>
+		<a href="#status">Status History</a>&nbsp;&nbsp;&nbsp;<a href="#correspondence">Correspondence History</a>&nbsp;&nbsp;&nbsp;
+
+
+		<br /><br /><a href="docHistoryStatusTypeView.asp?docid=3375">Switch to Status Type View</a>
+
+		
+		<br /><br /><input type="button" name="close" value="Close" onclick="window.close();" />
+	</div>
+
+	<div>
+		<br /><br />
+		
+			<fieldset>
+				<legend><a name="status"></a>STATUS HISTORY</legend>
+				
+					<table border="0" cellpadding="0" cellspacing="0" width="97%" class="datatable">
+						<tr>
+							<th>Status Date</th>
+							<th>Document Status</th>
+							<th>Edit Submission Status</th>
+							<th>Status Days</th>
+							<th>Role Family</th>
+							<th>Revision </th>
+							<th>Operator</th>
+						</tr>
+
+						
+							<tr>
+								
+								<td>Jul 28 2015 12:34PM</td>
+
+								
+								<td>
+									Completed Accept
+								</td>
+
+								
+									<td>
+										
+									</td>
+									
+								<td>----</td>
+
+								
+								<td>
+									EDITOR
+								</td>
+
+								
+								<td>2</td>
+
+								
+								<td>S. Karthick Ramakrishnan
+								</td>
+							</tr>
+							
+							<tr>
+								
+								<td>Jul 28 2015 12:31PM</td>
+
+								
+								<td>
+									Accept
+								</td>
+
+								
+									<td>
+										
+									</td>
+									
+								<td>----</td>
+
+								
+								<td>
+									EDITOR
+								</td>
+
+								
+								<td>2</td>
+
+								
+								<td>S. Karthick Ramakrishnan
+								</td>
+							</tr>
+							
+							<tr>
+								
+								<td>Jul 28 2015 12:30PM</td>
+
+								
+								<td>
+									Decision in Process
+								</td>
+
+								
+									<td>
+										Editor Approved Edited Submission
+									</td>
+									
+								<td>----</td>
+
+								
+								<td>
+									EDITOR
+								</td>
+
+								
+								<td>2</td>
+
+								
+								<td>S. Karthick Ramakrishnan
+								</td>
+							</tr>
+							
+							<tr>
+								
+								<td>Jul 28 2015 12:28PM</td>
+
+								
+								<td>
+									With Editor
+								</td>
+
+								
+									<td>
+										
+									</td>
+									
+								<td>----</td>
+
+								
+								<td>
+									EDITOR
+								</td>
+
+								
+								<td>2</td>
+
+								
+								<td>Allan Colbern, Ph.D.<br /><span class="proxy">[Proxied by S. Karthick Ramakrishnan]</span>
+								</td>
+							</tr>
+							
+							<tr>
+								
+								<td>Jul 28 2015 12:27PM</td>
+
+								
+								<td>
+									Revised Manuscript Submitted
+								</td>
+
+								
+									<td>
+										
+									</td>
+									
+								<td>----</td>
+
+								
+								<td>
+									EDITOR
+								</td>
+
+								
+								<td>2</td>
+
+								
+								<td>Rita Kaur Dhamoon, PHD<br /><span class="proxy">[Proxied by S. Karthick Ramakrishnan]</span>
+								</td>
+							</tr>
+							
+							<tr>
+								
+								<td>Jul 28 2015 12:26PM</td>
+
+								
+								<td>
+									Revision Needs Approval
+								</td>
+
+								
+									<td>
+										
+									</td>
+									
+								<td>----</td>
+
+								
+								<td>
+									AUTHOR
+								</td>
+
+								
+								<td>2</td>
+
+								
+								<td>Rita Kaur Dhamoon, PHD<br /><span class="proxy">[Proxied by S. Karthick Ramakrishnan]</span>
+								</td>
+							</tr>
+							
+							<tr>
+								
+								<td>Jul 28 2015 12:26PM</td>
+
+								
+								<td>
+									Building PDF
+								</td>
+
+								
+									<td>
+										
+									</td>
+									
+								<td>----</td>
+
+								
+								<td>
+									AUTHOR
+								</td>
+
+								
+								<td>2</td>
+
+								
+								<td>Rita Kaur Dhamoon, PHD<br /><span class="proxy">[Proxied by S. Karthick Ramakrishnan]</span>
+								</td>
+							</tr>
+							
+							<tr>
+								
+								<td>Jul 26 2015  8:18PM</td>
+
+								
+								<td>
+									Incomplete
+								</td>
+
+								
+									<td>
+										
+									</td>
+									
+								<td>2</td>
+
+								
+								<td>
+									AUTHOR
+								</td>
+
+								
+								<td>2</td>
+
+								
+								<td>Rita Kaur Dhamoon, PHD
+								</td>
+							</tr>
+							
+							<tr>
+								
+								<td>Jul 15 2015 12:09PM</td>
+
+								
+								<td>
+									Revise
+								</td>
+
+								
+									<td>
+										
+									</td>
+									
+								<td>11</td>
+
+								
+								<td>
+									AUTHOR
+								</td>
+
+								
+								<td>1</td>
+
+								
+								<td>S. Karthick Ramakrishnan
+								</td>
+							</tr>
+							
+							<tr>
+								
+								<td>Jul 13 2015  4:10PM</td>
+
+								
+								<td>
+									Decision in Process
+								</td>
+
+								
+									<td>
+										
+									</td>
+									
+								<td>1</td>
+
+								
+								<td>
+									EDITOR
+								</td>
+
+								
+								<td>1</td>
+
+								
+								<td>Sheryl R. Lightfoot, PhD
+								</td>
+							</tr>
+							
+							<tr>
+								
+								<td>Jul  8 2015 12:16PM</td>
+
+								
+								<td>
+									
+								</td>
+
+								
+									<td>
+										Editor Approved Edited Submission
+									</td>
+									
+								<td>----</td>
+
+								
+								<td>
+									EDITOR
+								</td>
+
+								
+								<td>1</td>
+
+								
+								<td>S. Karthick Ramakrishnan
+								</td>
+							</tr>
+							
+							<tr>
+								
+								<td>Jul  8 2015 12:16PM</td>
+
+								
+								<td>
+									
+								</td>
+
+								
+									<td>
+										Revised PDF Needs Editor Approval
+									</td>
+									
+								<td>----</td>
+
+								
+								<td>
+									EDITOR
+								</td>
+
+								
+								<td>1</td>
+
+								
+								<td>S. Karthick Ramakrishnan
+								</td>
+							</tr>
+							
+							<tr>
+								
+								<td>Jul  8 2015 12:15PM</td>
+
+								
+								<td>
+									
+								</td>
+
+								
+									<td>
+										Building PDF for Editor
+									</td>
+									
+								<td>----</td>
+
+								
+								<td>
+									EDITOR
+								</td>
+
+								
+								<td>1</td>
+
+								
+								<td>S. Karthick Ramakrishnan
+								</td>
+							</tr>
+							
+							<tr>
+								
+								<td>Jul  8 2015 12:13PM</td>
+
+								
+								<td>
+									
+								</td>
+
+								
+									<td>
+										Incomplete with Editor
+									</td>
+									
+								<td>----</td>
+
+								
+								<td>
+									EDITOR
+								</td>
+
+								
+								<td>1</td>
+
+								
+								<td>S. Karthick Ramakrishnan
+								</td>
+							</tr>
+							
+							<tr>
+								
+								<td>Jul  6 2015  3:46PM</td>
+
+								
+								<td>
+									With Editor
+								</td>
+
+								
+									<td>
+										
+									</td>
+									
+								<td>7</td>
+
+								
+								<td>
+									EDITOR
+								</td>
+
+								
+								<td>1</td>
+
+								
+								<td>Allan Colbern, Ph.D.
+								</td>
+							</tr>
+							
+							<tr>
+								
+								<td>Jun 30 2015 12:04AM</td>
+
+								
+								<td>
+									Revised Manuscript Submitted
+								</td>
+
+								
+									<td>
+										
+									</td>
+									
+								<td>6</td>
+
+								
+								<td>
+									EDITOR
+								</td>
+
+								
+								<td>1</td>
+
+								
+								<td>Rita Kaur Dhamoon, PHD
+								</td>
+							</tr>
+							
+							<tr>
+								
+								<td>Jun 30 2015 12:00AM</td>
+
+								
+								<td>
+									Revision Needs Approval
+								</td>
+
+								
+									<td>
+										
+									</td>
+									
+								<td>----</td>
+
+								
+								<td>
+									AUTHOR
+								</td>
+
+								
+								<td>1</td>
+
+								
+								<td>Rita Kaur Dhamoon, PHD
+								</td>
+							</tr>
+							
+							<tr>
+								
+								<td>Jun 30 2015 12:00AM</td>
+
+								
+								<td>
+									Building PDF
+								</td>
+
+								
+									<td>
+										
+									</td>
+									
+								<td>----</td>
+
+								
+								<td>
+									AUTHOR
+								</td>
+
+								
+								<td>1</td>
+
+								
+								<td>Rita Kaur Dhamoon, PHD
+								</td>
+							</tr>
+							
+							<tr>
+								
+								<td>Jun 29 2015 11:39PM</td>
+
+								
+								<td>
+									Incomplete
+								</td>
+
+								
+									<td>
+										
+									</td>
+									
+								<td>1</td>
+
+								
+								<td>
+									AUTHOR
+								</td>
+
+								
+								<td>1</td>
+
+								
+								<td>Rita Kaur Dhamoon, PHD
+								</td>
+							</tr>
+							
+							<tr>
+								
+								<td>Apr 16 2015  8:18PM</td>
+
+								
+								<td>
+									Revise
+								</td>
+
+								
+									<td>
+										
+									</td>
+									
+								<td>74</td>
+
+								
+								<td>
+									AUTHOR
+								</td>
+
+								
+								<td>0</td>
+
+								
+								<td>S. Karthick Ramakrishnan
+								</td>
+							</tr>
+							
+							<tr>
+								
+								<td>Apr  2 2015  1:03PM</td>
+
+								
+								<td>
+									Decision in Process
+								</td>
+
+								
+									<td>
+										
+									</td>
+									
+								<td>14</td>
+
+								
+								<td>
+									EDITOR
+								</td>
+
+								
+								<td>0</td>
+
+								
+								<td>Sheryl R. Lightfoot, PhD
+								</td>
+							</tr>
+							
+							<tr>
+								
+								<td>Mar 31 2015  4:54PM</td>
+
+								
+								<td>
+									Required Reviews Completed
+								</td>
+
+								
+									<td>
+										
+									</td>
+									
+								<td>2</td>
+
+								
+								<td>
+									EDITOR
+								</td>
+
+								
+								<td>0</td>
+
+								
+								<td>Fiona MacDonald, Ph.D
+								</td>
+							</tr>
+							
+							<tr>
+								
+								<td>Jan 29 2015  5:03PM</td>
+
+								
+								<td>
+									Under Review
+								</td>
+
+								
+									<td>
+										
+									</td>
+									
+								<td>61</td>
+
+								
+								<td>
+									REVIEWER
+								</td>
+
+								
+								<td>0</td>
+
+								
+								<td>Sheryl R. Lightfoot, PhD
+								</td>
+							</tr>
+							
+							<tr>
+								
+								<td>Dec 29 2014  7:08PM</td>
+
+								
+								<td>
+									With Editor
+								</td>
+
+								
+									<td>
+										
+									</td>
+									
+								<td>30</td>
+
+								
+								<td>
+									EDITOR
+								</td>
+
+								
+								<td>0</td>
+
+								
+								<td>Allan Colbern, Ph.D.
+								</td>
+							</tr>
+							
+							<tr>
+								
+								<td>Dec 28 2014 10:13PM</td>
+
+								
+								<td>
+									Manuscript Submitted
+								</td>
+
+								
+									<td>
+										
+									</td>
+									
+								<td>----</td>
+
+								
+								<td>
+									EDITOR
+								</td>
+
+								
+								<td>0</td>
+
+								
+								<td>Rita Kaur Dhamoon, PHD
+								</td>
+							</tr>
+							
+							<tr>
+								
+								<td>Dec 28 2014 10:12PM</td>
+
+								
+								<td>
+									Needs Approval
+								</td>
+
+								
+									<td>
+										
+									</td>
+									
+								<td>----</td>
+
+								
+								<td>
+									AUTHOR
+								</td>
+
+								
+								<td>0</td>
+
+								
+								<td>Rita Kaur Dhamoon, PHD
+								</td>
+							</tr>
+							
+							<tr>
+								
+								<td>Dec 28 2014 10:11PM</td>
+
+								
+								<td>
+									Building PDF
+								</td>
+
+								
+									<td>
+										
+									</td>
+									
+								<td>----</td>
+
+								
+								<td>
+									AUTHOR
+								</td>
+
+								
+								<td>0</td>
+
+								
+								<td>Rita Kaur Dhamoon, PHD
+								</td>
+							</tr>
+							
+							<tr>
+								
+								<td>Dec 28 2014 10:04PM</td>
+
+								
+								<td>
+									Incomplete
+								</td>
+
+								
+									<td>
+										
+									</td>
+									
+								<td>----</td>
+
+								
+								<td>
+									AUTHOR
+								</td>
+
+								
+								<td>0</td>
+
+								
+								<td>Rita Kaur Dhamoon, PHD
+								</td>
+							</tr>
+							
+					</table>
+					
+			</fieldset>
+			<br />
+			<br />
+		
+			<fieldset>
+				<legend><a name="correspondence"></a>CORRESPONDENCE HISTORY</legend>
+				
+						<div class="buttonAlign" style="padding-bottom:4px;">
+							<input type="button" name="btnAddExtEditorialCorrespondence" value="Add&#32;Editorial&#32;Correspondence" onclick="AddExternalCorrespondence(1);" />
+							
+						</div>
+					
+					<table border="0" cellpadding="0" cellspacing="0" width="97%" class="datatable">
+						<tr>
+							<th>Correspondence Date</th>
+							<th>Letter</th>
+							<th>Recipient</th>
+							<th>Status</th>
+                            
+							<th>Revision</th>
+							<th>Operator</th>
+						</tr>
+
+						
+							<tr>
+								
+								<td>28 Jul 2015</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(99843, '{EE2BF297-22E6-46C2-A51B-679CAA8621B6}')" title="JREP %MS_NUMBER% is Accepted for Publication">Publisher Notification of Accepted Manuscript</a></td><td>Kelly Loftus <span style="color:red">(proxy registration pending)</span></td>
+								<td>
+									Completed Accept
+
+								</td>
+
+                                
+								<td>
+									2
+								</td>
+
+								
+								<td>S. Karthick Ramakrishnan
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>28 Jul 2015</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(99842, '{D3F38F81-9D14-428B-ABFF-3EB526762DE0}')" title="JREP %MS_NUMBER% is Accepted for Publication">Publisher Notification of Accepted Manuscript</a></td><td>Cambridge Production</td>
+								<td>
+									Completed Accept
+
+								</td>
+
+                                
+								<td>
+									2
+								</td>
+
+								
+								<td>S. Karthick Ramakrishnan
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>28 Jul 2015</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(99841, '{C0DC53CD-8641-4864-ABD9-5EE074717831}')" title="Your Submission to JREP">Editor Decision - Accept</a></td><td>Rita Kaur Dhamoon, PHD</td>
+								<td>
+									Accept
+
+								</td>
+
+                                
+								<td>
+									2
+								</td>
+
+								
+								<td>S. Karthick Ramakrishnan
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>28 Jul 2015</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(99840, '{A0FB9FBC-F6B9-4D53-A79D-4499C48368BA}')" title="You have a new Editor Assignment for JREP">Editor Assignment</a></td><td>S. Karthick Ramakrishnan</td>
+								<td>
+									With Editor
+
+								</td>
+
+                                
+								<td>
+									2
+								</td>
+
+								
+								<td>Allan Colbern, Ph.D.<br /><span class="proxy">[Proxied by S. Karthick Ramakrishnan]</span>
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>28 Jul 2015</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(99839, '{EAF93845-6BFA-4BDB-87A6-17A0B2CC1519}')" title="Revision Confirmation for JREP">Author Submits Revision Confirmation</a></td><td>Rita Kaur Dhamoon, PHD</td>
+								<td>
+									Revised Manuscript Submitted
+
+								</td>
+
+                                
+								<td>
+									2
+								</td>
+
+								
+								<td>Rita Kaur Dhamoon, PHD<br /><span class="proxy">[Proxied by S. Karthick Ramakrishnan]</span>
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>15 Jul 2015</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(99761, '{065C9ED6-1A57-47B0-8653-20B3846B223F}')" title="Decision on your JREP article">Editor Decision - Accept - Final Files Needed</a></td><td>Rita Kaur Dhamoon, PHD</td>
+								<td>
+									Revise
+
+								</td>
+
+                                
+								<td>
+									1
+								</td>
+
+								
+								<td>S. Karthick Ramakrishnan
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>06 Jul 2015</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(99743, '{933FC36B-FC7D-47C0-8B4F-139E15226A6A}')" title="You have a new Editor Assignment for JREP">Editor Assignment</a></td><td>S. Karthick Ramakrishnan</td>
+								<td>
+									With Editor
+
+								</td>
+
+                                
+								<td>
+									1
+								</td>
+
+								
+								<td>Allan Colbern, Ph.D.
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>30 Jun 2015</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(99729, '{2F77AA2E-82EA-4FD9-9285-1DD3C84967AC}')" title="Revision Confirmation for JREP">Author Submits Revision Confirmation</a></td><td>Rita Kaur Dhamoon, PHD</td>
+								<td>
+									Revised Manuscript Submitted
+
+								</td>
+
+                                
+								<td>
+									1
+								</td>
+
+								
+								<td>Rita Kaur Dhamoon, PHD
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>16 Apr 2015</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(99603, '{B1E76283-5842-4C3D-8291-116DD0DDEE84}')" title="Your JREP Submission: Revise and Resubmit">Editor Decision - Revise</a></td><td>Rita Kaur Dhamoon, PHD</td>
+								<td>
+									Revise
+
+								</td>
+
+                                
+								<td>
+									0
+								</td>
+
+								
+								<td>S. Karthick Ramakrishnan
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>31 Mar 2015</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(99565, '{03DDEC93-8DEF-4A62-A804-59138B1F6111}')" title="JREP Completed Reviews for &quot;%ARTICLE_TITLE%&quot;">Editor Notice All Reviews Complete</a></td><td>Allan Colbern, Ph.D.</td>
+								<td>
+									Required Reviews Completed
+
+								</td>
+
+                                
+								<td>
+									0
+								</td>
+
+								
+								<td>Fiona MacDonald, Ph.D
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>31 Mar 2015</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(99564, '{1E332CA5-1CBB-48BD-970C-4DFEE836D9DB}')" title="Thank you for the review for JREP">Reviewer Thank You</a></td><td>Fiona MacDonald, Ph.D</td>
+								<td>
+									Under Review
+
+								</td>
+
+                                
+								<td>
+									0
+								</td>
+
+								
+								<td>Fiona MacDonald, Ph.D
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>30 Mar 2015</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(99558, '{27B4124A-7142-4878-823B-6BAE5FC3372E}')" title="JREP Reminder: Review assignment is due soon">Reviewer Reminder - Before Due Date</a></td><td>Fiona MacDonald, Ph.D</td>
+								<td>
+									Under Review
+
+								</td>
+
+                                
+								<td>
+									0
+								</td>
+
+								
+								<td>S. Karthick Ramakrishnan
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>23 Mar 2015</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(99544, '{14C42D63-EEC3-4AC1-99F7-73964219DD49}')" title="Thank you for the review for JREP">Reviewer Thank You</a></td><td>David MacDonald, PhD</td>
+								<td>
+									Under Review
+
+								</td>
+
+                                
+								<td>
+									0
+								</td>
+
+								
+								<td>David MacDonald, PhD<br /><span class="proxy">[Proxied by S. Karthick Ramakrishnan]</span>
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>23 Mar 2015</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(99532, '{D4F0AD94-CECC-4FB4-A9AD-D75A58908646}')" title="Reminder of Late Review for JREP">Reviewer - First Late Reminder</a></td><td>David MacDonald, PhD</td>
+								<td>
+									Under Review
+
+								</td>
+
+                                
+								<td>
+									0
+								</td>
+
+								
+								<td>S. Karthick Ramakrishnan
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>16 Mar 2015</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(99511, '{908669FF-E068-464E-9DDC-DA4280B33679}')" title="JREP Reminder: Review assignment is due soon">Reviewer Reminder - Before Due Date</a></td><td>David MacDonald, PhD</td>
+								<td>
+									Under Review
+
+								</td>
+
+                                
+								<td>
+									0
+								</td>
+
+								
+								<td>S. Karthick Ramakrishnan
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>28 Feb 2015</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(99396, '{29C2C9A5-E42D-4A2B-8137-B2F5D4106F48}')" title="JREP: Thank you for agreeing to review">Reviewer Instructions and Due Date</a>&nbsp;<img style="vertical-align:middle;margin-top:4px" src="img/paperclip_icon.gif" alt=""/></td><td>Fiona MacDonald, Ph.D</td>
+								<td>
+									Under Review
+
+								</td>
+
+                                
+								<td>
+									0
+								</td>
+
+								
+								<td>Fiona MacDonald, Ph.D
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>28 Feb 2015</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(99395, '{01A4D9D9-9AAF-49FC-B663-24C077616FDD}')" title="Reviewer Invitation for JREP">Reviewer Invitation</a></td><td>Fiona MacDonald, Ph.D</td>
+								<td>
+									Under Review
+
+								</td>
+
+                                
+								<td>
+									0
+								</td>
+
+								
+								<td>Sheryl R. Lightfoot, PhD
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>19 Feb 2015</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(99368, '{349B9E11-072E-4E1E-ACEE-904487D408A1}')" title="JREP will seek alternate reviewer">Reviewer Uninvited Notice</a></td><td>Melissa S. Williams, PHD</td>
+								<td>
+									Under Review
+
+								</td>
+
+                                
+								<td>
+									0
+								</td>
+
+								
+								<td>Sheryl R. Lightfoot, PhD
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>18 Feb 2015</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(99367, '{2C91E2FA-9D1C-4FAB-A5C8-464ED7CEE572}')" title="JREP will seek alternate reviewer">Reviewer Uninvited Notice</a></td><td>Niigaanwewidam Sinclair, PhD</td>
+								<td>
+									Under Review
+
+								</td>
+
+                                
+								<td>
+									0
+								</td>
+
+								
+								<td>Sheryl R. Lightfoot, PhD
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>16 Feb 2015</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(99360, '{33859524-ADF8-4AAB-996E-D85AB663E584}')" title="Declined invitation for JREP">Reviewer Invitation Declined</a></td><td>Hayden King, PhD</td>
+								<td>
+									Under Review
+
+								</td>
+
+                                
+								<td>
+									0
+								</td>
+
+								
+								<td>Hayden King, PhD
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>16 Feb 2015</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(99359, '{D4257D27-5B6E-43CF-8DCF-25FA3C1272A8}')" title="JREP will seek alternate reviewer">Reviewer Uninvited Notice</a></td><td>Daniel Butt</td>
+								<td>
+									Under Review
+
+								</td>
+
+                                
+								<td>
+									0
+								</td>
+
+								
+								<td>Sheryl R. Lightfoot, PhD
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>14 Feb 2015</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(99352, '{37069012-6F73-4439-B648-73FDDF99C1BB}')" title="JREP: Thank you for agreeing to review">Reviewer Instructions and Due Date</a>&nbsp;<img style="vertical-align:middle;margin-top:4px" src="img/paperclip_icon.gif" alt=""/></td><td>David MacDonald, PhD</td>
+								<td>
+									Under Review
+
+								</td>
+
+                                
+								<td>
+									0
+								</td>
+
+								
+								<td>David MacDonald, PhD
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>14 Feb 2015</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(99351, '{4C9CE3D5-9896-4E62-A5FB-AD024CB33AC4}')" title="Reviewer Invitation for JREP">Reviewer Invitation</a></td><td>David MacDonald, PhD</td>
+								<td>
+									Under Review
+
+								</td>
+
+                                
+								<td>
+									0
+								</td>
+
+								
+								<td>Sheryl R. Lightfoot, PhD
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>14 Feb 2015</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(99349, '{358F92C0-C500-4EBC-BB08-E96F69FE7181}')" title="JREP will seek alternate reviewer">Reviewer Uninvited Notice</a></td><td>Niigaanwewidam Sinclair, PhD</td>
+								<td>
+									Under Review
+
+								</td>
+
+                                
+								<td>
+									0
+								</td>
+
+								
+								<td>Sheryl R. Lightfoot, PhD
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>14 Feb 2015</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(99348, '{40540DD3-4D7E-4E07-8927-6D766686D080}')" title="Reviewer Invitation for JREP">Reviewer Invitation</a></td><td>Niigaanwewidam Sinclair, PhD</td>
+								<td>
+									Under Review
+
+								</td>
+
+                                
+								<td>
+									0
+								</td>
+
+								
+								<td>Sheryl R. Lightfoot, PhD
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>13 Feb 2015</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(99346, '{E27431DC-5AAD-45D8-AD8B-CFA673CCF3CA}')" title="Reviewer Invitation for JREP">Reviewer Invitation</a></td><td>Hayden King, PhD</td>
+								<td>
+									Under Review
+
+								</td>
+
+                                
+								<td>
+									0
+								</td>
+
+								
+								<td>Sheryl R. Lightfoot, PhD
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>11 Feb 2015</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(99320, '{C99E828A-078F-4B38-9217-7DEEEE003659}')" title="Reviewer Invitation for JREP">Reviewer Invitation</a></td><td>Niigaanwewidam Sinclair, PhD</td>
+								<td>
+									Under Review
+
+								</td>
+
+                                
+								<td>
+									0
+								</td>
+
+								
+								<td>Sheryl R. Lightfoot, PhD
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>11 Feb 2015</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(99318, '{6ECD4F40-8E67-4402-B05D-861A5ECA0879}')" title="Reviewer Invitation for JREP">Reviewer Invitation</a></td><td>Melissa S. Williams, PHD</td>
+								<td>
+									Under Review
+
+								</td>
+
+                                
+								<td>
+									0
+								</td>
+
+								
+								<td>Sheryl R. Lightfoot, PhD
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>11 Feb 2015</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(99317, '{93881F24-ECAF-48A3-90F4-758067A83FE9}')" title="JREP will seek alternate reviewer">Reviewer Uninvited Notice</a></td><td>Simone Chambers, PHD</td>
+								<td>
+									Under Review
+
+								</td>
+
+                                
+								<td>
+									0
+								</td>
+
+								
+								<td>Sheryl R. Lightfoot, PhD
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>10 Feb 2015</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(99314, '{BA66A13C-BC97-4631-903D-2A3CFEA3B0CE}')" title="Reviewer Invitation for JREP">Reviewer Invitation</a></td><td>Robert Nichols, PHD</td>
+								<td>
+									Under Review
+
+								</td>
+
+                                
+								<td>
+									0
+								</td>
+
+								
+								<td>Sheryl R. Lightfoot, PhD
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>08 Feb 2015</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(99307, '{A3D07AB8-19BA-41FA-A115-025A89443CF8}')" title="Reviewer Invitation for JREP">Reviewer Invitation</a></td><td>Daniel Butt</td>
+								<td>
+									Under Review
+
+								</td>
+
+                                
+								<td>
+									0
+								</td>
+
+								
+								<td>Sheryl R. Lightfoot, PhD
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>08 Feb 2015</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(99306, '{6D0391AE-89D2-4436-8BE9-EC7D4B9855D4}')" title="Declined invitation for JREP">Reviewer Invitation Declined</a></td><td>Sarah Fine, DPhil</td>
+								<td>
+									Under Review
+
+								</td>
+
+                                
+								<td>
+									0
+								</td>
+
+								
+								<td>Sarah Fine, DPhil
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>07 Feb 2015</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(99303, '{A6D47938-5C88-4071-829B-260E5F3DCE64}')" title="Reviewer Invitation for JREP">Reviewer Invitation</a></td><td>Sarah Fine, DPhil</td>
+								<td>
+									Under Review
+
+								</td>
+
+                                
+								<td>
+									0
+								</td>
+
+								
+								<td>Sheryl R. Lightfoot, PhD
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>07 Feb 2015</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(99302, '{5DB27DA7-E8D1-4E33-A627-91133AE732F3}')" title="Reviewer Invitation for JREP">Reviewer Invitation</a></td><td>Simone Chambers, PHD</td>
+								<td>
+									Under Review
+
+								</td>
+
+                                
+								<td>
+									0
+								</td>
+
+								
+								<td>Sheryl R. Lightfoot, PhD
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>06 Feb 2015</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(99290, '{B62592F2-1FBF-47B8-BF17-D29DB1FBCD61}')" title="Declined invitation for JREP">Reviewer Invitation Declined</a></td><td>Michael Freeman, PHD</td>
+								<td>
+									Under Review
+
+								</td>
+
+                                
+								<td>
+									0
+								</td>
+
+								
+								<td>Michael Freeman, PHD
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>06 Feb 2015</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(99287, '{A30360EE-E80F-4CD5-8E58-3135B1D07986}')" title="JREP will seek alternate reviewer">Reviewer Uninvited Notice</a></td><td>Duncan Ivison, PHD</td>
+								<td>
+									Under Review
+
+								</td>
+
+                                
+								<td>
+									0
+								</td>
+
+								
+								<td>Sheryl R. Lightfoot, PhD
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>05 Feb 2015</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(99284, '{A5F690DA-F2D6-4D4E-97CA-27E697796047}')" title="JREP will seek alternate reviewer">Reviewer Uninvited Notice</a>&nbsp;<img style="vertical-align:middle;margin-top:4px" src="img/paperclip_icon.gif" alt=""/></td><td>Michael A. Murphy, PHD</td>
+								<td>
+									Under Review
+
+								</td>
+
+                                
+								<td>
+									0
+								</td>
+
+								
+								<td>S. Karthick Ramakrishnan
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>05 Feb 2015</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(99282, '{E7658FC7-22F8-4FC6-BF1B-85B787B20F04}')" title="Reviewer Invitation for JREP">Reviewer Invitation</a></td><td>Michael Freeman, PHD</td>
+								<td>
+									Under Review
+
+								</td>
+
+                                
+								<td>
+									0
+								</td>
+
+								
+								<td>Sheryl R. Lightfoot, PhD
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>03 Feb 2015</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(99275, '{B650F637-E906-495A-BB90-1A9500495332}')" title="Declined invitation for JREP">Reviewer Invitation Declined</a></td><td>Dale Turner, PHD</td>
+								<td>
+									Under Review
+
+								</td>
+
+                                
+								<td>
+									0
+								</td>
+
+								
+								<td>Dale Turner, PHD
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>02 Feb 2015</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(99265, '{5F1DF66C-6607-478C-9D8B-7C3B5CA7C8A4}')" title="Reviewer Invitation for JREP">Reviewer Invitation</a></td><td>Kevin M. Bruyneel, PHD</td>
+								<td>
+									Under Review
+
+								</td>
+
+                                
+								<td>
+									0
+								</td>
+
+								
+								<td>Sheryl R. Lightfoot, PhD
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>02 Feb 2015</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(99264, '{D60B66DA-B8BC-433C-BAF3-A77BC90CD5C0}')" title="Declined invitation for JREP">Reviewer Invitation Declined</a></td><td>Benedict Kiernan, Ph.D.</td>
+								<td>
+									Under Review
+
+								</td>
+
+                                
+								<td>
+									0
+								</td>
+
+								
+								<td>Benedict Kiernan, Ph.D.
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>02 Feb 2015</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(99263, '{643C778F-A0A2-481C-BFD3-F67986D90FB7}')" title="Reviewer Invitation for JREP">Reviewer Invitation</a></td><td>Benedict Kiernan, Ph.D.</td>
+								<td>
+									Under Review
+
+								</td>
+
+                                
+								<td>
+									0
+								</td>
+
+								
+								<td>Sheryl R. Lightfoot, PhD
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>01 Feb 2015</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(99260, '{22E1761C-D64A-4255-BBD6-8CC2315B195D}')" title="JREP: Thank you for agreeing to review">Reviewer Instructions and Due Date</a>&nbsp;<img style="vertical-align:middle;margin-top:4px" src="img/paperclip_icon.gif" alt=""/></td><td>Michael A. Murphy, PHD</td>
+								<td>
+									Under Review
+
+								</td>
+
+                                
+								<td>
+									0
+								</td>
+
+								
+								<td>Michael A. Murphy, PHD
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>31 Jan 2015</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(99258, '{9D9C7787-ED8E-47AD-9E58-0D34DF34A016}')" title="Reviewer Invitation for JREP">Reviewer Invitation</a></td><td>Michael A. Murphy, PHD</td>
+								<td>
+									Under Review
+
+								</td>
+
+                                
+								<td>
+									0
+								</td>
+
+								
+								<td>Sheryl R. Lightfoot, PhD
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>29 Jan 2015</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(99211, '{44FB9786-2674-4F2C-8357-0FC477062A6D}')" title="Declined invitation for JREP">Reviewer Invitation Declined</a></td><td>Sherene Razack, PHD</td>
+								<td>
+									Under Review
+
+								</td>
+
+                                
+								<td>
+									0
+								</td>
+
+								
+								<td>Sherene Razack, PHD
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>29 Jan 2015</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(99210, '{7BCECAAD-7CA1-4425-8619-E8162E37FC67}')" title="Reviewer Invitation for JREP">Reviewer Invitation</a></td><td>Sherene Razack, PHD</td>
+								<td>
+									Under Review
+
+								</td>
+
+                                
+								<td>
+									0
+								</td>
+
+								
+								<td>Sheryl R. Lightfoot, PhD
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>29 Jan 2015</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(99209, '{148DC63A-2B79-460F-914F-AD11AFA93B5D}')" title="Reviewer Invitation for JREP">Reviewer Invitation</a></td><td>Duncan Ivison, PHD</td>
+								<td>
+									Under Review
+
+								</td>
+
+                                
+								<td>
+									0
+								</td>
+
+								
+								<td>Sheryl R. Lightfoot, PhD
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>29 Jan 2015</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(99208, '{F617AE61-B9AA-4BB5-8A0F-41EEECD65F03}')" title="Reviewer Invitation for JREP">Reviewer Invitation</a></td><td>Dale Turner, PHD</td>
+								<td>
+									Under Review
+
+								</td>
+
+                                
+								<td>
+									0
+								</td>
+
+								
+								<td>Sheryl R. Lightfoot, PhD
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>23 Jan 2015</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(99192, '{B9D178F5-430A-400C-8FF8-A302543D5FD4}')" title="You have a new Editor Assignment for JREP">Editor Assignment</a></td><td>Sheryl R. Lightfoot, PhD</td>
+								<td>
+									With Editor
+
+								</td>
+
+                                
+								<td>
+									0
+								</td>
+
+								
+								<td>S. Karthick Ramakrishnan
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>29 Dec 2014</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(99125, '{91B461A4-76BE-4399-ACCF-1C1DBFF63040}')" title="You have a new Editor Assignment for JREP">Editor Assignment</a></td><td>S. Karthick Ramakrishnan</td>
+								<td>
+									With Editor
+
+								</td>
+
+                                
+								<td>
+									0
+								</td>
+
+								
+								<td>Allan Colbern, Ph.D.
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>28 Dec 2014</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(99114, '{B48EE3BD-4F22-4101-9C63-4941F062D8CE}')" title="Submission Confirmation for JREP">Author Submits New Manuscript Confirmation</a></td><td>Rita Kaur Dhamoon, PHD</td>
+								<td>
+									Manuscript Submitted
+
+								</td>
+
+                                
+								<td>
+									0
+								</td>
+
+								
+								<td>Rita Kaur Dhamoon, PHD
+								</td>
+
+							
+							</tr>
+							
+					</table>
+					
+			</fieldset>
+			
+	</div>
+	<div class="centered">
+		
+		<br /><br /><input type="button" name="close" value="Close" onclick="window.close();" />
+		<br /><br />
+		<a href="#status">Status History</a>&nbsp;&nbsp;&nbsp;<a href="#correspondence">Correspondence History</a>&nbsp;&nbsp;&nbsp;
+		<br /><br /><a href="docHistoryStatusTypeView.asp?docid=3375">Switch to Status Type View</a>
+	</div>
+
+    <div id="modalDiv" style="display:none"></div>
+
+</form>
+
+<script type="text/javascript">
+    if (typeof pageDataTracker !== 'undefined') {
+        RetrieveAnalyticsData();
+    }
+</script>
+    <script type="text/javascript">
+        $(document).ready(function() 
+	    {
+	        url = 'ajax/RenderControlToPage.ashx?control=DialogWidgetControl&id=warningDialog&titleResourceId=Common.Text.Warning&titleBarIcon=warning&showTitleBar=true&showTitleBarClose=false&dialogStyle=confirm&width=400';
+	        $.get(url, function (data) 
+	        {
+	            $('body').append(data);
+	        });
+        });
+    </script>
+</body>
+</html>

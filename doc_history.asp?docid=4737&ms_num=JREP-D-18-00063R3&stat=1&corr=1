@@ -1,0 +1,3445 @@
+
+
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+<head>
+	<title>History Details</title>
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+
+    <link rel="stylesheet" type="text/css" href="cssSiteStyle.aspx" />
+    <link rel="stylesheet" type="text/css" href="cssJQueryDialog.aspx" />
+
+	<style type="text/css">
+		.centered table
+		{
+			margin: 0 auto;
+		}
+        .activeSubFlagHistory
+        {
+            color: red;
+        }
+	</style>
+
+    <script type="text/javascript">
+//<![CDATA[
+
+function FormatString(stringToFormat, replacementValues)
+{
+	return stringToFormat.replace(/{([0-9]+)}/g, function(wholematch, firstmatch)
+		  { var i = +firstmatch; return i < replacementValues.length ? replacementValues[i] : wholematch; }
+		);
+}
+
+
+
+function EscapeAttributeValue(value) 
+{
+
+        return value.replace(/&/g, '&amp;')
+                    .replace(/'/g, "&apos;")
+                    .replace(/"/g, '&quot;')
+                    .replace(/</g, '&lt;')
+                    .replace(/>/g, '&gt;');
+}
+
+//]]>
+</script>
+
+<script type="text/javascript" src="/jrep/WebUserControls/ClientJScript/translatedClientutil.aspx?lang=en%2DUS"></script>
+<script type="text/javascript" src="/jrep/ClientScript/clientutil.aspx"></script>
+
+<script src="/jrep/ClientScript/jquery.js" type="text/javascript"></script>
+<script src="/jrep/ClientScript/jquery-ui.js" type="text/javascript"></script>   
+
+
+
+    <script type="text/javascript" src="ClientScript/MSPFunctions.js"></script>
+
+	<script type="text/javascript">
+		/***********************************************************************
+		* 7.0-39	TimH	20090424
+		* Navigate to the Add External Correspondence Page, providing
+		* info needed to add a new External Correspondence record.
+		***********************************************************************/
+		function AddExternalCorrespondence(externalCorrespType)
+		{
+			var hdnExternalCorrespondenceType = document.getElementById("hdnExternalCorrespondenceType");
+			hdnExternalCorrespondenceType.value = "" + externalCorrespType;
+
+			var hdnLetterSecurityID = document.getElementById("hdnLetterSecurityID");
+			hdnLetterSecurityID.value = "";
+
+			document.frmDocHistory.submit();
+		}
+
+		/***********************************************************************
+		* 7.0-39	TimH	20090424
+		* Edit or Remove the External Correspondence specified by the
+		* Edit or Remove hyperlink clicked by the user.
+		***********************************************************************/
+		function EditExternalCorrespondence(externalCorrespondenceID, externalCorrespType, remove, letterSecurityID)
+		{
+			var hdnExternalCorrespondenceID = document.getElementById("hdnExternalCorrespondenceID");
+			hdnExternalCorrespondenceID.value = "" + externalCorrespondenceID;
+
+			var hdnExternalCorrespondenceType = document.getElementById("hdnExternalCorrespondenceType");
+			hdnExternalCorrespondenceType.value = "" + externalCorrespType;
+
+			var hdnLetterSecurityID = document.getElementById("hdnLetterSecurityID");
+			hdnLetterSecurityID.value = letterSecurityID;
+
+			var hdnRemove = document.getElementById("hdnRemove");
+			hdnRemove.value = remove;
+
+			if(hdnRemove.value == "1")
+			{
+                var okAction = function ()
+                {
+					document.frmDocHistory.submit();	
+                }
+                $("#warningDialog")[0].showDialog('Removing the correspondence cannot be undone.\x0a\x3cbr\x2f\x3e\x3cbr\x2f\x3e\x0aClick Cancel to return to the History page without deleting the correspondence.\x0a\x3cbr\x2f\x3eClick OK to remove this item of correspondence.', okAction);
+                return;
+			}
+			else if(hdnRemove.value == "0")
+			{
+				document.frmDocHistory.submit();
+			}
+		}
+
+		/***********************************************************************
+		* 7.0-39	TimH	20090424
+		* In a new popup, View a read only version of the External Correspondence specified by the
+		* External Correspondence Description hyperlink clicked by the user.
+		***********************************************************************/
+		function ViewExternalCorrespondence(externalCorrespondenceID, externalCorrespType, letterSecurityID)
+		{
+			var sNavUrl = "DotNetPopUps/ViewExternalCorrespondence.aspx";
+			sNavUrl += "?hdnExternalCorrespondenceID=" + externalCorrespondenceID;
+			sNavUrl += "&hdnExternalCorrespondenceType=" + externalCorrespType;
+			sNavUrl += "&hdnLetterSecurityID=" + letterSecurityID;
+			sNavUrl += "&hdnAssociatedEntityType=" + EXT_CORRES_ASSOC_TYPE_SUBMISSION;
+
+			openCenterWin(sNavUrl, 'ViewExternalCorrespondence', 1, 1, 0, 0, 0, 0);
+		}
+
+		function resendEditorialStatus(statHistID, notLatest)
+		{
+            if (notLatest)
+            {
+                var okAction = function ()
+                {
+					resendStatus(statHistID);	
+                }
+                $("#warningDialog")[0].showDialog('The Status you are attempting to resend is not the most recent status. Do you want to continue\x3f', okAction);
+                return;
+            }
+            else
+            {
+                resendStatus(statHistID);
+            }
+        }
+        function resendStatus(statHistID)
+        {
+            // Resend status
+		    var documentID = "4737";
+		    var exportType = 4;
+		    var operatorID = "217520";
+		    var proxyOperatorID = "";
+		    if (proxyOperatorID != "")
+		    {
+		        operatorID = proxyOperatorID;
+		    }
+		    resendMSPEditorialStatus(documentID, exportType, operatorID, statHistID, "");
+        }
+
+		function displayOverlay(text) {
+		    $("#modalDiv").text(text);
+		    $("#modalDiv").dialog({
+	            title: '',
+	            resizable: true, modal: true, buttons: [{ text: 'OK',
+	                click: function () { $(this).dialog("close"); }
+	            }], closeText: '',
+
+	            open: function ()
+	            {
+	                $(this).dialog('widget').find(".ui-dialog-titlebar-close").hide();
+	                $(this).dialog({ position: 'center' });
+	            }
+
+	        });
+
+	        return false;
+		}
+	</script>
+    
+</head>
+<body>
+
+	<form name="frmDocHistory" method="post" id="frmDocHistory" action="DotNetPopUps/AddEditExternalCorrespondence.aspx">
+	<div class="centered">
+	    <input type="hidden" id="hdnAssociatedEntityID" name="hdnAssociatedEntityID" value="4737" />
+	    <input type="hidden" id="hdnLetterSecurityID" name="hdnLetterSecurityID" value="" />
+	    <input type="hidden" id="hdnAssociatedEntityType" name="hdnAssociatedEntityType" value="1" />
+	    <input type="hidden" id="hdnExternalCorrespondenceID" name="hdnExternalCorrespondenceID" value="" />
+	    <input type="hidden" id="hdnExternalCorrespondenceType" name="hdnExternalCorrespondenceType" value=""/>
+	    <input type="hidden" id="hdnRemove" name="hdnRemove" value="" />
+	    <input type="hidden" id="hdnReturnPage" name="hdnReturnPage" value="doc_history.asp" />
+	    <input type="hidden" id="hdnAttachmentGroupID" name="hdnAttachmentGroupID" value="" />
+		<h3>
+			History for Manuscript Number: JREP-D-18-00063R3 &quot;No Safe Space: Neoliberalism and the Production of Violence in the lives of Central American Migrants&quot;
+		</h3>
+		<a href="#status">Status History</a>&nbsp;&nbsp;&nbsp;<a href="#correspondence">Correspondence History</a>&nbsp;&nbsp;&nbsp;
+
+
+		<br /><br /><a href="docHistoryStatusTypeView.asp?docid=4737">Switch to Status Type View</a>
+
+		
+		<br /><br /><input type="button" name="close" value="Close" onclick="window.close();" />
+	</div>
+
+	<div>
+		<br /><br />
+		
+			<fieldset>
+				<legend><a name="status"></a>STATUS HISTORY</legend>
+				
+					<table border="0" cellpadding="0" cellspacing="0" width="97%" class="datatable">
+						<tr>
+							<th>Status Date</th>
+							<th>Document Status</th>
+							
+							<th>Status Days</th>
+							<th>Role Family</th>
+							<th>Revision </th>
+							<th>Operator</th>
+						</tr>
+
+						
+							<tr>
+								
+								<td>May 21 2019 10:56AM</td>
+
+								
+								<td>
+									Completed Accept
+								</td>
+
+								
+								<td>----</td>
+
+								
+								<td>
+									EDITOR
+								</td>
+
+								
+								<td>3</td>
+
+								
+								<td>Alexandra Filindra
+								</td>
+							</tr>
+							
+							<tr>
+								
+								<td>May 21 2019 10:55AM</td>
+
+								
+								<td>
+									Accept
+								</td>
+
+								
+								<td>----</td>
+
+								
+								<td>
+									EDITOR
+								</td>
+
+								
+								<td>3</td>
+
+								
+								<td>Alexandra Filindra
+								</td>
+							</tr>
+							
+							<tr>
+								
+								<td>May 21 2019 10:55AM</td>
+
+								
+								<td>
+									Decision in Process
+								</td>
+
+								
+								<td>----</td>
+
+								
+								<td>
+									EDITOR
+								</td>
+
+								
+								<td>3</td>
+
+								
+								<td>Alexandra Filindra
+								</td>
+							</tr>
+							
+							<tr>
+								
+								<td>May 21 2019 10:22AM</td>
+
+								
+								<td>
+									With Editor
+								</td>
+
+								
+								<td>----</td>
+
+								
+								<td>
+									EDITOR
+								</td>
+
+								
+								<td>3</td>
+
+								
+								<td>Maureen Heffern Ponicki
+								</td>
+							</tr>
+							
+							<tr>
+								
+								<td>May 20 2019  7:06PM</td>
+
+								
+								<td>
+									Revised Manuscript Submitted
+								</td>
+
+								
+								<td>----</td>
+
+								
+								<td>
+									EDITOR
+								</td>
+
+								
+								<td>3</td>
+
+								
+								<td>Linda Alvarez, Ph.D.
+								</td>
+							</tr>
+							
+							<tr>
+								
+								<td>May 20 2019  7:04PM</td>
+
+								
+								<td>
+									Revision Needs Approval
+								</td>
+
+								
+								<td>----</td>
+
+								
+								<td>
+									AUTHOR
+								</td>
+
+								
+								<td>3</td>
+
+								
+								<td>Linda Alvarez, Ph.D.
+								</td>
+							</tr>
+							
+							<tr>
+								
+								<td>May 20 2019  7:04PM</td>
+
+								
+								<td>
+									Building PDF
+								</td>
+
+								
+								<td>----</td>
+
+								
+								<td>
+									AUTHOR
+								</td>
+
+								
+								<td>3</td>
+
+								
+								<td>Linda Alvarez, Ph.D.
+								</td>
+							</tr>
+							
+							<tr>
+								
+								<td>May 20 2019  6:54PM</td>
+
+								
+								<td>
+									Incomplete
+								</td>
+
+								
+								<td>----</td>
+
+								
+								<td>
+									AUTHOR
+								</td>
+
+								
+								<td>3</td>
+
+								
+								<td>Linda Alvarez, Ph.D.
+								</td>
+							</tr>
+							
+							<tr>
+								
+								<td>Mar 25 2019  4:21PM</td>
+
+								
+								<td>
+									Revise
+								</td>
+
+								
+								<td>56</td>
+
+								
+								<td>
+									AUTHOR
+								</td>
+
+								
+								<td>2</td>
+
+								
+								<td>Alexandra Filindra
+								</td>
+							</tr>
+							
+							<tr>
+								
+								<td>Mar 25 2019  4:21PM</td>
+
+								
+								<td>
+									Decision in Process
+								</td>
+
+								
+								<td>----</td>
+
+								
+								<td>
+									EDITOR
+								</td>
+
+								
+								<td>2</td>
+
+								
+								<td>Alexandra Filindra
+								</td>
+							</tr>
+							
+							<tr>
+								
+								<td>Mar 25 2019 11:22AM</td>
+
+								
+								<td>
+									With Editor
+								</td>
+
+								
+								<td>----</td>
+
+								
+								<td>
+									EDITOR
+								</td>
+
+								
+								<td>2</td>
+
+								
+								<td>Maureen Heffern Ponicki
+								</td>
+							</tr>
+							
+							<tr>
+								
+								<td>Mar 20 2019 11:48AM</td>
+
+								
+								<td>
+									Revised Manuscript Submitted
+								</td>
+
+								
+								<td>4</td>
+
+								
+								<td>
+									EDITOR
+								</td>
+
+								
+								<td>2</td>
+
+								
+								<td>Linda Alvarez, Ph.D.
+								</td>
+							</tr>
+							
+							<tr>
+								
+								<td>Mar 20 2019 11:48AM</td>
+
+								
+								<td>
+									Revision Needs Approval
+								</td>
+
+								
+								<td>----</td>
+
+								
+								<td>
+									AUTHOR
+								</td>
+
+								
+								<td>2</td>
+
+								
+								<td>Linda Alvarez, Ph.D.
+								</td>
+							</tr>
+							
+							<tr>
+								
+								<td>Mar 20 2019 11:48AM</td>
+
+								
+								<td>
+									Building PDF
+								</td>
+
+								
+								<td>----</td>
+
+								
+								<td>
+									AUTHOR
+								</td>
+
+								
+								<td>2</td>
+
+								
+								<td>Linda Alvarez, Ph.D.
+								</td>
+							</tr>
+							
+							<tr>
+								
+								<td>Mar 20 2019 11:45AM</td>
+
+								
+								<td>
+									Incomplete
+								</td>
+
+								
+								<td>----</td>
+
+								
+								<td>
+									AUTHOR
+								</td>
+
+								
+								<td>2</td>
+
+								
+								<td>Linda Alvarez, Ph.D.
+								</td>
+							</tr>
+							
+							<tr>
+								
+								<td>Mar 20 2019 11:44AM</td>
+
+								
+								<td>
+									Revision Needs Approval
+								</td>
+
+								
+								<td>----</td>
+
+								
+								<td>
+									AUTHOR
+								</td>
+
+								
+								<td>2</td>
+
+								
+								<td>Linda Alvarez, Ph.D.
+								</td>
+							</tr>
+							
+							<tr>
+								
+								<td>Mar 20 2019 11:44AM</td>
+
+								
+								<td>
+									Building PDF
+								</td>
+
+								
+								<td>----</td>
+
+								
+								<td>
+									AUTHOR
+								</td>
+
+								
+								<td>2</td>
+
+								
+								<td>Linda Alvarez, Ph.D.
+								</td>
+							</tr>
+							
+							<tr>
+								
+								<td>Mar 20 2019 11:43AM</td>
+
+								
+								<td>
+									Incomplete
+								</td>
+
+								
+								<td>----</td>
+
+								
+								<td>
+									AUTHOR
+								</td>
+
+								
+								<td>2</td>
+
+								
+								<td>Linda Alvarez, Ph.D.
+								</td>
+							</tr>
+							
+							<tr>
+								
+								<td>Mar 20 2019 11:41AM</td>
+
+								
+								<td>
+									Revision Needs Approval
+								</td>
+
+								
+								<td>----</td>
+
+								
+								<td>
+									AUTHOR
+								</td>
+
+								
+								<td>2</td>
+
+								
+								<td>Linda Alvarez, Ph.D.
+								</td>
+							</tr>
+							
+							<tr>
+								
+								<td>Mar 20 2019 11:41AM</td>
+
+								
+								<td>
+									Building PDF
+								</td>
+
+								
+								<td>----</td>
+
+								
+								<td>
+									AUTHOR
+								</td>
+
+								
+								<td>2</td>
+
+								
+								<td>Linda Alvarez, Ph.D.
+								</td>
+							</tr>
+							
+							<tr>
+								
+								<td>Mar 20 2019 11:35AM</td>
+
+								
+								<td>
+									Incomplete
+								</td>
+
+								
+								<td>----</td>
+
+								
+								<td>
+									AUTHOR
+								</td>
+
+								
+								<td>2</td>
+
+								
+								<td>Linda Alvarez, Ph.D.
+								</td>
+							</tr>
+							
+							<tr>
+								
+								<td>Feb 20 2019  1:14PM</td>
+
+								
+								<td>
+									Revise
+								</td>
+
+								
+								<td>27</td>
+
+								
+								<td>
+									AUTHOR
+								</td>
+
+								
+								<td>1</td>
+
+								
+								<td>Alexandra Filindra
+								</td>
+							</tr>
+							
+							<tr>
+								
+								<td>Feb 20 2019  1:14PM</td>
+
+								
+								<td>
+									Decision in Process
+								</td>
+
+								
+								<td>----</td>
+
+								
+								<td>
+									EDITOR
+								</td>
+
+								
+								<td>1</td>
+
+								
+								<td>Alexandra Filindra
+								</td>
+							</tr>
+							
+							<tr>
+								
+								<td>Feb 20 2019 10:15AM</td>
+
+								
+								<td>
+									With Editor
+								</td>
+
+								
+								<td>----</td>
+
+								
+								<td>
+									EDITOR
+								</td>
+
+								
+								<td>1</td>
+
+								
+								<td>Maureen Heffern Ponicki
+								</td>
+							</tr>
+							
+							<tr>
+								
+								<td>Feb 20 2019  4:05AM</td>
+
+								
+								<td>
+									Revised Manuscript Submitted
+								</td>
+
+								
+								<td>----</td>
+
+								
+								<td>
+									EDITOR
+								</td>
+
+								
+								<td>1</td>
+
+								
+								<td>Linda Alvarez, Ph.D.
+								</td>
+							</tr>
+							
+							<tr>
+								
+								<td>Feb 20 2019  4:03AM</td>
+
+								
+								<td>
+									Revision Needs Approval
+								</td>
+
+								
+								<td>----</td>
+
+								
+								<td>
+									AUTHOR
+								</td>
+
+								
+								<td>1</td>
+
+								
+								<td>Linda Alvarez, Ph.D.
+								</td>
+							</tr>
+							
+							<tr>
+								
+								<td>Feb 20 2019  4:03AM</td>
+
+								
+								<td>
+									Building PDF
+								</td>
+
+								
+								<td>----</td>
+
+								
+								<td>
+									AUTHOR
+								</td>
+
+								
+								<td>1</td>
+
+								
+								<td>Linda Alvarez, Ph.D.
+								</td>
+							</tr>
+							
+							<tr>
+								
+								<td>Feb 20 2019  3:59AM</td>
+
+								
+								<td>
+									Incomplete
+								</td>
+
+								
+								<td>----</td>
+
+								
+								<td>
+									AUTHOR
+								</td>
+
+								
+								<td>1</td>
+
+								
+								<td>Linda Alvarez, Ph.D.<br /><span class="proxy">[Proxied by Linda Alvarez, Ph.D.]</span>
+								</td>
+							</tr>
+							
+							<tr>
+								
+								<td>Feb 20 2019  3:54AM</td>
+
+								
+								<td>
+									Revision Needs Approval
+								</td>
+
+								
+								<td>----</td>
+
+								
+								<td>
+									AUTHOR
+								</td>
+
+								
+								<td>1</td>
+
+								
+								<td>Linda Alvarez, Ph.D.
+								</td>
+							</tr>
+							
+							<tr>
+								
+								<td>Feb 20 2019  3:54AM</td>
+
+								
+								<td>
+									Building PDF
+								</td>
+
+								
+								<td>----</td>
+
+								
+								<td>
+									AUTHOR
+								</td>
+
+								
+								<td>1</td>
+
+								
+								<td>Linda Alvarez, Ph.D.
+								</td>
+							</tr>
+							
+							<tr>
+								
+								<td>Feb 20 2019  2:58AM</td>
+
+								
+								<td>
+									Incomplete
+								</td>
+
+								
+								<td>----</td>
+
+								
+								<td>
+									AUTHOR
+								</td>
+
+								
+								<td>1</td>
+
+								
+								<td>Linda Alvarez, Ph.D.<br /><span class="proxy">[Proxied by Linda Alvarez, Ph.D.]</span>
+								</td>
+							</tr>
+							
+							<tr>
+								
+								<td>Feb 20 2019  2:56AM</td>
+
+								
+								<td>
+									Revision Needs Approval
+								</td>
+
+								
+								<td>----</td>
+
+								
+								<td>
+									AUTHOR
+								</td>
+
+								
+								<td>1</td>
+
+								
+								<td>Linda Alvarez, Ph.D.
+								</td>
+							</tr>
+							
+							<tr>
+								
+								<td>Feb 20 2019  2:56AM</td>
+
+								
+								<td>
+									Building PDF
+								</td>
+
+								
+								<td>----</td>
+
+								
+								<td>
+									AUTHOR
+								</td>
+
+								
+								<td>1</td>
+
+								
+								<td>Linda Alvarez, Ph.D.
+								</td>
+							</tr>
+							
+							<tr>
+								
+								<td>Feb 20 2019  2:28AM</td>
+
+								
+								<td>
+									Incomplete
+								</td>
+
+								
+								<td>----</td>
+
+								
+								<td>
+									AUTHOR
+								</td>
+
+								
+								<td>1</td>
+
+								
+								<td>Linda Alvarez, Ph.D.<br /><span class="proxy">[Proxied by Linda Alvarez, Ph.D.]</span>
+								</td>
+							</tr>
+							
+							<tr>
+								
+								<td>Nov 25 2018  5:21PM</td>
+
+								
+								<td>
+									Revise
+								</td>
+
+								
+								<td>86</td>
+
+								
+								<td>
+									AUTHOR
+								</td>
+
+								
+								<td>0</td>
+
+								
+								<td>Jane Y. Junn, PHD
+								</td>
+							</tr>
+							
+							<tr>
+								
+								<td>Nov 25 2018  5:21PM</td>
+
+								
+								<td>
+									Decision in Process
+								</td>
+
+								
+								<td>----</td>
+
+								
+								<td>
+									REVIEWER
+								</td>
+
+								
+								<td>0</td>
+
+								
+								<td>Jane Y. Junn, PHD
+								</td>
+							</tr>
+							
+							<tr>
+								
+								<td>Oct  8 2018 11:57AM</td>
+
+								
+								<td>
+									
+								</td>
+
+								
+								<td>48</td>
+
+								
+								<td>
+									REVIEWER
+								</td>
+
+								
+								<td>0</td>
+
+								
+								<td>Nhat-Dang Do
+								</td>
+							</tr>
+							
+							<tr>
+								
+								<td>Sep 24 2018  5:25PM</td>
+
+								
+								<td>
+									Under Review
+								</td>
+
+								
+								<td>----</td>
+
+								
+								<td>
+									REVIEWER
+								</td>
+
+								
+								<td>0</td>
+
+								
+								<td>Marisa Abrajano
+								</td>
+							</tr>
+							
+							<tr>
+								
+								<td>Sep 20 2018  2:04PM</td>
+
+								
+								<td>
+									With Editor
+								</td>
+
+								
+								<td>4</td>
+
+								
+								<td>
+									EDITOR
+								</td>
+
+								
+								<td>0</td>
+
+								
+								<td>Beyza Buyuker
+								</td>
+							</tr>
+							
+							<tr>
+								
+								<td>Sep 16 2018 12:15AM</td>
+
+								
+								<td>
+									Manuscript Submitted
+								</td>
+
+								
+								<td>4</td>
+
+								
+								<td>
+									EDITOR
+								</td>
+
+								
+								<td>0</td>
+
+								
+								<td>Linda Alvarez, Ph.D.
+								</td>
+							</tr>
+							
+							<tr>
+								
+								<td>Sep 16 2018 12:13AM</td>
+
+								
+								<td>
+									Needs Approval
+								</td>
+
+								
+								<td>----</td>
+
+								
+								<td>
+									AUTHOR
+								</td>
+
+								
+								<td>0</td>
+
+								
+								<td>Linda Alvarez, Ph.D.
+								</td>
+							</tr>
+							
+							<tr>
+								
+								<td>Sep 16 2018 12:13AM</td>
+
+								
+								<td>
+									Building PDF
+								</td>
+
+								
+								<td>----</td>
+
+								
+								<td>
+									AUTHOR
+								</td>
+
+								
+								<td>0</td>
+
+								
+								<td>Linda Alvarez, Ph.D.
+								</td>
+							</tr>
+							
+							<tr>
+								
+								<td>Sep 15 2018 11:42PM</td>
+
+								
+								<td>
+									Incomplete
+								</td>
+
+								
+								<td>----</td>
+
+								
+								<td>
+									AUTHOR
+								</td>
+
+								
+								<td>0</td>
+
+								
+								<td>Linda Alvarez, Ph.D.
+								</td>
+							</tr>
+							
+					</table>
+					
+			</fieldset>
+			<br />
+			<br />
+		
+			<fieldset>
+				<legend><a name="correspondence"></a>CORRESPONDENCE HISTORY</legend>
+				
+						<div class="buttonAlign" style="padding-bottom:4px;">
+							<input type="button" name="btnAddExtEditorialCorrespondence" value="Add&#32;Editorial&#32;Correspondence" onclick="AddExternalCorrespondence(1);" />
+							
+						</div>
+					
+					<table border="0" cellpadding="0" cellspacing="0" width="97%" class="datatable">
+						<tr>
+							<th>Correspondence Date</th>
+							<th>Letter</th>
+							<th>Recipient</th>
+							<th>Status</th>
+                            
+							<th>Revision</th>
+							<th>Operator</th>
+						</tr>
+
+						
+							<tr>
+								
+								<td>21 May 2019</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(110403, '{4E532119-0A2E-423C-BD4D-E25FA3191B24}')" title="JREP %MS_NUMBER% is Accepted for Publication">Publisher Notification of Accepted Manuscript</a></td><td>Jon Samuel Geffner</td>
+								<td>
+									Completed Accept
+
+								</td>
+
+                                
+								<td>
+									3
+								</td>
+
+								
+								<td>Alexandra Filindra
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>21 May 2019</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(110402, '{4AD69ECE-4F2B-4A46-AD5B-DC9917511715}')" title="JREP %MS_NUMBER% is Accepted for Publication">Publisher Notification of Accepted Manuscript</a></td><td>Cambridge Production</td>
+								<td>
+									Completed Accept
+
+								</td>
+
+                                
+								<td>
+									3
+								</td>
+
+								
+								<td>Alexandra Filindra
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>21 May 2019</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(110401, '{A32CB218-69B0-408A-8DCF-6E82B433B209}')" title="Your Submission to JREP">Editor Decision - Accept</a></td><td>Linda Alvarez, Ph.D.</td>
+								<td>
+									Accept
+
+								</td>
+
+                                
+								<td>
+									3
+								</td>
+
+								
+								<td>Alexandra Filindra
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>21 May 2019</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(110400, '{A8DC9F94-EAD1-45D8-84A1-E8BB9461C8E4}')" title="To assist. Editor: Decision Notification">Journal Office Notice Editor Decision Notification</a></td><td>Maureen Heffern Ponicki</td>
+								<td>
+									Decision in Process
+
+								</td>
+
+                                
+								<td>
+									3
+								</td>
+
+								
+								<td>Alexandra Filindra
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>21 May 2019</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(110399, '{7790BCFB-9BDA-4551-9BF6-BA3C9CAE9DA3}')" title="You have a new Editor Assignment for JREP">Editor Assignment</a></td><td>Alexandra Filindra</td>
+								<td>
+									With Editor
+
+								</td>
+
+                                
+								<td>
+									3
+								</td>
+
+								
+								<td>Maureen Heffern Ponicki
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>20 May 2019</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(110396, '{37A64A80-FCB1-4A27-9CE9-3A3F2083A244}')" title="REP notification: Revision Submitted for &quot;%ARTICLE_TITLE%&quot;">Journal Office Notice Revised Submission</a></td><td>Maureen Heffern Ponicki</td>
+								<td>
+									Revised Manuscript Submitted
+
+								</td>
+
+                                
+								<td>
+									3
+								</td>
+
+								
+								<td>Linda Alvarez, Ph.D.
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>20 May 2019</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(110395, '{B5EBDE2A-769C-44B4-949B-C6F4D95E507E}')" title="REP notification: Revision Submitted for &quot;%ARTICLE_TITLE%&quot;">Journal Office Notice Revised Submission</a></td><td>Beyza Buyuker</td>
+								<td>
+									Revised Manuscript Submitted
+
+								</td>
+
+                                
+								<td>
+									3
+								</td>
+
+								
+								<td>Linda Alvarez, Ph.D.
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>20 May 2019</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(110394, '{392ECC1D-7034-43C3-8069-EDD5BE5599CC}')" title="REP notification: Revision Submitted for &quot;%ARTICLE_TITLE%&quot;">Journal Office Notice Revised Submission</a></td><td>Nhat-Dang Do</td>
+								<td>
+									Revised Manuscript Submitted
+
+								</td>
+
+                                
+								<td>
+									3
+								</td>
+
+								
+								<td>Linda Alvarez, Ph.D.
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>20 May 2019</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(110393, '{93317462-7E36-495F-A22C-4D7BDB1A6E8B}')" title="REP notification: Revision Submitted for &quot;%ARTICLE_TITLE%&quot;">Journal Office Notice Revised Submission</a></td><td>Dan Gibson</td>
+								<td>
+									Revised Manuscript Submitted
+
+								</td>
+
+                                
+								<td>
+									3
+								</td>
+
+								
+								<td>Linda Alvarez, Ph.D.
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>20 May 2019</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(110392, '{9311E70E-9C97-41A3-984F-89C004953319}')" title="REP notification: Revision Submitted for &quot;%ARTICLE_TITLE%&quot;">Journal Office Notice Revised Submission</a></td><td>Allan Colbern, Ph.D.</td>
+								<td>
+									Revised Manuscript Submitted
+
+								</td>
+
+                                
+								<td>
+									3
+								</td>
+
+								
+								<td>Linda Alvarez, Ph.D.
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>20 May 2019</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(110391, '{C91270FC-72D9-4B31-A38C-9E1FDFC1754B}')" title="REP notification: Revision Submitted for &quot;%ARTICLE_TITLE%&quot;">Journal Office Notice Revised Submission</a></td><td>Allan Colbern, Ph.D.</td>
+								<td>
+									Revised Manuscript Submitted
+
+								</td>
+
+                                
+								<td>
+									3
+								</td>
+
+								
+								<td>Linda Alvarez, Ph.D.
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>20 May 2019</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(110390, '{E581B28C-22A1-40E5-BDD0-7B16674C3C5A}')" title="REP notification: Revision Submitted for &quot;%ARTICLE_TITLE%&quot;">Journal Office Notice Revised Submission</a></td><td>Alexandra Filindra</td>
+								<td>
+									Revised Manuscript Submitted
+
+								</td>
+
+                                
+								<td>
+									3
+								</td>
+
+								
+								<td>Linda Alvarez, Ph.D.
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>20 May 2019</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(110389, '{256E9F6A-D88A-45B2-811C-02C3D89276DE}')" title="REP notification: Revision Submitted for &quot;%ARTICLE_TITLE%&quot;">Journal Office Notice Revised Submission</a></td><td>S. Karthick Ramakrishnan</td>
+								<td>
+									Revised Manuscript Submitted
+
+								</td>
+
+                                
+								<td>
+									3
+								</td>
+
+								
+								<td>Linda Alvarez, Ph.D.
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>20 May 2019</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(110388, '{5DE846FE-F671-4B07-997E-606300797537}')" title="REP notification: Revision Submitted for &quot;%ARTICLE_TITLE%&quot;">Journal Office Notice Revised Submission</a></td><td>Marisa Abrajano</td>
+								<td>
+									Revised Manuscript Submitted
+
+								</td>
+
+                                
+								<td>
+									3
+								</td>
+
+								
+								<td>Linda Alvarez, Ph.D.
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>20 May 2019</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(110387, '{211E2B80-25BF-473F-A0CC-53C244740835}')" title="REP notification: Revision Submitted for &quot;%ARTICLE_TITLE%&quot;">Journal Office Notice Revised Submission</a></td><td>Jane Y. Junn, PHD</td>
+								<td>
+									Revised Manuscript Submitted
+
+								</td>
+
+                                
+								<td>
+									3
+								</td>
+
+								
+								<td>Linda Alvarez, Ph.D.
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>20 May 2019</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(110386, '{42E8337B-D042-4F1E-8E22-C861296822A1}')" title="Revision Confirmation for JREP">Author Submits Revision Confirmation</a></td><td>Linda Alvarez, Ph.D.</td>
+								<td>
+									Revised Manuscript Submitted
+
+								</td>
+
+                                
+								<td>
+									3
+								</td>
+
+								
+								<td>Linda Alvarez, Ph.D.
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>25 Mar 2019</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(109612, '{A2DA746A-CD92-42F3-842E-39460A644C69}')" title="Decision on your JREP article">Editor Decision - Accept - Final Files Needed</a>&nbsp;<img style="vertical-align:middle;margin-top:4px" src="img/paperclip_icon.gif" alt=""/></td><td>Linda Alvarez, Ph.D.</td>
+								<td>
+									Revise
+
+								</td>
+
+                                
+								<td>
+									2
+								</td>
+
+								
+								<td>Alexandra Filindra
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>25 Mar 2019</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(109611, '{735784DD-727C-47CB-839F-2A1A178DAB9F}')" title="To assist. Editor: Decision Notification">Journal Office Notice Editor Decision Notification</a></td><td>Maureen Heffern Ponicki</td>
+								<td>
+									Decision in Process
+
+								</td>
+
+                                
+								<td>
+									2
+								</td>
+
+								
+								<td>Alexandra Filindra
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>25 Mar 2019</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(109600, '{7422662D-6E22-41FF-AAD8-E115EB6D6B24}')" title="You have a new Editor Assignment for JREP">Editor Assignment</a></td><td>Alexandra Filindra</td>
+								<td>
+									With Editor
+
+								</td>
+
+                                
+								<td>
+									2
+								</td>
+
+								
+								<td>Maureen Heffern Ponicki
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>20 Mar 2019</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(109532, '{9AB0D732-0335-44E7-8D84-0490B17B7894}')" title="REP notification: Revision Submitted for &quot;%ARTICLE_TITLE%&quot;">Journal Office Notice Revised Submission</a></td><td>Maureen Heffern Ponicki</td>
+								<td>
+									Revised Manuscript Submitted
+
+								</td>
+
+                                
+								<td>
+									2
+								</td>
+
+								
+								<td>Linda Alvarez, Ph.D.
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>20 Mar 2019</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(109531, '{3EFE239B-E8E7-4D12-A378-5D30D2AC79F9}')" title="REP notification: Revision Submitted for &quot;%ARTICLE_TITLE%&quot;">Journal Office Notice Revised Submission</a></td><td>Beyza Buyuker</td>
+								<td>
+									Revised Manuscript Submitted
+
+								</td>
+
+                                
+								<td>
+									2
+								</td>
+
+								
+								<td>Linda Alvarez, Ph.D.
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>20 Mar 2019</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(109530, '{2AF2C910-0C21-4253-A5E4-712983DF456B}')" title="REP notification: Revision Submitted for &quot;%ARTICLE_TITLE%&quot;">Journal Office Notice Revised Submission</a></td><td>Nhat-Dang Do</td>
+								<td>
+									Revised Manuscript Submitted
+
+								</td>
+
+                                
+								<td>
+									2
+								</td>
+
+								
+								<td>Linda Alvarez, Ph.D.
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>20 Mar 2019</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(109529, '{F35A0C68-2655-4BD1-8DB7-25177A3461C5}')" title="REP notification: Revision Submitted for &quot;%ARTICLE_TITLE%&quot;">Journal Office Notice Revised Submission</a></td><td>Dan Gibson</td>
+								<td>
+									Revised Manuscript Submitted
+
+								</td>
+
+                                
+								<td>
+									2
+								</td>
+
+								
+								<td>Linda Alvarez, Ph.D.
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>20 Mar 2019</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(109528, '{CCFC9B5C-1D81-4AF9-8698-6AEB1F33F357}')" title="REP notification: Revision Submitted for &quot;%ARTICLE_TITLE%&quot;">Journal Office Notice Revised Submission</a></td><td>Allan Colbern, Ph.D.</td>
+								<td>
+									Revised Manuscript Submitted
+
+								</td>
+
+                                
+								<td>
+									2
+								</td>
+
+								
+								<td>Linda Alvarez, Ph.D.
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>20 Mar 2019</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(109527, '{2596E52A-DDB6-4B11-9E73-B1C32E1C2216}')" title="REP notification: Revision Submitted for &quot;%ARTICLE_TITLE%&quot;">Journal Office Notice Revised Submission</a></td><td>Allan Colbern, Ph.D.</td>
+								<td>
+									Revised Manuscript Submitted
+
+								</td>
+
+                                
+								<td>
+									2
+								</td>
+
+								
+								<td>Linda Alvarez, Ph.D.
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>20 Mar 2019</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(109526, '{3A76F2C0-99D4-4391-9394-6452312B5556}')" title="REP notification: Revision Submitted for &quot;%ARTICLE_TITLE%&quot;">Journal Office Notice Revised Submission</a></td><td>Alexandra Filindra</td>
+								<td>
+									Revised Manuscript Submitted
+
+								</td>
+
+                                
+								<td>
+									2
+								</td>
+
+								
+								<td>Linda Alvarez, Ph.D.
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>20 Mar 2019</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(109525, '{9DBF558A-2C3A-4FDD-B1C0-FD0974CF3D98}')" title="REP notification: Revision Submitted for &quot;%ARTICLE_TITLE%&quot;">Journal Office Notice Revised Submission</a></td><td>S. Karthick Ramakrishnan</td>
+								<td>
+									Revised Manuscript Submitted
+
+								</td>
+
+                                
+								<td>
+									2
+								</td>
+
+								
+								<td>Linda Alvarez, Ph.D.
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>20 Mar 2019</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(109524, '{60DFDE9E-1D2F-4ED4-B381-97F353209560}')" title="REP notification: Revision Submitted for &quot;%ARTICLE_TITLE%&quot;">Journal Office Notice Revised Submission</a></td><td>Marisa Abrajano</td>
+								<td>
+									Revised Manuscript Submitted
+
+								</td>
+
+                                
+								<td>
+									2
+								</td>
+
+								
+								<td>Linda Alvarez, Ph.D.
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>20 Mar 2019</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(109523, '{0EA68ED6-8FBE-40D5-B9BC-F7C33FDB985E}')" title="REP notification: Revision Submitted for &quot;%ARTICLE_TITLE%&quot;">Journal Office Notice Revised Submission</a></td><td>Jane Y. Junn, PHD</td>
+								<td>
+									Revised Manuscript Submitted
+
+								</td>
+
+                                
+								<td>
+									2
+								</td>
+
+								
+								<td>Linda Alvarez, Ph.D.
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>20 Mar 2019</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(109522, '{3CDDEB3A-49C8-4C9F-ACC4-E414524AD3C1}')" title="Revision Confirmation for JREP">Author Submits Revision Confirmation</a></td><td>Linda Alvarez, Ph.D.</td>
+								<td>
+									Revised Manuscript Submitted
+
+								</td>
+
+                                
+								<td>
+									2
+								</td>
+
+								
+								<td>Linda Alvarez, Ph.D.
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>20 Feb 2019</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(108914, '{9E85AB2E-6023-4581-B950-D2364B459E59}')" title="Your JREP Submission">Editor Decision - Conditional Accept</a>&nbsp;<img style="vertical-align:middle;margin-top:4px" src="img/paperclip_icon.gif" alt=""/></td><td>Linda Alvarez, Ph.D.</td>
+								<td>
+									Revise
+
+								</td>
+
+                                
+								<td>
+									1
+								</td>
+
+								
+								<td>Alexandra Filindra
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>20 Feb 2019</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(108913, '{D6E9D1C2-E298-4B7B-81E1-ED2F08BD7CE1}')" title="To assist. Editor: Decision Notification">Journal Office Notice Editor Decision Notification</a></td><td>Maureen Heffern Ponicki</td>
+								<td>
+									Decision in Process
+
+								</td>
+
+                                
+								<td>
+									1
+								</td>
+
+								
+								<td>Alexandra Filindra
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>20 Feb 2019</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(108899, '{59FD6D35-7690-414A-A55F-8193E188CF07}')" title="You have a new Editor Assignment for JREP">Editor Assignment</a></td><td>Alexandra Filindra</td>
+								<td>
+									With Editor
+
+								</td>
+
+                                
+								<td>
+									1
+								</td>
+
+								
+								<td>Maureen Heffern Ponicki
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>20 Feb 2019</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(108896, '{EE55B2A4-64AE-46EE-8201-4FE7A54A73B0}')" title="REP notification: Revision Submitted for &quot;%ARTICLE_TITLE%&quot;">Journal Office Notice Revised Submission</a></td><td>Maureen Heffern Ponicki</td>
+								<td>
+									Revised Manuscript Submitted
+
+								</td>
+
+                                
+								<td>
+									1
+								</td>
+
+								
+								<td>Linda Alvarez, Ph.D.
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>20 Feb 2019</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(108895, '{22CD3FEA-DDF5-4B74-93ED-919344F7C5F6}')" title="REP notification: Revision Submitted for &quot;%ARTICLE_TITLE%&quot;">Journal Office Notice Revised Submission</a></td><td>Beyza Buyuker</td>
+								<td>
+									Revised Manuscript Submitted
+
+								</td>
+
+                                
+								<td>
+									1
+								</td>
+
+								
+								<td>Linda Alvarez, Ph.D.
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>20 Feb 2019</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(108894, '{2228B7E0-78B3-4853-93C7-6D5873797A2B}')" title="REP notification: Revision Submitted for &quot;%ARTICLE_TITLE%&quot;">Journal Office Notice Revised Submission</a></td><td>Nhat-Dang Do</td>
+								<td>
+									Revised Manuscript Submitted
+
+								</td>
+
+                                
+								<td>
+									1
+								</td>
+
+								
+								<td>Linda Alvarez, Ph.D.
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>20 Feb 2019</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(108893, '{70F1405C-19A8-43D3-887E-3424DBFB38A6}')" title="REP notification: Revision Submitted for &quot;%ARTICLE_TITLE%&quot;">Journal Office Notice Revised Submission</a></td><td>Dan Gibson</td>
+								<td>
+									Revised Manuscript Submitted
+
+								</td>
+
+                                
+								<td>
+									1
+								</td>
+
+								
+								<td>Linda Alvarez, Ph.D.
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>20 Feb 2019</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(108892, '{41EEEA30-EBEF-4125-A0B5-045083C71CE2}')" title="REP notification: Revision Submitted for &quot;%ARTICLE_TITLE%&quot;">Journal Office Notice Revised Submission</a></td><td>Allan Colbern, Ph.D.</td>
+								<td>
+									Revised Manuscript Submitted
+
+								</td>
+
+                                
+								<td>
+									1
+								</td>
+
+								
+								<td>Linda Alvarez, Ph.D.
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>20 Feb 2019</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(108891, '{38DDB2C9-2D1C-4CC0-A398-15066E3DAFA1}')" title="REP notification: Revision Submitted for &quot;%ARTICLE_TITLE%&quot;">Journal Office Notice Revised Submission</a></td><td>Allan Colbern, Ph.D.</td>
+								<td>
+									Revised Manuscript Submitted
+
+								</td>
+
+                                
+								<td>
+									1
+								</td>
+
+								
+								<td>Linda Alvarez, Ph.D.
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>20 Feb 2019</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(108890, '{D12ADB8F-32E1-4E5F-A53F-4A6047AF0822}')" title="REP notification: Revision Submitted for &quot;%ARTICLE_TITLE%&quot;">Journal Office Notice Revised Submission</a></td><td>Alexandra Filindra</td>
+								<td>
+									Revised Manuscript Submitted
+
+								</td>
+
+                                
+								<td>
+									1
+								</td>
+
+								
+								<td>Linda Alvarez, Ph.D.
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>20 Feb 2019</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(108889, '{499B1DBE-37E1-4DE9-AA0C-8DE51026194E}')" title="REP notification: Revision Submitted for &quot;%ARTICLE_TITLE%&quot;">Journal Office Notice Revised Submission</a></td><td>S. Karthick Ramakrishnan</td>
+								<td>
+									Revised Manuscript Submitted
+
+								</td>
+
+                                
+								<td>
+									1
+								</td>
+
+								
+								<td>Linda Alvarez, Ph.D.
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>20 Feb 2019</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(108888, '{5B6DFAFC-0CE1-4956-80E9-725A3715736C}')" title="REP notification: Revision Submitted for &quot;%ARTICLE_TITLE%&quot;">Journal Office Notice Revised Submission</a></td><td>Marisa Abrajano</td>
+								<td>
+									Revised Manuscript Submitted
+
+								</td>
+
+                                
+								<td>
+									1
+								</td>
+
+								
+								<td>Linda Alvarez, Ph.D.
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>20 Feb 2019</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(108887, '{EBE7D45D-9E94-4394-A29E-9F3351D0C66A}')" title="REP notification: Revision Submitted for &quot;%ARTICLE_TITLE%&quot;">Journal Office Notice Revised Submission</a></td><td>Jane Y. Junn, PHD</td>
+								<td>
+									Revised Manuscript Submitted
+
+								</td>
+
+                                
+								<td>
+									1
+								</td>
+
+								
+								<td>Linda Alvarez, Ph.D.
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>20 Feb 2019</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(108886, '{C0501B3C-B872-462D-90D2-D4006EE89C01}')" title="Revision Confirmation for JREP">Author Submits Revision Confirmation</a></td><td>Linda Alvarez, Ph.D.</td>
+								<td>
+									Revised Manuscript Submitted
+
+								</td>
+
+                                
+								<td>
+									1
+								</td>
+
+								
+								<td>Linda Alvarez, Ph.D.
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>25 Nov 2018</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(107860, '{9C454121-BFC3-4045-99BD-0C071F7845FF}')" title="Your JREP Submission">Editor Decision - Conditional Accept</a></td><td>Linda Alvarez, Ph.D.</td>
+								<td>
+									Revise
+
+								</td>
+
+                                
+								<td>
+									0
+								</td>
+
+								
+								<td>Jane Y. Junn, PHD
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>25 Nov 2018</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(107859, '{1E4646D5-9C05-4048-8FCF-139F1D83BEC7}')" title="To assist. Editor: Decision Notification">Journal Office Notice Editor Decision Notification</a></td><td>Beyza Buyuker</td>
+								<td>
+									Decision in Process
+
+								</td>
+
+                                
+								<td>
+									0
+								</td>
+
+								
+								<td>Jane Y. Junn, PHD
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>25 Nov 2018</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(107858, '{83F44452-1DBC-454D-8556-9C44E480F6FF}')" title="JREP will seek alternate reviewer">Reviewer Uninvited Notice</a></td><td>Arely Zimmerman</td>
+								<td>
+									Under Review
+
+								</td>
+
+                                
+								<td>
+									0
+								</td>
+
+								
+								<td>Jane Y. Junn, PHD
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>19 Nov 2018</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(107812, '{A886009D-1A8C-4FF4-9036-A1405B3BBDCA}')" title="Thank you for the review for JREP">Reviewer Thank You</a></td><td>Claudia Sandoval, Ph.D.</td>
+								<td>
+									Under Review
+
+								</td>
+
+                                
+								<td>
+									0
+								</td>
+
+								
+								<td>Claudia Sandoval, Ph.D.
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>15 Nov 2018</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(107804, '{C5C4876C-BFDB-481C-BF6B-DC892DFF0C2A}')" title="Reminder of Late Review for JREP">Reviewer - First Late Reminder</a></td><td>Claudia Sandoval, Ph.D.</td>
+								<td>
+									Under Review
+
+								</td>
+
+                                
+								<td>
+									0
+								</td>
+
+								
+								<td>Jane Y. Junn, PHD
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>08 Nov 2018</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(107760, '{15456A91-D7D1-413E-88F3-DE3CEB22A8E4}')" title="Second Reminder of Late Review for %ARTICLE_TITLE%">Reviewer - Second Late Reminder</a></td><td>Adrian Felix, PHD</td>
+								<td>
+									Under Review
+
+								</td>
+
+                                
+								<td>
+									0
+								</td>
+
+								
+								<td>Jane Y. Junn, PHD
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>08 Nov 2018</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(107757, '{EE37E691-7194-49B7-888A-85693FC1F330}')" title="JREP Reminder: Review assignment is due soon">Reviewer Reminder - Before Due Date</a></td><td>Claudia Sandoval, Ph.D.</td>
+								<td>
+									Under Review
+
+								</td>
+
+                                
+								<td>
+									0
+								</td>
+
+								
+								<td>Jane Y. Junn, PHD
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>03 Nov 2018</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(107727, '{2BD87B18-E9FC-4E4E-B9AE-1D82493CDEA1}')" title="Reminder of Late Review for JREP">Reviewer - First Late Reminder</a></td><td>Adrian Felix, PHD</td>
+								<td>
+									Under Review
+
+								</td>
+
+                                
+								<td>
+									0
+								</td>
+
+								
+								<td>Jane Y. Junn, PHD
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>27 Oct 2018</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(107692, '{D08AAEDA-EE42-42D6-AEF3-2BFD34DB85B7}')" title="JREP Reminder: Review assignment is due soon">Reviewer Reminder - Before Due Date</a></td><td>Adrian Felix, PHD</td>
+								<td>
+									Under Review
+
+								</td>
+
+                                
+								<td>
+									0
+								</td>
+
+								
+								<td>Jane Y. Junn, PHD
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>23 Oct 2018</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(107691, '{A13988BA-6CDB-4AFF-AF80-7FDD8C072F3B}')" title="Thank you for the review for JREP">Reviewer Thank You</a></td><td>Adrian Felix, PhD</td>
+								<td>
+									Under Review
+
+								</td>
+
+                                
+								<td>
+									0
+								</td>
+
+								
+								<td>Adrian Felix, PhD
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>23 Oct 2018</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(107690, '{8566FECE-128D-4D91-814C-DA1465386E1A}')" title="JREP: Thank you for agreeing to review">Reviewer Instructions and Due Date</a>&nbsp;<img style="vertical-align:middle;margin-top:4px" src="img/paperclip_icon.gif" alt=""/></td><td>Adrian Felix, PhD</td>
+								<td>
+									Under Review
+
+								</td>
+
+                                
+								<td>
+									0
+								</td>
+
+								
+								<td>Adrian Felix, PhD
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>23 Oct 2018</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(107689, '{D595B19B-B138-4BC9-A1CF-626C9482D510}')" title="Reviewer agrees to review &quot;%ARTICLE_TITLE%&quot;">Editor Notice Reviewer Agrees to Review</a></td><td>Jane Y. Junn, PHD</td>
+								<td>
+									Under Review
+
+								</td>
+
+                                
+								<td>
+									0
+								</td>
+
+								
+								<td>Adrian Felix, PhD
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>23 Oct 2018</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(107688, '{E50FD7B3-E4B7-4769-8C20-850A5BC82957}')" title="Reviewer Invitation for JREP">Reviewer Invitation</a></td><td>Adrian Felix, PhD</td>
+								<td>
+									Under Review
+
+								</td>
+
+                                
+								<td>
+									0
+								</td>
+
+								
+								<td>Jane Y. Junn, PHD
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>16 Oct 2018</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(107666, '{9319B486-B16F-4ECA-ACAE-E28331194F9B}')" title="Invitation to review manuscript for JREP">Reviewer Reminder - Before Agree or Decline</a></td><td>Arely Zimmerman</td>
+								<td>
+									Under Review
+
+								</td>
+
+                                
+								<td>
+									0
+								</td>
+
+								
+								<td>Nhat-Dang Do
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>09 Oct 2018</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(107595, '{E3002D38-9E02-4695-A809-F38727745C91}')" title="Reviewer Invitation for JREP">Reviewer Invitation</a></td><td>Arely Zimmerman</td>
+								<td>
+									Under Review
+
+								</td>
+
+                                
+								<td>
+									0
+								</td>
+
+								
+								<td>Jane Y. Junn, PHD
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>09 Oct 2018</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(107594, '{40ECB133-C358-41BE-AA7E-7B1919D61B03}')" title="JREP: Thank you for agreeing to review">Reviewer Instructions and Due Date</a>&nbsp;<img style="vertical-align:middle;margin-top:4px" src="img/paperclip_icon.gif" alt=""/></td><td>Claudia Sandoval, Ph.D.</td>
+								<td>
+									Under Review
+
+								</td>
+
+                                
+								<td>
+									0
+								</td>
+
+								
+								<td>Claudia Sandoval, Ph.D.
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>09 Oct 2018</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(107593, '{4C88FED1-A3D1-4C6E-BCCD-6687E61974A0}')" title="Reviewer agrees to review &quot;%ARTICLE_TITLE%&quot;">Editor Notice Reviewer Agrees to Review</a></td><td>Jane Y. Junn, PHD</td>
+								<td>
+									Under Review
+
+								</td>
+
+                                
+								<td>
+									0
+								</td>
+
+								
+								<td>Claudia Sandoval, Ph.D.
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>09 Oct 2018</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(107591, '{73C6B496-44B8-408D-96B0-9D6B142ACDC1}')" title="Reviewer Invitation for JREP">Reviewer Invitation</a></td><td>Claudia Sandoval, Ph.D.</td>
+								<td>
+									Under Review
+
+								</td>
+
+                                
+								<td>
+									0
+								</td>
+
+								
+								<td>Jane Y. Junn, PHD
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>08 Oct 2018</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(107575, '{3D6E6C0B-FF32-4CF5-823F-1FD658EB2859}')" title="You have a new Editor Assignment for JREP">Editor Assignment</a></td><td>Jane Y. Junn, PHD</td>
+								<td>
+									Under Review
+
+								</td>
+
+                                
+								<td>
+									0
+								</td>
+
+								
+								<td>Nhat-Dang Do
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>08 Oct 2018</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(107574, '{44459A0D-1E7C-4623-91CA-F37534659382}')" title="Your assignment for %MS_NUMBER% has been undone">Editor Assignment Undone</a></td><td>Marisa Abrajano</td>
+								<td>
+									Under Review
+
+								</td>
+
+                                
+								<td>
+									0
+								</td>
+
+								
+								<td>Nhat-Dang Do
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>01 Oct 2018</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(107537, '{0E600729-7EBB-4119-BAC4-B61D77382C98}')" title="Declined invitation for JREP">Reviewer Invitation Declined</a></td><td>Kara Cebulko</td>
+								<td>
+									Under Review
+
+								</td>
+
+                                
+								<td>
+									0
+								</td>
+
+								
+								<td>Kara Cebulko
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>01 Oct 2018</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(107536, '{4CEE2D60-D047-430B-BC44-47ACEF56C949}')" title="Reviewer declines to review &quot;%ARTICLE_TITLE%&quot;">Editor Notice Reviewer Declines to Review</a></td><td>Marisa Abrajano</td>
+								<td>
+									Under Review
+
+								</td>
+
+                                
+								<td>
+									0
+								</td>
+
+								
+								<td>Kara Cebulko
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>01 Oct 2018</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(107526, '{6019697A-3465-4F87-A815-CA99B37067BF}')" title="Invitation to review manuscript for JREP">Reviewer Reminder - Before Agree or Decline</a></td><td>Kara Cebulko</td>
+								<td>
+									Under Review
+
+								</td>
+
+                                
+								<td>
+									0
+								</td>
+
+								
+								<td>Nhat-Dang Do
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>27 Sep 2018</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(107522, '{5C6EA1B2-D332-4362-91F3-EFFD4FC490E5}')" title="Reviewer agrees to review &quot;%ARTICLE_TITLE%&quot;">Editor Notice Reviewer Agrees to Review</a></td><td>Marisa Abrajano</td>
+								<td>
+									Under Review
+
+								</td>
+
+                                
+								<td>
+									0
+								</td>
+
+								
+								<td>Adrian Felix, PHD
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>25 Sep 2018</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(107515, '{65145206-0F48-4FEC-A8CC-EDD862E2B4C2}')" title="Declined invitation for JREP">Reviewer Invitation Declined</a></td><td>Guillermo Rosas, PHD</td>
+								<td>
+									Under Review
+
+								</td>
+
+                                
+								<td>
+									0
+								</td>
+
+								
+								<td>Guillermo Rosas, PHD
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>25 Sep 2018</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(107514, '{DC87541C-202F-4909-BBBB-A7732D6FE75E}')" title="Reviewer declines to review &quot;%ARTICLE_TITLE%&quot;">Editor Notice Reviewer Declines to Review</a></td><td>Marisa Abrajano</td>
+								<td>
+									Under Review
+
+								</td>
+
+                                
+								<td>
+									0
+								</td>
+
+								
+								<td>Guillermo Rosas, PHD
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>24 Sep 2018</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(107511, '{BC14E18D-6C9F-4F69-ADAC-6E28674CBDF5}')" title="Reviewer Invitation for JREP">Reviewer Invitation</a></td><td>Guillermo Rosas, PHD</td>
+								<td>
+									Under Review
+
+								</td>
+
+                                
+								<td>
+									0
+								</td>
+
+								
+								<td>Marisa Abrajano
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>24 Sep 2018</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(107508, '{68102CDB-A800-4A75-91A1-8C5B3261F4E7}')" title="Declined invitation for JREP">Reviewer Invitation Declined</a></td><td>Tanya Golash-Boza</td>
+								<td>
+									Under Review
+
+								</td>
+
+                                
+								<td>
+									0
+								</td>
+
+								
+								<td>Tanya Golash-Boza
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>24 Sep 2018</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(107507, '{14105DA8-71AD-4757-BFFC-D3D87B89C446}')" title="Reviewer declines to review &quot;%ARTICLE_TITLE%&quot;">Editor Notice Reviewer Declines to Review</a></td><td>Marisa Abrajano</td>
+								<td>
+									Under Review
+
+								</td>
+
+                                
+								<td>
+									0
+								</td>
+
+								
+								<td>Tanya Golash-Boza
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>24 Sep 2018</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(107506, '{C7B8DF10-FDA6-4641-9428-40D256CC5FD9}')" title="Declined invitation for JREP">Reviewer Invitation Declined</a></td><td>Susan Coutin</td>
+								<td>
+									Under Review
+
+								</td>
+
+                                
+								<td>
+									0
+								</td>
+
+								
+								<td>Susan Coutin
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>24 Sep 2018</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(107505, '{47607685-687B-4048-BC8F-80417CF0AE61}')" title="Reviewer declines to review &quot;%ARTICLE_TITLE%&quot;">Editor Notice Reviewer Declines to Review</a></td><td>Marisa Abrajano</td>
+								<td>
+									Under Review
+
+								</td>
+
+                                
+								<td>
+									0
+								</td>
+
+								
+								<td>Susan Coutin
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>24 Sep 2018</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(107503, '{CC9D841C-483F-4CA2-BF8C-0729BF6D3081}')" title="Reviewer Invitation for JREP">Reviewer Invitation</a></td><td>Susan Coutin</td>
+								<td>
+									Under Review
+
+								</td>
+
+                                
+								<td>
+									0
+								</td>
+
+								
+								<td>Marisa Abrajano
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>24 Sep 2018</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(107499, '{2C9A6FBC-28EF-4717-9111-8C08B8A3E363}')" title="Reviewer Invitation for JREP">Reviewer Invitation</a></td><td>Kara Cebulko</td>
+								<td>
+									Under Review
+
+								</td>
+
+                                
+								<td>
+									0
+								</td>
+
+								
+								<td>Marisa Abrajano
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>24 Sep 2018</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(107497, '{8610EB0C-FBB2-4EF7-8CD2-EF4AC44FBC3B}')" title="Reviewer Invitation for JREP">Reviewer Invitation</a></td><td>Tanya Golash-Boza</td>
+								<td>
+									Under Review
+
+								</td>
+
+                                
+								<td>
+									0
+								</td>
+
+								
+								<td>Marisa Abrajano
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>24 Sep 2018</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(107495, '{F7E91160-7AFF-4C77-8C73-D116A79345B9}')" title="Reviewer Invitation for JREP">Reviewer Invitation</a></td><td>Adrian Felix, PHD</td>
+								<td>
+									Under Review
+
+								</td>
+
+                                
+								<td>
+									0
+								</td>
+
+								
+								<td>Marisa Abrajano
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>20 Sep 2018</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(107489, '{A0CCD656-A413-442E-9E32-26D9F827EBC8}')" title="You have a new Editor Assignment for JREP">Editor Assignment</a></td><td>Marisa Abrajano</td>
+								<td>
+									With Editor
+
+								</td>
+
+                                
+								<td>
+									0
+								</td>
+
+								
+								<td>Beyza Buyuker
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>16 Sep 2018</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(107466, '{7267080B-9234-464E-A19E-71983D3AD7CB}')" title="REP: New Manuscript Submission ">Journal Office Notice New Submission</a></td><td>Maureen Heffern Ponicki</td>
+								<td>
+									Manuscript Submitted
+
+								</td>
+
+                                
+								<td>
+									0
+								</td>
+
+								
+								<td>Linda Alvarez, Ph.D.
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>16 Sep 2018</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(107465, '{B4557269-ED38-4D56-BD9A-FE9B5F118207}')" title="REP: New Manuscript Submission ">Journal Office Notice New Submission</a></td><td>Beyza Buyuker</td>
+								<td>
+									Manuscript Submitted
+
+								</td>
+
+                                
+								<td>
+									0
+								</td>
+
+								
+								<td>Linda Alvarez, Ph.D.
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>16 Sep 2018</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(107464, '{62B27553-BEC8-47BF-94E7-6DA5333B8D5C}')" title="REP: New Manuscript Submission ">Journal Office Notice New Submission</a></td><td>Nhat-Dang Do</td>
+								<td>
+									Manuscript Submitted
+
+								</td>
+
+                                
+								<td>
+									0
+								</td>
+
+								
+								<td>Linda Alvarez, Ph.D.
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>16 Sep 2018</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(107463, '{15E3C9DD-E3D5-4553-BE5F-9B7A7F4BCDBF}')" title="REP: New Manuscript Submission ">Journal Office Notice New Submission</a></td><td>Dan Gibson</td>
+								<td>
+									Manuscript Submitted
+
+								</td>
+
+                                
+								<td>
+									0
+								</td>
+
+								
+								<td>Linda Alvarez, Ph.D.
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>16 Sep 2018</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(107462, '{9306ABA3-A821-4617-A0CE-1D325A74AB92}')" title="REP: New Manuscript Submission ">Journal Office Notice New Submission</a></td><td>Allan Colbern, Ph.D.</td>
+								<td>
+									Manuscript Submitted
+
+								</td>
+
+                                
+								<td>
+									0
+								</td>
+
+								
+								<td>Linda Alvarez, Ph.D.
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>16 Sep 2018</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(107461, '{2EE7FC90-1CC8-4616-89C1-ABEB77BDADD9}')" title="REP: New Manuscript Submission ">Journal Office Notice New Submission</a></td><td>Allan Colbern, Ph.D.</td>
+								<td>
+									Manuscript Submitted
+
+								</td>
+
+                                
+								<td>
+									0
+								</td>
+
+								
+								<td>Linda Alvarez, Ph.D.
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>16 Sep 2018</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(107460, '{132925BF-7074-4F00-9C2F-FCFCAE90548C}')" title="REP: New Manuscript Submission ">Journal Office Notice New Submission</a></td><td>Alexandra Filindra</td>
+								<td>
+									Manuscript Submitted
+
+								</td>
+
+                                
+								<td>
+									0
+								</td>
+
+								
+								<td>Linda Alvarez, Ph.D.
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>16 Sep 2018</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(107459, '{38308691-8F59-40FD-A5AB-FF9276D6D373}')" title="REP: New Manuscript Submission ">Journal Office Notice New Submission</a></td><td>S. Karthick Ramakrishnan</td>
+								<td>
+									Manuscript Submitted
+
+								</td>
+
+                                
+								<td>
+									0
+								</td>
+
+								
+								<td>Linda Alvarez, Ph.D.
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>16 Sep 2018</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(107458, '{5BA2B296-330C-4A57-A47F-930CD7B8BC0F}')" title="REP: New Manuscript Submission ">Journal Office Notice New Submission</a></td><td>Marisa Abrajano</td>
+								<td>
+									Manuscript Submitted
+
+								</td>
+
+                                
+								<td>
+									0
+								</td>
+
+								
+								<td>Linda Alvarez, Ph.D.
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>16 Sep 2018</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(107457, '{70A4D35A-5193-42EB-A94A-AAFB1F3CA291}')" title="REP: New Manuscript Submission ">Journal Office Notice New Submission</a></td><td>Jane Y. Junn, PHD</td>
+								<td>
+									Manuscript Submitted
+
+								</td>
+
+                                
+								<td>
+									0
+								</td>
+
+								
+								<td>Linda Alvarez, Ph.D.
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>16 Sep 2018</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(107456, '{57626B8E-45F8-48E5-A275-003E58012AE9}')" title="Submission Confirmation for JREP">Author Submits New Manuscript Confirmation</a></td><td>Linda Alvarez, Ph.D.</td>
+								<td>
+									Manuscript Submitted
+
+								</td>
+
+                                
+								<td>
+									0
+								</td>
+
+								
+								<td>Linda Alvarez, Ph.D.
+								</td>
+
+							
+							</tr>
+							
+					</table>
+					
+			</fieldset>
+			
+	</div>
+	<div class="centered">
+		
+		<br /><br /><input type="button" name="close" value="Close" onclick="window.close();" />
+		<br /><br />
+		<a href="#status">Status History</a>&nbsp;&nbsp;&nbsp;<a href="#correspondence">Correspondence History</a>&nbsp;&nbsp;&nbsp;
+		<br /><br /><a href="docHistoryStatusTypeView.asp?docid=4737">Switch to Status Type View</a>
+	</div>
+
+    <div id="modalDiv" style="display:none"></div>
+
+</form>
+
+<script type="text/javascript">
+    if (typeof pageDataTracker !== 'undefined') {
+        RetrieveAnalyticsData();
+    }
+</script>
+    <script type="text/javascript">
+        $(document).ready(function() 
+	    {
+	        url = 'ajax/RenderControlToPage.ashx?control=DialogWidgetControl&id=warningDialog&titleResourceId=Common.Text.Warning&titleBarIcon=warning&showTitleBar=true&showTitleBarClose=false&dialogStyle=confirm&width=400';
+	        $.get(url, function (data) 
+	        {
+	            $('body').append(data);
+	        });
+        });
+    </script>
+</body>
+</html>

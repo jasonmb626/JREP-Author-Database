@@ -1,0 +1,1514 @@
+
+
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+<head>
+	<title>History Details</title>
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+
+    <link rel="stylesheet" type="text/css" href="cssSiteStyle.aspx" />
+    <link rel="stylesheet" type="text/css" href="cssJQueryDialog.aspx" />
+
+	<style type="text/css">
+		.centered table
+		{
+			margin: 0 auto;
+		}
+        .activeSubFlagHistory
+        {
+            color: red;
+        }
+	</style>
+
+    <script type="text/javascript">
+//<![CDATA[
+
+function FormatString(stringToFormat, replacementValues)
+{
+	return stringToFormat.replace(/{([0-9]+)}/g, function(wholematch, firstmatch)
+		  { var i = +firstmatch; return i < replacementValues.length ? replacementValues[i] : wholematch; }
+		);
+}
+
+
+
+function EscapeAttributeValue(value) 
+{
+
+        return value.replace(/&/g, '&amp;')
+                    .replace(/'/g, "&apos;")
+                    .replace(/"/g, '&quot;')
+                    .replace(/</g, '&lt;')
+                    .replace(/>/g, '&gt;');
+}
+
+//]]>
+</script>
+
+<script type="text/javascript" src="/jrep/WebUserControls/ClientJScript/translatedClientutil.aspx?lang=en%2DUS"></script>
+<script type="text/javascript" src="/jrep/ClientScript/clientutil.aspx"></script>
+
+<script src="/jrep/ClientScript/jquery.js" type="text/javascript"></script>
+<script src="/jrep/ClientScript/jquery-ui.js" type="text/javascript"></script>   
+
+
+
+    <script type="text/javascript" src="ClientScript/MSPFunctions.js"></script>
+
+	<script type="text/javascript">
+		/***********************************************************************
+		* 7.0-39	TimH	20090424
+		* Navigate to the Add External Correspondence Page, providing
+		* info needed to add a new External Correspondence record.
+		***********************************************************************/
+		function AddExternalCorrespondence(externalCorrespType)
+		{
+			var hdnExternalCorrespondenceType = document.getElementById("hdnExternalCorrespondenceType");
+			hdnExternalCorrespondenceType.value = "" + externalCorrespType;
+
+			var hdnLetterSecurityID = document.getElementById("hdnLetterSecurityID");
+			hdnLetterSecurityID.value = "";
+
+			document.frmDocHistory.submit();
+		}
+
+		/***********************************************************************
+		* 7.0-39	TimH	20090424
+		* Edit or Remove the External Correspondence specified by the
+		* Edit or Remove hyperlink clicked by the user.
+		***********************************************************************/
+		function EditExternalCorrespondence(externalCorrespondenceID, externalCorrespType, remove, letterSecurityID)
+		{
+			var hdnExternalCorrespondenceID = document.getElementById("hdnExternalCorrespondenceID");
+			hdnExternalCorrespondenceID.value = "" + externalCorrespondenceID;
+
+			var hdnExternalCorrespondenceType = document.getElementById("hdnExternalCorrespondenceType");
+			hdnExternalCorrespondenceType.value = "" + externalCorrespType;
+
+			var hdnLetterSecurityID = document.getElementById("hdnLetterSecurityID");
+			hdnLetterSecurityID.value = letterSecurityID;
+
+			var hdnRemove = document.getElementById("hdnRemove");
+			hdnRemove.value = remove;
+
+			if(hdnRemove.value == "1")
+			{
+                var okAction = function ()
+                {
+					document.frmDocHistory.submit();	
+                }
+                $("#warningDialog")[0].showDialog('Removing the correspondence cannot be undone.\x0a\x3cbr\x2f\x3e\x3cbr\x2f\x3e\x0aClick Cancel to return to the History page without deleting the correspondence.\x0a\x3cbr\x2f\x3eClick OK to remove this item of correspondence.', okAction);
+                return;
+			}
+			else if(hdnRemove.value == "0")
+			{
+				document.frmDocHistory.submit();
+			}
+		}
+
+		/***********************************************************************
+		* 7.0-39	TimH	20090424
+		* In a new popup, View a read only version of the External Correspondence specified by the
+		* External Correspondence Description hyperlink clicked by the user.
+		***********************************************************************/
+		function ViewExternalCorrespondence(externalCorrespondenceID, externalCorrespType, letterSecurityID)
+		{
+			var sNavUrl = "DotNetPopUps/ViewExternalCorrespondence.aspx";
+			sNavUrl += "?hdnExternalCorrespondenceID=" + externalCorrespondenceID;
+			sNavUrl += "&hdnExternalCorrespondenceType=" + externalCorrespType;
+			sNavUrl += "&hdnLetterSecurityID=" + letterSecurityID;
+			sNavUrl += "&hdnAssociatedEntityType=" + EXT_CORRES_ASSOC_TYPE_SUBMISSION;
+
+			openCenterWin(sNavUrl, 'ViewExternalCorrespondence', 1, 1, 0, 0, 0, 0);
+		}
+
+		function resendEditorialStatus(statHistID, notLatest)
+		{
+            if (notLatest)
+            {
+                var okAction = function ()
+                {
+					resendStatus(statHistID);	
+                }
+                $("#warningDialog")[0].showDialog('The Status you are attempting to resend is not the most recent status. Do you want to continue\x3f', okAction);
+                return;
+            }
+            else
+            {
+                resendStatus(statHistID);
+            }
+        }
+        function resendStatus(statHistID)
+        {
+            // Resend status
+		    var documentID = "5006";
+		    var exportType = 4;
+		    var operatorID = "217520";
+		    var proxyOperatorID = "";
+		    if (proxyOperatorID != "")
+		    {
+		        operatorID = proxyOperatorID;
+		    }
+		    resendMSPEditorialStatus(documentID, exportType, operatorID, statHistID, "");
+        }
+
+		function displayOverlay(text) {
+		    $("#modalDiv").text(text);
+		    $("#modalDiv").dialog({
+	            title: '',
+	            resizable: true, modal: true, buttons: [{ text: 'OK',
+	                click: function () { $(this).dialog("close"); }
+	            }], closeText: '',
+
+	            open: function ()
+	            {
+	                $(this).dialog('widget').find(".ui-dialog-titlebar-close").hide();
+	                $(this).dialog({ position: 'center' });
+	            }
+
+	        });
+
+	        return false;
+		}
+	</script>
+    
+</head>
+<body>
+
+	<form name="frmDocHistory" method="post" id="frmDocHistory" action="DotNetPopUps/AddEditExternalCorrespondence.aspx">
+	<div class="centered">
+	    <input type="hidden" id="hdnAssociatedEntityID" name="hdnAssociatedEntityID" value="5006" />
+	    <input type="hidden" id="hdnLetterSecurityID" name="hdnLetterSecurityID" value="" />
+	    <input type="hidden" id="hdnAssociatedEntityType" name="hdnAssociatedEntityType" value="1" />
+	    <input type="hidden" id="hdnExternalCorrespondenceID" name="hdnExternalCorrespondenceID" value="" />
+	    <input type="hidden" id="hdnExternalCorrespondenceType" name="hdnExternalCorrespondenceType" value=""/>
+	    <input type="hidden" id="hdnRemove" name="hdnRemove" value="" />
+	    <input type="hidden" id="hdnReturnPage" name="hdnReturnPage" value="doc_history.asp" />
+	    <input type="hidden" id="hdnAttachmentGroupID" name="hdnAttachmentGroupID" value="" />
+		<h3>
+			History for Manuscript Number: JREP-D-20-00009 &quot;Unequal Values: Individualism, Equality, and Race in State of the Union Addresses, 1960-2017&quot;
+		</h3>
+		<a href="#status">Status History</a>&nbsp;&nbsp;&nbsp;<a href="#correspondence">Correspondence History</a>&nbsp;&nbsp;&nbsp;
+
+
+		<br /><br /><a href="docHistoryStatusTypeView.asp?docid=5006">Switch to Status Type View</a>
+
+		
+		<br /><br /><input type="button" name="close" value="Close" onclick="window.close();" />
+	</div>
+
+	<div>
+		<br /><br />
+		
+			<fieldset>
+				<legend><a name="status"></a>STATUS HISTORY</legend>
+				
+					<table border="0" cellpadding="0" cellspacing="0" width="97%" class="datatable">
+						<tr>
+							<th>Status Date</th>
+							<th>Document Status</th>
+							
+							<th>Status Days</th>
+							<th>Role Family</th>
+							<th>Revision </th>
+							<th>Operator</th>
+						</tr>
+
+						
+							<tr>
+								
+								<td>Apr 13 2020  1:19PM</td>
+
+								
+								<td>
+									Revise
+								</td>
+
+								
+								<td>----</td>
+
+								
+								<td>
+									AUTHOR
+								</td>
+
+								
+								<td>0</td>
+
+								
+								<td>Alexandra Filindra
+								</td>
+							</tr>
+							
+							<tr>
+								
+								<td>Apr 13 2020  1:19PM</td>
+
+								
+								<td>
+									Decision in Process
+								</td>
+
+								
+								<td>----</td>
+
+								
+								<td>
+									EDITOR
+								</td>
+
+								
+								<td>0</td>
+
+								
+								<td>Alexandra Filindra
+								</td>
+							</tr>
+							
+							<tr>
+								
+								<td>Apr 12 2020  9:12PM</td>
+
+								
+								<td>
+									Required Reviews Completed
+								</td>
+
+								
+								<td>----</td>
+
+								
+								<td>
+									EDITOR
+								</td>
+
+								
+								<td>0</td>
+
+								
+								<td>Nicole Kalaf-Hughes
+								</td>
+							</tr>
+							
+							<tr>
+								
+								<td>Jan 31 2020  6:32PM</td>
+
+								
+								<td>
+									Under Review
+								</td>
+
+								
+								<td>72</td>
+
+								
+								<td>
+									REVIEWER
+								</td>
+
+								
+								<td>0</td>
+
+								
+								<td>Alexandra Filindra
+								</td>
+							</tr>
+							
+							<tr>
+								
+								<td>Jan 31 2020  1:22PM</td>
+
+								
+								<td>
+									With Editor
+								</td>
+
+								
+								<td>----</td>
+
+								
+								<td>
+									EDITOR
+								</td>
+
+								
+								<td>0</td>
+
+								
+								<td>Beyza Buyuker
+								</td>
+							</tr>
+							
+							<tr>
+								
+								<td>Jan 26 2020  2:06AM</td>
+
+								
+								<td>
+									Manuscript Submitted
+								</td>
+
+								
+								<td>5</td>
+
+								
+								<td>
+									EDITOR
+								</td>
+
+								
+								<td>0</td>
+
+								
+								<td>Morris E Levy, PHD
+								</td>
+							</tr>
+							
+							<tr>
+								
+								<td>Jan 26 2020  2:05AM</td>
+
+								
+								<td>
+									Needs Approval
+								</td>
+
+								
+								<td>----</td>
+
+								
+								<td>
+									AUTHOR
+								</td>
+
+								
+								<td>0</td>
+
+								
+								<td>Morris E Levy, PHD
+								</td>
+							</tr>
+							
+							<tr>
+								
+								<td>Jan 26 2020  2:05AM</td>
+
+								
+								<td>
+									Building PDF
+								</td>
+
+								
+								<td>----</td>
+
+								
+								<td>
+									AUTHOR
+								</td>
+
+								
+								<td>0</td>
+
+								
+								<td>Morris E Levy, PHD
+								</td>
+							</tr>
+							
+							<tr>
+								
+								<td>Jan 26 2020  1:53AM</td>
+
+								
+								<td>
+									Incomplete
+								</td>
+
+								
+								<td>----</td>
+
+								
+								<td>
+									AUTHOR
+								</td>
+
+								
+								<td>0</td>
+
+								
+								<td>Morris E Levy, PHD
+								</td>
+							</tr>
+							
+					</table>
+					
+			</fieldset>
+			<br />
+			<br />
+		
+			<fieldset>
+				<legend><a name="correspondence"></a>CORRESPONDENCE HISTORY</legend>
+				
+						<div class="buttonAlign" style="padding-bottom:4px;">
+							<input type="button" name="btnAddExtEditorialCorrespondence" value="Add&#32;Editorial&#32;Correspondence" onclick="AddExternalCorrespondence(1);" />
+							
+						</div>
+					
+					<table border="0" cellpadding="0" cellspacing="0" width="97%" class="datatable">
+						<tr>
+							<th>Correspondence Date</th>
+							<th>Letter</th>
+							<th>Recipient</th>
+							<th>Status</th>
+                            
+							<th>Revision</th>
+							<th>Operator</th>
+						</tr>
+
+						
+							<tr>
+								
+								<td>13 Apr 2020</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(114398, '{C7313A07-8C54-4257-B596-E93FCD5BE741}')" title="A decision has been made on %MS_NUMBER%">Reviewer Notification of Revise Decision</a></td><td>Alvin Tillery, Ph.D.</td>
+								<td>
+									Revise
+
+								</td>
+
+                                
+								<td>
+									0
+								</td>
+
+								
+								<td>Alexandra Filindra
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>13 Apr 2020</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(114397, '{63DDC16F-8540-436E-8C27-F289932FBD37}')" title="Your JREP Submission">Editor Decision - Revise</a>&nbsp;<img style="vertical-align:middle;margin-top:4px" src="img/paperclip_icon.gif" alt=""/></td><td>Morris E Levy, PHD</td>
+								<td>
+									Revise
+
+								</td>
+
+                                
+								<td>
+									0
+								</td>
+
+								
+								<td>Alexandra Filindra
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>13 Apr 2020</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(114396, '{7C152A89-A913-4449-BF0A-20900DE38A89}')" title="To assist. Editor: Decision Notification">Journal Office Notice Editor Decision Notification</a></td><td>Beyza Buyuker</td>
+								<td>
+									Decision in Process
+
+								</td>
+
+                                
+								<td>
+									0
+								</td>
+
+								
+								<td>Alexandra Filindra
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>12 Apr 2020</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(114382, '{9A75FEF8-B125-4BE4-AACD-1B4C4E604E17}')" title="All Reviews Complete  for &quot;%ARTICLE_TITLE%&quot;">Journal Office Notice All Reviews Complete</a></td><td>Beyza Buyuker</td>
+								<td>
+									Required Reviews Completed
+
+								</td>
+
+                                
+								<td>
+									0
+								</td>
+
+								
+								<td>Nicole Kalaf-Hughes
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>12 Apr 2020</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(114381, '{06F48C33-F73E-45E0-ABC4-8123345A8062}')" title="JREP Completed Reviews for &quot;%ARTICLE_TITLE%&quot;">Editor Notice All Reviews Complete</a></td><td>Alexandra Filindra</td>
+								<td>
+									Required Reviews Completed
+
+								</td>
+
+                                
+								<td>
+									0
+								</td>
+
+								
+								<td>Nicole Kalaf-Hughes
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>12 Apr 2020</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(114380, '{3C9928D3-758C-46E4-B6E5-3B2EA5CBD1CE}')" title="Thank you for the review for JREP">Reviewer Thank You</a></td><td>Nicole Kalaf-Hughes</td>
+								<td>
+									Under Review
+
+								</td>
+
+                                
+								<td>
+									0
+								</td>
+
+								
+								<td>Nicole Kalaf-Hughes
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>12 Apr 2020</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(114366, '{E9B687E6-6311-4EEF-892D-082DB355506B}')" title="Second Reminder of Late Review for %ARTICLE_TITLE%">Reviewer - Second Late Reminder</a></td><td>Nicole Kalaf-Hughes</td>
+								<td>
+									Under Review
+
+								</td>
+
+                                
+								<td>
+									0
+								</td>
+
+								
+								<td>Alexandra Filindra
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>07 Apr 2020</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(114319, '{6D47F140-7671-4302-90CB-A12B59F5ACF6}')" title="Reminder of Late Review for JREP">Reviewer - First Late Reminder</a></td><td>Nicole Kalaf-Hughes</td>
+								<td>
+									Under Review
+
+								</td>
+
+                                
+								<td>
+									0
+								</td>
+
+								
+								<td>Alexandra Filindra
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>04 Apr 2020</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(114296, '{7A6D59FF-386F-4B0B-BE98-5437198DE7AA}')" title="Reminder of Late Review for JREP">Reviewer - First Late Reminder</a></td><td>Alvin Tillery, Ph.D.</td>
+								<td>
+									Under Review
+
+								</td>
+
+                                
+								<td>
+									0
+								</td>
+
+								
+								<td>Alexandra Filindra
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>31 Mar 2020</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(114244, '{C5720E01-C12E-4CDA-82FD-DE3AB56A2195}')" title="JREP Reminder: Review assignment is due soon">Reviewer Reminder - Before Due Date</a></td><td>Nicole Kalaf-Hughes</td>
+								<td>
+									Under Review
+
+								</td>
+
+                                
+								<td>
+									0
+								</td>
+
+								
+								<td>Alexandra Filindra
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>29 Mar 2020</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(114207, '{45573123-D89C-4C40-818B-2B6DA2DF5E11}')" title="Second Reminder of Late Review for %ARTICLE_TITLE%">Reviewer - Second Late Reminder</a></td><td>Alexandra Filindra</td>
+								<td>
+									Under Review
+
+								</td>
+
+                                
+								<td>
+									0
+								</td>
+
+								
+								<td>Alexandra Filindra
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>28 Mar 2020</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(114188, '{F27D8F6C-99C3-43DA-9358-74E929735888}')" title="JREP Reminder: Review assignment is due soon">Reviewer Reminder - Before Due Date</a></td><td>Alvin Tillery, Ph.D.</td>
+								<td>
+									Under Review
+
+								</td>
+
+                                
+								<td>
+									0
+								</td>
+
+								
+								<td>Alexandra Filindra
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>24 Mar 2020</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(114140, '{23C377EE-5437-4998-8310-00A3C6C17FFA}')" title="Reminder of Late Review for JREP">Reviewer - First Late Reminder</a></td><td>Alexandra Filindra</td>
+								<td>
+									Under Review
+
+								</td>
+
+                                
+								<td>
+									0
+								</td>
+
+								
+								<td>Alexandra Filindra
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>17 Mar 2020</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(114081, '{A5DF83D0-6049-4D3C-8A1F-EEB895C4F48A}')" title="JREP Reminder: Review assignment is due soon">Reviewer Reminder - Before Due Date</a></td><td>Alexandra Filindra</td>
+								<td>
+									Under Review
+
+								</td>
+
+                                
+								<td>
+									0
+								</td>
+
+								
+								<td>Alexandra Filindra
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>28 Feb 2020</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(113873, '{01B82EAE-B431-4A5C-B459-FEE993920841}')" title="JREP will seek alternate reviewer">Reviewer Uninvited Notice</a></td><td>Scott Adler, PHD</td>
+								<td>
+									Under Review
+
+								</td>
+
+                                
+								<td>
+									0
+								</td>
+
+								
+								<td>Alexandra Filindra
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>27 Feb 2020</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(113858, '{F17578C5-7A78-4697-9424-5CB7353AA335}')" title="Invitation to review manuscript for JREP">Reviewer Reminder - Before Agree or Decline</a></td><td>Scott Adler, PHD</td>
+								<td>
+									Under Review
+
+								</td>
+
+                                
+								<td>
+									0
+								</td>
+
+								
+								<td>Chris McKeen, PhD
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>20 Feb 2020</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(113721, '{440F6C98-2607-404F-8C30-C4903542D06A}')" title="JREP: Thank you for agreeing to review">Reviewer Instructions and Due Date</a>&nbsp;<img style="vertical-align:middle;margin-top:4px" src="img/paperclip_icon.gif" alt=""/></td><td>Nicole Kalaf-Hughes</td>
+								<td>
+									Under Review
+
+								</td>
+
+                                
+								<td>
+									0
+								</td>
+
+								
+								<td>Nicole Kalaf-Hughes
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>20 Feb 2020</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(113720, '{EE4F84E4-58EC-4233-A649-30710564E3AB}')" title="Reviewer agrees to review &quot;%ARTICLE_TITLE%&quot;">Editor Notice Reviewer Agrees to Review</a></td><td>Alexandra Filindra</td>
+								<td>
+									Under Review
+
+								</td>
+
+                                
+								<td>
+									0
+								</td>
+
+								
+								<td>Nicole Kalaf-Hughes
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>20 Feb 2020</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(113719, '{02228438-3D5D-461C-A2B2-24F96F310165}')" title="Reviewer Invitation for JREP">Reviewer Invitation</a></td><td>Scott Adler, PHD</td>
+								<td>
+									Under Review
+
+								</td>
+
+                                
+								<td>
+									0
+								</td>
+
+								
+								<td>Alexandra Filindra
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>20 Feb 2020</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(113718, '{78AB3AC6-E288-49B9-9B4A-7911F8F2FFEA}')" title="Reviewer Invitation for JREP">Reviewer Invitation</a></td><td>Nicole Kalaf-Hughes</td>
+								<td>
+									Under Review
+
+								</td>
+
+                                
+								<td>
+									0
+								</td>
+
+								
+								<td>Alexandra Filindra
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>19 Feb 2020</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(113695, '{E9141564-B977-4A20-8425-41F38839A630}')" title="JREP will seek alternate reviewer">Reviewer Uninvited Notice</a></td><td>Sidney M. Milkis, PHD</td>
+								<td>
+									Under Review
+
+								</td>
+
+                                
+								<td>
+									0
+								</td>
+
+								
+								<td>Alexandra Filindra
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>18 Feb 2020</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(113676, '{BCC6654F-9D6F-442B-81BF-51EA342FF6F7}')" title="Invitation to review manuscript for JREP">Reviewer Reminder - Before Agree or Decline</a></td><td>Sidney M. Milkis, PHD</td>
+								<td>
+									Under Review
+
+								</td>
+
+                                
+								<td>
+									0
+								</td>
+
+								
+								<td>Nhat-Dang Do
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>11 Feb 2020</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(113601, '{5BA0FA05-29A6-4D20-8B72-27F324D13ABA}')" title="Reviewer Invitation for JREP">Reviewer Invitation</a></td><td>Sidney M. Milkis, PHD</td>
+								<td>
+									Under Review
+
+								</td>
+
+                                
+								<td>
+									0
+								</td>
+
+								
+								<td>Alexandra Filindra
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>09 Feb 2020</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(113582, '{547B2A49-66B3-4B39-AB56-756A9D9CD360}')" title="JREP will seek alternate reviewer">Reviewer Uninvited Notice</a></td><td>Daniel Q. Gillion, PHD</td>
+								<td>
+									Under Review
+
+								</td>
+
+                                
+								<td>
+									0
+								</td>
+
+								
+								<td>Alexandra Filindra
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>08 Feb 2020</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(113578, '{E4DA3397-2E3D-40B4-A2B5-DF1DC092F699}')" title="JREP will seek alternate reviewer">Reviewer Uninvited Notice</a></td><td>Seth E. Masket, PHD</td>
+								<td>
+									Under Review
+
+								</td>
+
+                                
+								<td>
+									0
+								</td>
+
+								
+								<td>Alexandra Filindra
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>08 Feb 2020</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(113577, '{7FDB201F-10FE-4130-ABD6-0FB1E92CF9E4}')" title="Invitation to review manuscript for JREP">Reviewer Reminder - Before Agree or Decline</a></td><td>Daniel Q. Gillion, PHD</td>
+								<td>
+									Under Review
+
+								</td>
+
+                                
+								<td>
+									0
+								</td>
+
+								
+								<td>Nhat-Dang Do
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>07 Feb 2020</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(113575, '{E5A59AF8-63B1-400C-8C30-E5D53530F320}')" title="Reviewer agrees to review &quot;%ARTICLE_TITLE%&quot;">Editor Notice Reviewer Agrees to Review</a></td><td>Alexandra Filindra</td>
+								<td>
+									Under Review
+
+								</td>
+
+                                
+								<td>
+									0
+								</td>
+
+								
+								<td>Alvin Tillery, Ph.D.
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>07 Feb 2020</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(113561, '{D46A94D5-BA77-4E97-B195-6A12D9CBD9EE}')" title="Invitation to review manuscript for JREP">Reviewer Reminder - Before Agree or Decline</a></td><td>Seth E. Masket, PHD</td>
+								<td>
+									Under Review
+
+								</td>
+
+                                
+								<td>
+									0
+								</td>
+
+								
+								<td>Nhat-Dang Do
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>07 Feb 2020</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(113559, '{81D87B60-84EF-4669-9B12-D5BCAE292B70}')" title="Invitation to review manuscript for JREP">Reviewer Reminder - Before Agree or Decline</a></td><td>Alvin Tillery, Ph.D.</td>
+								<td>
+									Under Review
+
+								</td>
+
+                                
+								<td>
+									0
+								</td>
+
+								
+								<td>Nhat-Dang Do
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>01 Feb 2020</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(113506, '{756BBF00-FD53-4283-AE9B-C5756BE8177C}')" title="Reviewer agrees to review &quot;%ARTICLE_TITLE%&quot;">Editor Notice Reviewer Agrees to Review</a>&nbsp;<img style="vertical-align:middle;margin-top:4px" src="img/paperclip_icon.gif" alt=""/></td><td>Alexandra Filindra</td>
+								<td>
+									Under Review
+
+								</td>
+
+                                
+								<td>
+									0
+								</td>
+
+								
+								<td>Alexandra Filindra
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>01 Feb 2020</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(113500, '{C04E28DA-FF85-413F-9C77-0926670F0632}')" title="Reviewer Invitation for JREP">Reviewer Invitation</a></td><td>Daniel Q. Gillion, PHD</td>
+								<td>
+									Under Review
+
+								</td>
+
+                                
+								<td>
+									0
+								</td>
+
+								
+								<td>Alexandra Filindra
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>01 Feb 2020</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(113499, '{FB502C6E-115E-4CCD-A796-11CF5D55D0BA}')" title="Reviewer declines to review &quot;%ARTICLE_TITLE%&quot;">Editor Notice Reviewer Declines to Review</a></td><td>Alexandra Filindra</td>
+								<td>
+									Under Review
+
+								</td>
+
+                                
+								<td>
+									0
+								</td>
+
+								
+								<td>Desmond King
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>31 Jan 2020</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(113496, '{1E725540-FD51-41A7-9534-9B5D5FE2A1F4}')" title="Reviewer Invitation for JREP">Reviewer Invitation</a></td><td>Desmond King</td>
+								<td>
+									Under Review
+
+								</td>
+
+                                
+								<td>
+									0
+								</td>
+
+								
+								<td>Alexandra Filindra
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>31 Jan 2020</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(113495, '{AEF4F0F5-A33F-4F41-BCC5-2767747BB219}')" title="Reviewer Invitation for JREP">Reviewer Invitation</a></td><td>Seth E. Masket, PHD</td>
+								<td>
+									Under Review
+
+								</td>
+
+                                
+								<td>
+									0
+								</td>
+
+								
+								<td>Alexandra Filindra
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>31 Jan 2020</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(113494, '{C856A33E-3F77-4895-B9D2-2970A56EF8FA}')" title="Reviewer Invitation for JREP">Reviewer Invitation</a></td><td>Alvin Tillery, Ph.D.</td>
+								<td>
+									Under Review
+
+								</td>
+
+                                
+								<td>
+									0
+								</td>
+
+								
+								<td>Alexandra Filindra
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>31 Jan 2020</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(113493, '{CA017826-C818-4827-AD9C-43BCB57F6268}')" title="Reviewer Invitation for JREP">Reviewer Invitation</a></td><td>Alexandra Filindra</td>
+								<td>
+									Under Review
+
+								</td>
+
+                                
+								<td>
+									0
+								</td>
+
+								
+								<td>Alexandra Filindra
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>31 Jan 2020</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(113471, '{9875235C-D2C1-4CB5-9DEE-55D0ACABCC8A}')" title="You have a new Editor Assignment for JREP">Editor Assignment</a></td><td>Alexandra Filindra</td>
+								<td>
+									With Editor
+
+								</td>
+
+                                
+								<td>
+									0
+								</td>
+
+								
+								<td>Beyza Buyuker
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>26 Jan 2020</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(113380, '{E329625E-43E7-49B3-82D3-84D2275839FB}')" title="REP: New Manuscript Submission ">Journal Office Notice New Submission</a></td><td>Maureen Heffern Ponicki</td>
+								<td>
+									Manuscript Submitted
+
+								</td>
+
+                                
+								<td>
+									0
+								</td>
+
+								
+								<td>Morris E Levy, PHD
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>26 Jan 2020</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(113379, '{F9D95D38-35A1-4EC9-9EB4-82A017AF77E7}')" title="REP: New Manuscript Submission ">Journal Office Notice New Submission</a></td><td>Beyza Buyuker</td>
+								<td>
+									Manuscript Submitted
+
+								</td>
+
+                                
+								<td>
+									0
+								</td>
+
+								
+								<td>Morris E Levy, PHD
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>26 Jan 2020</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(113378, '{832C0620-6D89-4B9F-9497-DB440575805E}')" title="REP: New Manuscript Submission ">Journal Office Notice New Submission</a></td><td>Nhat-Dang Do</td>
+								<td>
+									Manuscript Submitted
+
+								</td>
+
+                                
+								<td>
+									0
+								</td>
+
+								
+								<td>Morris E Levy, PHD
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>26 Jan 2020</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(113377, '{4EC49342-5C2D-429A-B5B7-8B9D3CE73214}')" title="REP: New Manuscript Submission ">Journal Office Notice New Submission</a></td><td>Dan Gibson</td>
+								<td>
+									Manuscript Submitted
+
+								</td>
+
+                                
+								<td>
+									0
+								</td>
+
+								
+								<td>Morris E Levy, PHD
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>26 Jan 2020</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(113376, '{32CD5A11-EAE3-4A06-83BA-FCA6FB181B17}')" title="REP: New Manuscript Submission ">Journal Office Notice New Submission</a></td><td>Allan Colbern, Ph.D.</td>
+								<td>
+									Manuscript Submitted
+
+								</td>
+
+                                
+								<td>
+									0
+								</td>
+
+								
+								<td>Morris E Levy, PHD
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>26 Jan 2020</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(113375, '{E96CD4D8-11A4-4C2A-BA1F-12F802A9BDBD}')" title="REP: New Manuscript Submission ">Journal Office Notice New Submission</a></td><td>Alexandra Filindra</td>
+								<td>
+									Manuscript Submitted
+
+								</td>
+
+                                
+								<td>
+									0
+								</td>
+
+								
+								<td>Morris E Levy, PHD
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>26 Jan 2020</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(113374, '{87668DA0-FE01-423C-A60C-E2768581CA79}')" title="Submission Confirmation for JREP">Author Submits New Manuscript Confirmation</a></td><td>Morris E Levy, PHD</td>
+								<td>
+									Manuscript Submitted
+
+								</td>
+
+                                
+								<td>
+									0
+								</td>
+
+								
+								<td>Morris E Levy, PHD
+								</td>
+
+							
+							</tr>
+							
+					</table>
+					
+			</fieldset>
+			
+	</div>
+	<div class="centered">
+		
+		<br /><br /><input type="button" name="close" value="Close" onclick="window.close();" />
+		<br /><br />
+		<a href="#status">Status History</a>&nbsp;&nbsp;&nbsp;<a href="#correspondence">Correspondence History</a>&nbsp;&nbsp;&nbsp;
+		<br /><br /><a href="docHistoryStatusTypeView.asp?docid=5006">Switch to Status Type View</a>
+	</div>
+
+    <div id="modalDiv" style="display:none"></div>
+
+</form>
+
+<script type="text/javascript">
+    if (typeof pageDataTracker !== 'undefined') {
+        RetrieveAnalyticsData();
+    }
+</script>
+    <script type="text/javascript">
+        $(document).ready(function() 
+	    {
+	        url = 'ajax/RenderControlToPage.ashx?control=DialogWidgetControl&id=warningDialog&titleResourceId=Common.Text.Warning&titleBarIcon=warning&showTitleBar=true&showTitleBarClose=false&dialogStyle=confirm&width=400';
+	        $.get(url, function (data) 
+	        {
+	            $('body').append(data);
+	        });
+        });
+    </script>
+</body>
+</html>

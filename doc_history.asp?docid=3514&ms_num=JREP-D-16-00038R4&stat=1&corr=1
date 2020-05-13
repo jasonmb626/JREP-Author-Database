@@ -1,0 +1,4014 @@
+
+
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+<head>
+	<title>History Details</title>
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+
+    <link rel="stylesheet" type="text/css" href="cssSiteStyle.aspx" />
+    <link rel="stylesheet" type="text/css" href="cssJQueryDialog.aspx" />
+
+	<style type="text/css">
+		.centered table
+		{
+			margin: 0 auto;
+		}
+        .activeSubFlagHistory
+        {
+            color: red;
+        }
+	</style>
+
+    <script type="text/javascript">
+//<![CDATA[
+
+function FormatString(stringToFormat, replacementValues)
+{
+	return stringToFormat.replace(/{([0-9]+)}/g, function(wholematch, firstmatch)
+		  { var i = +firstmatch; return i < replacementValues.length ? replacementValues[i] : wholematch; }
+		);
+}
+
+
+
+function EscapeAttributeValue(value) 
+{
+
+        return value.replace(/&/g, '&amp;')
+                    .replace(/'/g, "&apos;")
+                    .replace(/"/g, '&quot;')
+                    .replace(/</g, '&lt;')
+                    .replace(/>/g, '&gt;');
+}
+
+//]]>
+</script>
+
+<script type="text/javascript" src="/jrep/WebUserControls/ClientJScript/translatedClientutil.aspx?lang=en%2DUS"></script>
+<script type="text/javascript" src="/jrep/ClientScript/clientutil.aspx"></script>
+
+<script src="/jrep/ClientScript/jquery.js" type="text/javascript"></script>
+<script src="/jrep/ClientScript/jquery-ui.js" type="text/javascript"></script>   
+
+
+
+    <script type="text/javascript" src="ClientScript/MSPFunctions.js"></script>
+
+	<script type="text/javascript">
+		/***********************************************************************
+		* 7.0-39	TimH	20090424
+		* Navigate to the Add External Correspondence Page, providing
+		* info needed to add a new External Correspondence record.
+		***********************************************************************/
+		function AddExternalCorrespondence(externalCorrespType)
+		{
+			var hdnExternalCorrespondenceType = document.getElementById("hdnExternalCorrespondenceType");
+			hdnExternalCorrespondenceType.value = "" + externalCorrespType;
+
+			var hdnLetterSecurityID = document.getElementById("hdnLetterSecurityID");
+			hdnLetterSecurityID.value = "";
+
+			document.frmDocHistory.submit();
+		}
+
+		/***********************************************************************
+		* 7.0-39	TimH	20090424
+		* Edit or Remove the External Correspondence specified by the
+		* Edit or Remove hyperlink clicked by the user.
+		***********************************************************************/
+		function EditExternalCorrespondence(externalCorrespondenceID, externalCorrespType, remove, letterSecurityID)
+		{
+			var hdnExternalCorrespondenceID = document.getElementById("hdnExternalCorrespondenceID");
+			hdnExternalCorrespondenceID.value = "" + externalCorrespondenceID;
+
+			var hdnExternalCorrespondenceType = document.getElementById("hdnExternalCorrespondenceType");
+			hdnExternalCorrespondenceType.value = "" + externalCorrespType;
+
+			var hdnLetterSecurityID = document.getElementById("hdnLetterSecurityID");
+			hdnLetterSecurityID.value = letterSecurityID;
+
+			var hdnRemove = document.getElementById("hdnRemove");
+			hdnRemove.value = remove;
+
+			if(hdnRemove.value == "1")
+			{
+                var okAction = function ()
+                {
+					document.frmDocHistory.submit();	
+                }
+                $("#warningDialog")[0].showDialog('Removing the correspondence cannot be undone.\x0a\x3cbr\x2f\x3e\x3cbr\x2f\x3e\x0aClick Cancel to return to the History page without deleting the correspondence.\x0a\x3cbr\x2f\x3eClick OK to remove this item of correspondence.', okAction);
+                return;
+			}
+			else if(hdnRemove.value == "0")
+			{
+				document.frmDocHistory.submit();
+			}
+		}
+
+		/***********************************************************************
+		* 7.0-39	TimH	20090424
+		* In a new popup, View a read only version of the External Correspondence specified by the
+		* External Correspondence Description hyperlink clicked by the user.
+		***********************************************************************/
+		function ViewExternalCorrespondence(externalCorrespondenceID, externalCorrespType, letterSecurityID)
+		{
+			var sNavUrl = "DotNetPopUps/ViewExternalCorrespondence.aspx";
+			sNavUrl += "?hdnExternalCorrespondenceID=" + externalCorrespondenceID;
+			sNavUrl += "&hdnExternalCorrespondenceType=" + externalCorrespType;
+			sNavUrl += "&hdnLetterSecurityID=" + letterSecurityID;
+			sNavUrl += "&hdnAssociatedEntityType=" + EXT_CORRES_ASSOC_TYPE_SUBMISSION;
+
+			openCenterWin(sNavUrl, 'ViewExternalCorrespondence', 1, 1, 0, 0, 0, 0);
+		}
+
+		function resendEditorialStatus(statHistID, notLatest)
+		{
+            if (notLatest)
+            {
+                var okAction = function ()
+                {
+					resendStatus(statHistID);	
+                }
+                $("#warningDialog")[0].showDialog('The Status you are attempting to resend is not the most recent status. Do you want to continue\x3f', okAction);
+                return;
+            }
+            else
+            {
+                resendStatus(statHistID);
+            }
+        }
+        function resendStatus(statHistID)
+        {
+            // Resend status
+		    var documentID = "3514";
+		    var exportType = 4;
+		    var operatorID = "217520";
+		    var proxyOperatorID = "";
+		    if (proxyOperatorID != "")
+		    {
+		        operatorID = proxyOperatorID;
+		    }
+		    resendMSPEditorialStatus(documentID, exportType, operatorID, statHistID, "");
+        }
+
+		function displayOverlay(text) {
+		    $("#modalDiv").text(text);
+		    $("#modalDiv").dialog({
+	            title: '',
+	            resizable: true, modal: true, buttons: [{ text: 'OK',
+	                click: function () { $(this).dialog("close"); }
+	            }], closeText: '',
+
+	            open: function ()
+	            {
+	                $(this).dialog('widget').find(".ui-dialog-titlebar-close").hide();
+	                $(this).dialog({ position: 'center' });
+	            }
+
+	        });
+
+	        return false;
+		}
+	</script>
+    
+</head>
+<body>
+
+	<form name="frmDocHistory" method="post" id="frmDocHistory" action="DotNetPopUps/AddEditExternalCorrespondence.aspx">
+	<div class="centered">
+	    <input type="hidden" id="hdnAssociatedEntityID" name="hdnAssociatedEntityID" value="3514" />
+	    <input type="hidden" id="hdnLetterSecurityID" name="hdnLetterSecurityID" value="" />
+	    <input type="hidden" id="hdnAssociatedEntityType" name="hdnAssociatedEntityType" value="1" />
+	    <input type="hidden" id="hdnExternalCorrespondenceID" name="hdnExternalCorrespondenceID" value="" />
+	    <input type="hidden" id="hdnExternalCorrespondenceType" name="hdnExternalCorrespondenceType" value=""/>
+	    <input type="hidden" id="hdnRemove" name="hdnRemove" value="" />
+	    <input type="hidden" id="hdnReturnPage" name="hdnReturnPage" value="doc_history.asp" />
+	    <input type="hidden" id="hdnAttachmentGroupID" name="hdnAttachmentGroupID" value="" />
+		<h3>
+			History for Manuscript Number: JREP-D-16-00038R4 &quot;Obamacares: Candidate Traits, Descriptive Representation, and Black Political Participation.&quot;
+		</h3>
+		<a href="#status">Status History</a>&nbsp;&nbsp;&nbsp;<a href="#correspondence">Correspondence History</a>&nbsp;&nbsp;&nbsp;
+
+
+		<br /><br /><a href="docHistoryStatusTypeView.asp?docid=3514">Switch to Status Type View</a>
+
+		
+		<br /><br /><input type="button" name="close" value="Close" onclick="window.close();" />
+	</div>
+
+	<div>
+		<br /><br />
+		
+			<fieldset>
+				<legend><a name="status"></a>STATUS HISTORY</legend>
+				
+					<table border="0" cellpadding="0" cellspacing="0" width="97%" class="datatable">
+						<tr>
+							<th>Status Date</th>
+							<th>Document Status</th>
+							
+							<th>Status Days</th>
+							<th>Role Family</th>
+							<th>Revision </th>
+							<th>Operator</th>
+						</tr>
+
+						
+							<tr>
+								
+								<td>Jul 24 2018  2:39PM</td>
+
+								
+								<td>
+									Completed Accept
+								</td>
+
+								
+								<td>----</td>
+
+								
+								<td>
+									EDITOR
+								</td>
+
+								
+								<td>4</td>
+
+								
+								<td>Marisa Abrajano
+								</td>
+							</tr>
+							
+							<tr>
+								
+								<td>Feb 15 2018 11:37AM</td>
+
+								
+								<td>
+									Accept
+								</td>
+
+								
+								<td>159</td>
+
+								
+								<td>
+									EDITOR
+								</td>
+
+								
+								<td>4</td>
+
+								
+								<td>Marisa Abrajano
+								</td>
+							</tr>
+							
+							<tr>
+								
+								<td>Feb 15 2018 11:37AM</td>
+
+								
+								<td>
+									Decision in Process
+								</td>
+
+								
+								<td>----</td>
+
+								
+								<td>
+									EDITOR
+								</td>
+
+								
+								<td>4</td>
+
+								
+								<td>Marisa Abrajano
+								</td>
+							</tr>
+							
+							<tr>
+								
+								<td>Feb  7 2018  4:48PM</td>
+
+								
+								<td>
+									With Editor
+								</td>
+
+								
+								<td>7</td>
+
+								
+								<td>
+									EDITOR
+								</td>
+
+								
+								<td>4</td>
+
+								
+								<td>Nhat-Dang Do
+								</td>
+							</tr>
+							
+							<tr>
+								
+								<td>Feb  7 2018 12:35AM</td>
+
+								
+								<td>
+									Revised Manuscript Submitted
+								</td>
+
+								
+								<td>----</td>
+
+								
+								<td>
+									EDITOR
+								</td>
+
+								
+								<td>4</td>
+
+								
+								<td>Christopher T. Stout, Ph.D.
+								</td>
+							</tr>
+							
+							<tr>
+								
+								<td>Feb  7 2018 12:34AM</td>
+
+								
+								<td>
+									Revision Needs Approval
+								</td>
+
+								
+								<td>----</td>
+
+								
+								<td>
+									AUTHOR
+								</td>
+
+								
+								<td>4</td>
+
+								
+								<td>Christopher T. Stout, Ph.D.
+								</td>
+							</tr>
+							
+							<tr>
+								
+								<td>Feb  7 2018 12:34AM</td>
+
+								
+								<td>
+									Building PDF
+								</td>
+
+								
+								<td>----</td>
+
+								
+								<td>
+									AUTHOR
+								</td>
+
+								
+								<td>4</td>
+
+								
+								<td>Christopher T. Stout, Ph.D.
+								</td>
+							</tr>
+							
+							<tr>
+								
+								<td>Feb  7 2018 12:33AM</td>
+
+								
+								<td>
+									Incomplete
+								</td>
+
+								
+								<td>----</td>
+
+								
+								<td>
+									AUTHOR
+								</td>
+
+								
+								<td>4</td>
+
+								
+								<td>Christopher T. Stout, Ph.D.
+								</td>
+							</tr>
+							
+							<tr>
+								
+								<td>Feb  7 2018 12:33AM</td>
+
+								
+								<td>
+									Revision Needs Approval
+								</td>
+
+								
+								<td>----</td>
+
+								
+								<td>
+									AUTHOR
+								</td>
+
+								
+								<td>4</td>
+
+								
+								<td>Christopher T. Stout, Ph.D.
+								</td>
+							</tr>
+							
+							<tr>
+								
+								<td>Feb  7 2018 12:32AM</td>
+
+								
+								<td>
+									Building PDF
+								</td>
+
+								
+								<td>----</td>
+
+								
+								<td>
+									AUTHOR
+								</td>
+
+								
+								<td>4</td>
+
+								
+								<td>Christopher T. Stout, Ph.D.
+								</td>
+							</tr>
+							
+							<tr>
+								
+								<td>Feb  7 2018 12:29AM</td>
+
+								
+								<td>
+									Incomplete
+								</td>
+
+								
+								<td>----</td>
+
+								
+								<td>
+									AUTHOR
+								</td>
+
+								
+								<td>4</td>
+
+								
+								<td>Christopher T. Stout, Ph.D.
+								</td>
+							</tr>
+							
+							<tr>
+								
+								<td>Dec  8 2017  1:37PM</td>
+
+								
+								<td>
+									Revise
+								</td>
+
+								
+								<td>61</td>
+
+								
+								<td>
+									AUTHOR
+								</td>
+
+								
+								<td>3</td>
+
+								
+								<td>Marisa Abrajano
+								</td>
+							</tr>
+							
+							<tr>
+								
+								<td>Dec  8 2017  1:37PM</td>
+
+								
+								<td>
+									Decision in Process
+								</td>
+
+								
+								<td>----</td>
+
+								
+								<td>
+									EDITOR
+								</td>
+
+								
+								<td>3</td>
+
+								
+								<td>Marisa Abrajano
+								</td>
+							</tr>
+							
+							<tr>
+								
+								<td>Nov 28 2017  3:41PM</td>
+
+								
+								<td>
+									With Editor
+								</td>
+
+								
+								<td>9</td>
+
+								
+								<td>
+									EDITOR
+								</td>
+
+								
+								<td>3</td>
+
+								
+								<td>Nhat-Dang Do
+								</td>
+							</tr>
+							
+							<tr>
+								
+								<td>Nov 22 2017  8:26PM</td>
+
+								
+								<td>
+									Revised Manuscript Submitted
+								</td>
+
+								
+								<td>5</td>
+
+								
+								<td>
+									EDITOR
+								</td>
+
+								
+								<td>3</td>
+
+								
+								<td>Christopher T. Stout, Ph.D.
+								</td>
+							</tr>
+							
+							<tr>
+								
+								<td>Nov 22 2017  8:22PM</td>
+
+								
+								<td>
+									Revision Needs Approval
+								</td>
+
+								
+								<td>----</td>
+
+								
+								<td>
+									AUTHOR
+								</td>
+
+								
+								<td>3</td>
+
+								
+								<td>Christopher T. Stout, Ph.D.
+								</td>
+							</tr>
+							
+							<tr>
+								
+								<td>Nov 22 2017  8:22PM</td>
+
+								
+								<td>
+									Building PDF
+								</td>
+
+								
+								<td>----</td>
+
+								
+								<td>
+									AUTHOR
+								</td>
+
+								
+								<td>3</td>
+
+								
+								<td>Christopher T. Stout, Ph.D.
+								</td>
+							</tr>
+							
+							<tr>
+								
+								<td>Nov 22 2017  8:16PM</td>
+
+								
+								<td>
+									Incomplete
+								</td>
+
+								
+								<td>----</td>
+
+								
+								<td>
+									AUTHOR
+								</td>
+
+								
+								<td>3</td>
+
+								
+								<td>Christopher T. Stout, Ph.D.
+								</td>
+							</tr>
+							
+							<tr>
+								
+								<td>Oct  9 2017  7:39PM</td>
+
+								
+								<td>
+									Revise
+								</td>
+
+								
+								<td>44</td>
+
+								
+								<td>
+									AUTHOR
+								</td>
+
+								
+								<td>2</td>
+
+								
+								<td>Marisa Abrajano
+								</td>
+							</tr>
+							
+							<tr>
+								
+								<td>Oct  9 2017  7:39PM</td>
+
+								
+								<td>
+									Decision in Process
+								</td>
+
+								
+								<td>----</td>
+
+								
+								<td>
+									REVIEWER
+								</td>
+
+								
+								<td>2</td>
+
+								
+								<td>Marisa Abrajano
+								</td>
+							</tr>
+							
+							<tr>
+								
+								<td>Aug 29 2017  6:53PM</td>
+
+								
+								<td>
+									Under Review
+								</td>
+
+								
+								<td>41</td>
+
+								
+								<td>
+									REVIEWER
+								</td>
+
+								
+								<td>2</td>
+
+								
+								<td>Marisa Abrajano
+								</td>
+							</tr>
+							
+							<tr>
+								
+								<td>Aug 29 2017  5:33PM</td>
+
+								
+								<td>
+									With Editor
+								</td>
+
+								
+								<td>----</td>
+
+								
+								<td>
+									EDITOR
+								</td>
+
+								
+								<td>2</td>
+
+								
+								<td>Allan Colbern, Ph.D.
+								</td>
+							</tr>
+							
+							<tr>
+								
+								<td>Aug 29 2017  5:33PM</td>
+
+								
+								<td>
+									Unassign Editor
+								</td>
+
+								
+								<td>----</td>
+
+								
+								<td>
+									EDITOR
+								</td>
+
+								
+								<td>2</td>
+
+								
+								<td>Allan Colbern, Ph.D.
+								</td>
+							</tr>
+							
+							<tr>
+								
+								<td>Jul 19 2017 12:54PM</td>
+
+								
+								<td>
+									With Editor
+								</td>
+
+								
+								<td>41</td>
+
+								
+								<td>
+									EDITOR
+								</td>
+
+								
+								<td>2</td>
+
+								
+								<td>Allan Colbern, Ph.D.
+								</td>
+							</tr>
+							
+							<tr>
+								
+								<td>Jul 18 2017  5:50PM</td>
+
+								
+								<td>
+									Revised Manuscript Submitted
+								</td>
+
+								
+								<td>----</td>
+
+								
+								<td>
+									EDITOR
+								</td>
+
+								
+								<td>2</td>
+
+								
+								<td>Christopher T. Stout, Ph.D.
+								</td>
+							</tr>
+							
+							<tr>
+								
+								<td>Jul 18 2017  5:46PM</td>
+
+								
+								<td>
+									Revision Needs Approval
+								</td>
+
+								
+								<td>----</td>
+
+								
+								<td>
+									AUTHOR
+								</td>
+
+								
+								<td>2</td>
+
+								
+								<td>Christopher T. Stout, Ph.D.
+								</td>
+							</tr>
+							
+							<tr>
+								
+								<td>Jul 18 2017  5:46PM</td>
+
+								
+								<td>
+									Building PDF
+								</td>
+
+								
+								<td>----</td>
+
+								
+								<td>
+									AUTHOR
+								</td>
+
+								
+								<td>2</td>
+
+								
+								<td>Christopher T. Stout, Ph.D.
+								</td>
+							</tr>
+							
+							<tr>
+								
+								<td>Jul 18 2017  5:44PM</td>
+
+								
+								<td>
+									Incomplete
+								</td>
+
+								
+								<td>----</td>
+
+								
+								<td>
+									AUTHOR
+								</td>
+
+								
+								<td>2</td>
+
+								
+								<td>Christopher T. Stout, Ph.D.
+								</td>
+							</tr>
+							
+							<tr>
+								
+								<td>Jun 25 2017  2:58PM</td>
+
+								
+								<td>
+									Revise
+								</td>
+
+								
+								<td>23</td>
+
+								
+								<td>
+									AUTHOR
+								</td>
+
+								
+								<td>1</td>
+
+								
+								<td>S. Karthick Ramakrishnan
+								</td>
+							</tr>
+							
+							<tr>
+								
+								<td>Jun 25 2017  2:58PM</td>
+
+								
+								<td>
+									Decision in Process
+								</td>
+
+								
+								<td>----</td>
+
+								
+								<td>
+									EDITOR
+								</td>
+
+								
+								<td>1</td>
+
+								
+								<td>S. Karthick Ramakrishnan
+								</td>
+							</tr>
+							
+							<tr>
+								
+								<td>Jun 16 2017  9:43AM</td>
+
+								
+								<td>
+									With Editor
+								</td>
+
+								
+								<td>9</td>
+
+								
+								<td>
+									EDITOR
+								</td>
+
+								
+								<td>1</td>
+
+								
+								<td>Allan Colbern, Ph.D.
+								</td>
+							</tr>
+							
+							<tr>
+								
+								<td>Jun 15 2017 11:23PM</td>
+
+								
+								<td>
+									Decision in Process
+								</td>
+
+								
+								<td>----</td>
+
+								
+								<td>
+									EDITOR
+								</td>
+
+								
+								<td>1</td>
+
+								
+								<td>Michael Javen Fortner
+								</td>
+							</tr>
+							
+							<tr>
+								
+								<td>Jun  7 2017 11:31AM</td>
+
+								
+								<td>
+									With Editor
+								</td>
+
+								
+								<td>8</td>
+
+								
+								<td>
+									EDITOR
+								</td>
+
+								
+								<td>1</td>
+
+								
+								<td>Allan Colbern, Ph.D.
+								</td>
+							</tr>
+							
+							<tr>
+								
+								<td>Jun  7 2017 11:31AM</td>
+
+								
+								<td>
+									Unassign Editor
+								</td>
+
+								
+								<td>----</td>
+
+								
+								<td>
+									EDITOR
+								</td>
+
+								
+								<td>1</td>
+
+								
+								<td>Allan Colbern, Ph.D.
+								</td>
+							</tr>
+							
+							<tr>
+								
+								<td>May 31 2017 12:09PM</td>
+
+								
+								<td>
+									With Editor
+								</td>
+
+								
+								<td>6</td>
+
+								
+								<td>
+									EDITOR
+								</td>
+
+								
+								<td>1</td>
+
+								
+								<td>Allan Colbern, Ph.D.
+								</td>
+							</tr>
+							
+							<tr>
+								
+								<td>May 30 2017  7:41PM</td>
+
+								
+								<td>
+									Revised Manuscript Submitted
+								</td>
+
+								
+								<td>----</td>
+
+								
+								<td>
+									EDITOR
+								</td>
+
+								
+								<td>1</td>
+
+								
+								<td>Christopher T. Stout, Ph.D.
+								</td>
+							</tr>
+							
+							<tr>
+								
+								<td>May 30 2017  7:38PM</td>
+
+								
+								<td>
+									Revision Needs Approval
+								</td>
+
+								
+								<td>----</td>
+
+								
+								<td>
+									AUTHOR
+								</td>
+
+								
+								<td>1</td>
+
+								
+								<td>Christopher T. Stout, Ph.D.
+								</td>
+							</tr>
+							
+							<tr>
+								
+								<td>May 30 2017  7:38PM</td>
+
+								
+								<td>
+									Building PDF
+								</td>
+
+								
+								<td>----</td>
+
+								
+								<td>
+									AUTHOR
+								</td>
+
+								
+								<td>1</td>
+
+								
+								<td>Christopher T. Stout, Ph.D.
+								</td>
+							</tr>
+							
+							<tr>
+								
+								<td>May 30 2017  7:37PM</td>
+
+								
+								<td>
+									Incomplete
+								</td>
+
+								
+								<td>----</td>
+
+								
+								<td>
+									AUTHOR
+								</td>
+
+								
+								<td>1</td>
+
+								
+								<td>Christopher T. Stout, Ph.D.
+								</td>
+							</tr>
+							
+							<tr>
+								
+								<td>May 30 2017  7:35PM</td>
+
+								
+								<td>
+									Revision Needs Approval
+								</td>
+
+								
+								<td>----</td>
+
+								
+								<td>
+									AUTHOR
+								</td>
+
+								
+								<td>1</td>
+
+								
+								<td>Christopher T. Stout, Ph.D.
+								</td>
+							</tr>
+							
+							<tr>
+								
+								<td>May 30 2017  7:34PM</td>
+
+								
+								<td>
+									Building PDF
+								</td>
+
+								
+								<td>----</td>
+
+								
+								<td>
+									AUTHOR
+								</td>
+
+								
+								<td>1</td>
+
+								
+								<td>Christopher T. Stout, Ph.D.
+								</td>
+							</tr>
+							
+							<tr>
+								
+								<td>May 30 2017  7:31PM</td>
+
+								
+								<td>
+									Incomplete
+								</td>
+
+								
+								<td>----</td>
+
+								
+								<td>
+									AUTHOR
+								</td>
+
+								
+								<td>1</td>
+
+								
+								<td>Christopher T. Stout, Ph.D.
+								</td>
+							</tr>
+							
+							<tr>
+								
+								<td>Feb  5 2017  3:22PM</td>
+
+								
+								<td>
+									Revise
+								</td>
+
+								
+								<td>114</td>
+
+								
+								<td>
+									AUTHOR
+								</td>
+
+								
+								<td>0</td>
+
+								
+								<td>S. Karthick Ramakrishnan
+								</td>
+							</tr>
+							
+							<tr>
+								
+								<td>Feb  5 2017  3:22PM</td>
+
+								
+								<td>
+									Decision in Process
+								</td>
+
+								
+								<td>----</td>
+
+								
+								<td>
+									EDITOR
+								</td>
+
+								
+								<td>0</td>
+
+								
+								<td>S. Karthick Ramakrishnan
+								</td>
+							</tr>
+							
+							<tr>
+								
+								<td>Feb  5 2017 10:02AM</td>
+
+								
+								<td>
+									With Editor
+								</td>
+
+								
+								<td>----</td>
+
+								
+								<td>
+									EDITOR
+								</td>
+
+								
+								<td>0</td>
+
+								
+								<td>S. Karthick Ramakrishnan
+								</td>
+							</tr>
+							
+							<tr>
+								
+								<td>Jan 20 2017  8:59PM</td>
+
+								
+								<td>
+									Decision in Process
+								</td>
+
+								
+								<td>15</td>
+
+								
+								<td>
+									EDITOR
+								</td>
+
+								
+								<td>0</td>
+
+								
+								<td>Michael Javen Fortner
+								</td>
+							</tr>
+							
+							<tr>
+								
+								<td>Jan  4 2017 10:24AM</td>
+
+								
+								<td>
+									Required Reviews Completed
+								</td>
+
+								
+								<td>16</td>
+
+								
+								<td>
+									EDITOR
+								</td>
+
+								
+								<td>0</td>
+
+								
+								<td>Benjamin Bishin
+								</td>
+							</tr>
+							
+							<tr>
+								
+								<td>Nov 27 2016  7:26PM</td>
+
+								
+								<td>
+									Under Review
+								</td>
+
+								
+								<td>38</td>
+
+								
+								<td>
+									REVIEWER
+								</td>
+
+								
+								<td>0</td>
+
+								
+								<td>Michael Javen Fortner
+								</td>
+							</tr>
+							
+							<tr>
+								
+								<td>Nov 26 2016 12:30AM</td>
+
+								
+								<td>
+									
+								</td>
+
+								
+								<td>1</td>
+
+								
+								<td>
+									EDITOR
+								</td>
+
+								
+								<td>0</td>
+
+								
+								<td>Michael Javen Fortner
+								</td>
+							</tr>
+							
+							<tr>
+								
+								<td>Nov 26 2016 12:29AM</td>
+
+								
+								<td>
+									Required Reviews Completed
+								</td>
+
+								
+								<td>----</td>
+
+								
+								<td>
+									EDITOR
+								</td>
+
+								
+								<td>0</td>
+
+								
+								<td>Michael Javen Fortner
+								</td>
+							</tr>
+							
+							<tr>
+								
+								<td>Nov 26 2016 12:28AM</td>
+
+								
+								<td>
+									Under Review
+								</td>
+
+								
+								<td>----</td>
+
+								
+								<td>
+									REVIEWER
+								</td>
+
+								
+								<td>0</td>
+
+								
+								<td>Michael Javen Fortner
+								</td>
+							</tr>
+							
+							<tr>
+								
+								<td>Nov 25 2016 11:22AM</td>
+
+								
+								<td>
+									With Editor
+								</td>
+
+								
+								<td>----</td>
+
+								
+								<td>
+									EDITOR
+								</td>
+
+								
+								<td>0</td>
+
+								
+								<td>S. Karthick Ramakrishnan
+								</td>
+							</tr>
+							
+							<tr>
+								
+								<td>Jun 13 2016  3:16PM</td>
+
+								
+								<td>
+									Decision in Process
+								</td>
+
+								
+								<td>164</td>
+
+								
+								<td>
+									EDITOR
+								</td>
+
+								
+								<td>0</td>
+
+								
+								<td>Sheryl R. Lightfoot, PhD
+								</td>
+							</tr>
+							
+							<tr>
+								
+								<td>Jun  9 2016 12:55PM</td>
+
+								
+								<td>
+									Required Reviews Completed
+								</td>
+
+								
+								<td>4</td>
+
+								
+								<td>
+									EDITOR
+								</td>
+
+								
+								<td>0</td>
+
+								
+								<td>Richard Flores
+								</td>
+							</tr>
+							
+							<tr>
+								
+								<td>Mar  7 2016  3:18PM</td>
+
+								
+								<td>
+									Under Review
+								</td>
+
+								
+								<td>94</td>
+
+								
+								<td>
+									REVIEWER
+								</td>
+
+								
+								<td>0</td>
+
+								
+								<td>Sheryl R. Lightfoot, PhD
+								</td>
+							</tr>
+							
+							<tr>
+								
+								<td>Mar  7 2016 12:23AM</td>
+
+								
+								<td>
+									With Editor
+								</td>
+
+								
+								<td>----</td>
+
+								
+								<td>
+									EDITOR
+								</td>
+
+								
+								<td>0</td>
+
+								
+								<td>Allan Colbern, Ph.D.
+								</td>
+							</tr>
+							
+							<tr>
+								
+								<td>Mar  3 2016 11:52PM</td>
+
+								
+								<td>
+									Manuscript Submitted
+								</td>
+
+								
+								<td>3</td>
+
+								
+								<td>
+									EDITOR
+								</td>
+
+								
+								<td>0</td>
+
+								
+								<td>Christopher T. Stout, Ph.D.
+								</td>
+							</tr>
+							
+							<tr>
+								
+								<td>Mar  3 2016 11:49PM</td>
+
+								
+								<td>
+									Needs Approval
+								</td>
+
+								
+								<td>----</td>
+
+								
+								<td>
+									AUTHOR
+								</td>
+
+								
+								<td>0</td>
+
+								
+								<td>Christopher T. Stout, Ph.D.
+								</td>
+							</tr>
+							
+							<tr>
+								
+								<td>Mar  3 2016 11:45PM</td>
+
+								
+								<td>
+									Building PDF
+								</td>
+
+								
+								<td>----</td>
+
+								
+								<td>
+									AUTHOR
+								</td>
+
+								
+								<td>0</td>
+
+								
+								<td>Christopher T. Stout, Ph.D.
+								</td>
+							</tr>
+							
+							<tr>
+								
+								<td>Mar  3 2016 11:41PM</td>
+
+								
+								<td>
+									Incomplete
+								</td>
+
+								
+								<td>----</td>
+
+								
+								<td>
+									AUTHOR
+								</td>
+
+								
+								<td>0</td>
+
+								
+								<td>Christopher T. Stout, Ph.D.
+								</td>
+							</tr>
+							
+							<tr>
+								
+								<td>Mar  3 2016 11:39PM</td>
+
+								
+								<td>
+									Needs Approval
+								</td>
+
+								
+								<td>----</td>
+
+								
+								<td>
+									AUTHOR
+								</td>
+
+								
+								<td>0</td>
+
+								
+								<td>Christopher T. Stout, Ph.D.
+								</td>
+							</tr>
+							
+							<tr>
+								
+								<td>Mar  3 2016 11:39PM</td>
+
+								
+								<td>
+									Building PDF
+								</td>
+
+								
+								<td>----</td>
+
+								
+								<td>
+									AUTHOR
+								</td>
+
+								
+								<td>0</td>
+
+								
+								<td>Christopher T. Stout, Ph.D.
+								</td>
+							</tr>
+							
+							<tr>
+								
+								<td>Mar  3 2016 11:09PM</td>
+
+								
+								<td>
+									Incomplete
+								</td>
+
+								
+								<td>----</td>
+
+								
+								<td>
+									AUTHOR
+								</td>
+
+								
+								<td>0</td>
+
+								
+								<td>Christopher T. Stout, Ph.D.
+								</td>
+							</tr>
+							
+					</table>
+					
+			</fieldset>
+			<br />
+			<br />
+		
+			<fieldset>
+				<legend><a name="correspondence"></a>CORRESPONDENCE HISTORY</legend>
+				
+						<div class="buttonAlign" style="padding-bottom:4px;">
+							<input type="button" name="btnAddExtEditorialCorrespondence" value="Add&#32;Editorial&#32;Correspondence" onclick="AddExternalCorrespondence(1);" />
+							
+						</div>
+					
+					<table border="0" cellpadding="0" cellspacing="0" width="97%" class="datatable">
+						<tr>
+							<th>Correspondence Date</th>
+							<th>Letter</th>
+							<th>Recipient</th>
+							<th>Status</th>
+                            
+							<th>Revision</th>
+							<th>Operator</th>
+						</tr>
+
+						
+							<tr>
+								
+								<td>24 Jul 2018</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(107106, '{48150048-0FBA-4287-AABE-7114CC543AE9}')" title="JREP %MS_NUMBER% is Accepted for Publication">Publisher Notification of Accepted Manuscript</a></td><td>Jon Samuel Geffner</td>
+								<td>
+									Completed Accept
+
+								</td>
+
+                                
+								<td>
+									4
+								</td>
+
+								
+								<td>Marisa Abrajano
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>24 Jul 2018</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(107105, '{7A620A67-2F38-4F9A-9577-40FFDE20FDE1}')" title="JREP %MS_NUMBER% is Accepted for Publication">Publisher Notification of Accepted Manuscript</a></td><td>Cambridge Production</td>
+								<td>
+									Completed Accept
+
+								</td>
+
+                                
+								<td>
+									4
+								</td>
+
+								
+								<td>Marisa Abrajano
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>15 Feb 2018</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(105141, '{24996C7C-51F8-446D-A76C-8528E30729FE}')" title="Your Submission to JREP">Editor Decision - Accept</a></td><td>Christopher T. Stout, Ph.D.</td>
+								<td>
+									Accept
+
+								</td>
+
+                                
+								<td>
+									4
+								</td>
+
+								
+								<td>Marisa Abrajano
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>15 Feb 2018</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(105140, '{4CBD8826-BB65-4A55-8964-3503C3091328}')" title="To assist. Editor: Decision Notification">Journal Office Notice Editor Decision Notification</a></td><td>Nhat-Dang Do</td>
+								<td>
+									Decision in Process
+
+								</td>
+
+                                
+								<td>
+									4
+								</td>
+
+								
+								<td>Marisa Abrajano
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>07 Feb 2018</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(105103, '{CBF93480-C667-4CC9-912C-D2A17E8B3515}')" title="You have a new Editor Assignment for JREP">Editor Assignment</a></td><td>Marisa Abrajano</td>
+								<td>
+									With Editor
+
+								</td>
+
+                                
+								<td>
+									4
+								</td>
+
+								
+								<td>Nhat-Dang Do
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>07 Feb 2018</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(105093, '{7E5876E0-DA9A-4443-9CED-709595BC9924}')" title="REP notification: Revision Submitted for &quot;%ARTICLE_TITLE%&quot;">Journal Office Notice Revised Submission</a></td><td>Nhat-Dang Do</td>
+								<td>
+									Revised Manuscript Submitted
+
+								</td>
+
+                                
+								<td>
+									4
+								</td>
+
+								
+								<td>Christopher T. Stout, Ph.D.
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>07 Feb 2018</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(105092, '{CBB5B651-174B-400E-90BF-9CCBDAF62E1D}')" title="REP notification: Revision Submitted for &quot;%ARTICLE_TITLE%&quot;">Journal Office Notice Revised Submission</a></td><td>Dan Gibson</td>
+								<td>
+									Revised Manuscript Submitted
+
+								</td>
+
+                                
+								<td>
+									4
+								</td>
+
+								
+								<td>Christopher T. Stout, Ph.D.
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>07 Feb 2018</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(105091, '{E7CF7055-68A3-4853-9462-48B608106B9A}')" title="REP notification: Revision Submitted for &quot;%ARTICLE_TITLE%&quot;">Journal Office Notice Revised Submission</a></td><td>Allan Colbern, Ph.D.</td>
+								<td>
+									Revised Manuscript Submitted
+
+								</td>
+
+                                
+								<td>
+									4
+								</td>
+
+								
+								<td>Christopher T. Stout, Ph.D.
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>07 Feb 2018</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(105090, '{1C4DE595-62B5-4002-A19F-4D3AF23B90C7}')" title="REP notification: Revision Submitted for &quot;%ARTICLE_TITLE%&quot;">Journal Office Notice Revised Submission</a></td><td>Allan Colbern, Ph.D.</td>
+								<td>
+									Revised Manuscript Submitted
+
+								</td>
+
+                                
+								<td>
+									4
+								</td>
+
+								
+								<td>Christopher T. Stout, Ph.D.
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>07 Feb 2018</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(105089, '{76FFF817-499C-4189-9B64-8FA5715ACDB6}')" title="REP notification: Revision Submitted for &quot;%ARTICLE_TITLE%&quot;">Journal Office Notice Revised Submission</a></td><td>S. Karthick Ramakrishnan</td>
+								<td>
+									Revised Manuscript Submitted
+
+								</td>
+
+                                
+								<td>
+									4
+								</td>
+
+								
+								<td>Christopher T. Stout, Ph.D.
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>07 Feb 2018</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(105088, '{05B097E2-CA8B-4743-AD07-9DFBFB57516A}')" title="REP notification: Revision Submitted for &quot;%ARTICLE_TITLE%&quot;">Journal Office Notice Revised Submission</a></td><td>Marisa Abrajano</td>
+								<td>
+									Revised Manuscript Submitted
+
+								</td>
+
+                                
+								<td>
+									4
+								</td>
+
+								
+								<td>Christopher T. Stout, Ph.D.
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>07 Feb 2018</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(105087, '{2423F0FD-E39E-4822-A4FE-DA010336A993}')" title="REP notification: Revision Submitted for &quot;%ARTICLE_TITLE%&quot;">Journal Office Notice Revised Submission</a></td><td>Jane Y. Junn, PHD</td>
+								<td>
+									Revised Manuscript Submitted
+
+								</td>
+
+                                
+								<td>
+									4
+								</td>
+
+								
+								<td>Christopher T. Stout, Ph.D.
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>07 Feb 2018</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(105086, '{55B32A82-5074-49B2-9956-1A32B04574E4}')" title="Revision Confirmation for JREP">Author Submits Revision Confirmation</a></td><td>Christopher T. Stout, Ph.D.</td>
+								<td>
+									Revised Manuscript Submitted
+
+								</td>
+
+                                
+								<td>
+									4
+								</td>
+
+								
+								<td>Christopher T. Stout, Ph.D.
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>08 Dec 2017</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(104624, '{D5F50476-6B77-4903-8AF0-FB2D5D36DC15}')" title="Decision on your JREP article">Editor Decision - Accept - Final Files Needed</a></td><td>Christopher T. Stout, Ph.D.</td>
+								<td>
+									Revise
+
+								</td>
+
+                                
+								<td>
+									3
+								</td>
+
+								
+								<td>Marisa Abrajano
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>08 Dec 2017</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(104623, '{FFD5CEFB-2870-4A6B-B137-832CFB920509}')" title="To assist. Editor: Decision Notification">Journal Office Notice Editor Decision Notification</a></td><td>Nhat-Dang Do</td>
+								<td>
+									Decision in Process
+
+								</td>
+
+                                
+								<td>
+									3
+								</td>
+
+								
+								<td>Marisa Abrajano
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>28 Nov 2017</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(104494, '{8E7C102E-E2AB-4E05-806C-3E7C5915CD5B}')" title="You have a new Editor Assignment for JREP">Editor Assignment</a></td><td>Marisa Abrajano</td>
+								<td>
+									With Editor
+
+								</td>
+
+                                
+								<td>
+									3
+								</td>
+
+								
+								<td>Nhat-Dang Do
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>22 Nov 2017</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(104478, '{04D1B2C2-FE00-45B0-8CDB-CDB7FEECCAEA}')" title="REP notification: Revision Submitted for &quot;%ARTICLE_TITLE%&quot;">Journal Office Notice Revised Submission</a></td><td>Nhat-Dang Do</td>
+								<td>
+									Revised Manuscript Submitted
+
+								</td>
+
+                                
+								<td>
+									3
+								</td>
+
+								
+								<td>Christopher T. Stout, Ph.D.
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>22 Nov 2017</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(104477, '{D95B19BB-1EF7-43B1-88AB-BEE699AA4ACD}')" title="REP notification: Revision Submitted for &quot;%ARTICLE_TITLE%&quot;">Journal Office Notice Revised Submission</a></td><td>Dan Gibson</td>
+								<td>
+									Revised Manuscript Submitted
+
+								</td>
+
+                                
+								<td>
+									3
+								</td>
+
+								
+								<td>Christopher T. Stout, Ph.D.
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>22 Nov 2017</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(104476, '{A99BEC2B-B5E2-4767-8F8D-DBA157A9B150}')" title="REP notification: Revision Submitted for &quot;%ARTICLE_TITLE%&quot;">Journal Office Notice Revised Submission</a></td><td>Allan Colbern, Ph.D.</td>
+								<td>
+									Revised Manuscript Submitted
+
+								</td>
+
+                                
+								<td>
+									3
+								</td>
+
+								
+								<td>Christopher T. Stout, Ph.D.
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>22 Nov 2017</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(104475, '{42BE7D94-9210-454D-A110-BA81FBE18E14}')" title="REP notification: Revision Submitted for &quot;%ARTICLE_TITLE%&quot;">Journal Office Notice Revised Submission</a></td><td>Allan Colbern, Ph.D.</td>
+								<td>
+									Revised Manuscript Submitted
+
+								</td>
+
+                                
+								<td>
+									3
+								</td>
+
+								
+								<td>Christopher T. Stout, Ph.D.
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>22 Nov 2017</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(104474, '{B0C4350C-DD2B-4FAA-8860-A44779697D09}')" title="REP notification: Revision Submitted for &quot;%ARTICLE_TITLE%&quot;">Journal Office Notice Revised Submission</a></td><td>S. Karthick Ramakrishnan</td>
+								<td>
+									Revised Manuscript Submitted
+
+								</td>
+
+                                
+								<td>
+									3
+								</td>
+
+								
+								<td>Christopher T. Stout, Ph.D.
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>22 Nov 2017</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(104473, '{BF379E62-C29B-451B-B9C8-C1995D0BBAD3}')" title="REP notification: Revision Submitted for &quot;%ARTICLE_TITLE%&quot;">Journal Office Notice Revised Submission</a></td><td>Marisa Abrajano</td>
+								<td>
+									Revised Manuscript Submitted
+
+								</td>
+
+                                
+								<td>
+									3
+								</td>
+
+								
+								<td>Christopher T. Stout, Ph.D.
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>22 Nov 2017</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(104472, '{9AC44D80-0435-426D-88C7-6645CECA9E78}')" title="REP notification: Revision Submitted for &quot;%ARTICLE_TITLE%&quot;">Journal Office Notice Revised Submission</a></td><td>Jane Y. Junn, PHD</td>
+								<td>
+									Revised Manuscript Submitted
+
+								</td>
+
+                                
+								<td>
+									3
+								</td>
+
+								
+								<td>Christopher T. Stout, Ph.D.
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>22 Nov 2017</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(104471, '{F46A7F3C-4F69-4D90-AD00-BC5B505896C9}')" title="Revision Confirmation for JREP">Author Submits Revision Confirmation</a></td><td>Christopher T. Stout, Ph.D.</td>
+								<td>
+									Revised Manuscript Submitted
+
+								</td>
+
+                                
+								<td>
+									3
+								</td>
+
+								
+								<td>Christopher T. Stout, Ph.D.
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>25 Oct 2017</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(104189, '{46F7A581-7C6F-4124-BA95-9DDDDACA2D96}')" title="Author query to JREP Office">Author Query to Journal Office</a></td><td>Journal of Race, Ethnicity, and Politics</td>
+								<td>
+									Revise
+
+								</td>
+
+                                
+								<td>
+									2
+								</td>
+
+								
+								<td>Christopher T. Stout, Ph.D.
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>09 Oct 2017</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(104071, '{18A0FD93-B1A3-4270-B084-CDF19AF3F196}')" title="Your JREP Submission">Editor Decision - Revise</a></td><td>Christopher T. Stout, Ph.D.</td>
+								<td>
+									Revise
+
+								</td>
+
+                                
+								<td>
+									2
+								</td>
+
+								
+								<td>Marisa Abrajano
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>09 Oct 2017</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(104070, '{6226FFB6-A2A4-4715-B031-C219E6D2917C}')" title="To assist. Editor: Decision Notification">Journal Office Notice Editor Decision Notification</a></td><td>Allan Colbern, Ph.D.</td>
+								<td>
+									Decision in Process
+
+								</td>
+
+                                
+								<td>
+									2
+								</td>
+
+								
+								<td>Marisa Abrajano
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>03 Oct 2017</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(104036, '{D9A6BF23-44D9-4DBE-9946-FCD1EBFAEB75}')" title="Thank you for the review for JREP">Reviewer Thank You</a></td><td>Benjamin Bishin</td>
+								<td>
+									Under Review
+
+								</td>
+
+                                
+								<td>
+									2
+								</td>
+
+								
+								<td>Benjamin Bishin
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>28 Sep 2017</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(103986, '{38BBD15D-DEDD-471F-B882-99EFC3ACD6E6}')" title="JREP Reminder: Review assignment is due soon">Reviewer Reminder - Before Due Date</a></td><td>Benjamin Bishin</td>
+								<td>
+									Under Review
+
+								</td>
+
+                                
+								<td>
+									2
+								</td>
+
+								
+								<td>S. Karthick Ramakrishnan
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>29 Aug 2017</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(102741, '{F62EFF0F-F854-421B-A925-D38451B60176}')" title="JREP: Thank you for agreeing to review">Reviewer Instructions and Due Date</a>&nbsp;<img style="vertical-align:middle;margin-top:4px" src="img/paperclip_icon.gif" alt=""/></td><td>Benjamin Bishin</td>
+								<td>
+									Under Review
+
+								</td>
+
+                                
+								<td>
+									2
+								</td>
+
+								
+								<td>Benjamin Bishin
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>29 Aug 2017</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(102740, '{21FFBD0C-2823-4796-BE10-4F1C6F3A7643}')" title="Reviewer agrees to review &quot;%ARTICLE_TITLE%&quot;">Editor Notice Reviewer Agrees to Review</a></td><td>Marisa Abrajano</td>
+								<td>
+									Under Review
+
+								</td>
+
+                                
+								<td>
+									2
+								</td>
+
+								
+								<td>Benjamin Bishin
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>29 Aug 2017</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(102739, '{124B9724-FB76-4DD3-89AD-E225C006912B}')" title="Reviewer Invitation for JREP Revision">Reviewer Invitation on Revision</a></td><td>Benjamin Bishin</td>
+								<td>
+									Under Review
+
+								</td>
+
+                                
+								<td>
+									2
+								</td>
+
+								
+								<td>Marisa Abrajano
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>29 Aug 2017</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(102729, '{6315A01D-D55B-4E1C-BBC9-99AF96738674}')" title="You have a new Editor Assignment for JREP">Editor Assignment</a></td><td>Marisa Abrajano</td>
+								<td>
+									With Editor
+
+								</td>
+
+                                
+								<td>
+									2
+								</td>
+
+								
+								<td>Allan Colbern, Ph.D.
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>29 Aug 2017</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(102728, '{2B0C9C6B-E106-480F-B100-A89C8536F879}')" title="Your assignment for %MS_NUMBER% has been undone">Editor Assignment Undone</a></td><td>Michael Javen Fortner</td>
+								<td>
+									With Editor
+
+								</td>
+
+                                
+								<td>
+									2
+								</td>
+
+								
+								<td>Allan Colbern, Ph.D.
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>19 Jul 2017</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(102416, '{5677CEB1-F3D7-4701-AAA4-67355E8BAFF4}')" title="You have a new Editor Assignment for JREP">Editor Assignment</a></td><td>Michael Javen Fortner</td>
+								<td>
+									With Editor
+
+								</td>
+
+                                
+								<td>
+									2
+								</td>
+
+								
+								<td>Allan Colbern, Ph.D.
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>18 Jul 2017</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(102414, '{0112F97E-3C76-47CB-8B75-4434F53F7688}')" title="REP notification: Revision Submitted for &quot;%ARTICLE_TITLE%&quot;">Journal Office Notice Revised Submission</a></td><td>Dan Gibson</td>
+								<td>
+									Revised Manuscript Submitted
+
+								</td>
+
+                                
+								<td>
+									2
+								</td>
+
+								
+								<td>Christopher T. Stout, Ph.D.
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>18 Jul 2017</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(102413, '{4F85DEC8-45B7-4AC2-882D-8D73348F25F7}')" title="REP notification: Revision Submitted for &quot;%ARTICLE_TITLE%&quot;">Journal Office Notice Revised Submission</a></td><td>Danielle Casarez Lemi, PhD</td>
+								<td>
+									Revised Manuscript Submitted
+
+								</td>
+
+                                
+								<td>
+									2
+								</td>
+
+								
+								<td>Christopher T. Stout, Ph.D.
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>18 Jul 2017</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(102412, '{3C41D5CB-7D36-42E2-94C9-957C257E4273}')" title="REP notification: Revision Submitted for &quot;%ARTICLE_TITLE%&quot;">Journal Office Notice Revised Submission</a></td><td>Andrea Silva, PhD</td>
+								<td>
+									Revised Manuscript Submitted
+
+								</td>
+
+                                
+								<td>
+									2
+								</td>
+
+								
+								<td>Christopher T. Stout, Ph.D.
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>18 Jul 2017</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(102411, '{50AF81F9-6B7B-4ADF-B11E-6C168426DDF8}')" title="REP notification: Revision Submitted for &quot;%ARTICLE_TITLE%&quot;">Journal Office Notice Revised Submission</a></td><td>Allan Colbern, Ph.D.</td>
+								<td>
+									Revised Manuscript Submitted
+
+								</td>
+
+                                
+								<td>
+									2
+								</td>
+
+								
+								<td>Christopher T. Stout, Ph.D.
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>18 Jul 2017</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(102410, '{B7656D64-ECE8-4B94-9882-70F7823BEEA0}')" title="REP notification: Revision Submitted for &quot;%ARTICLE_TITLE%&quot;">Journal Office Notice Revised Submission</a></td><td>S. Karthick Ramakrishnan</td>
+								<td>
+									Revised Manuscript Submitted
+
+								</td>
+
+                                
+								<td>
+									2
+								</td>
+
+								
+								<td>Christopher T. Stout, Ph.D.
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>18 Jul 2017</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(102409, '{5D0CA389-4995-45EA-80D1-076E5D8F061F}')" title="Revision Confirmation for JREP">Author Submits Revision Confirmation</a></td><td>Christopher T. Stout, Ph.D.</td>
+								<td>
+									Revised Manuscript Submitted
+
+								</td>
+
+                                
+								<td>
+									2
+								</td>
+
+								
+								<td>Christopher T. Stout, Ph.D.
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>25 Jun 2017</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(102254, '{EFCF6F39-9F78-49F0-BCF3-9D9E8B61F89E}')" title="Your JREP Submission">Editor Decision - Conditional Accept</a></td><td>Christopher T. Stout, Ph.D.</td>
+								<td>
+									Revise
+
+								</td>
+
+                                
+								<td>
+									1
+								</td>
+
+								
+								<td>S. Karthick Ramakrishnan
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>25 Jun 2017</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(102253, '{DA07BE76-A2E1-4114-8A22-32E16E353FC4}')" title="To assist. Editor: Decision Notification">Journal Office Notice Editor Decision Notification</a></td><td>Allan Colbern, Ph.D.</td>
+								<td>
+									Decision in Process
+
+								</td>
+
+                                
+								<td>
+									1
+								</td>
+
+								
+								<td>S. Karthick Ramakrishnan
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>16 Jun 2017</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(102185, '{3111FA1F-65A7-4B03-9E77-BCEEE565C57D}')" title="You have a new Editor Assignment for JREP">Editor Assignment</a></td><td>S. Karthick Ramakrishnan</td>
+								<td>
+									With Editor
+
+								</td>
+
+                                
+								<td>
+									1
+								</td>
+
+								
+								<td>Allan Colbern, Ph.D.
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>15 Jun 2017</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(102166, '{BC2F1D0F-ECA6-48D4-A89A-E04E8B73F2A1}')" title="To assist. Editor: Decision Notification">Journal Office Notice Editor Decision Notification</a></td><td>Allan Colbern, Ph.D.</td>
+								<td>
+									Decision in Process
+
+								</td>
+
+                                
+								<td>
+									1
+								</td>
+
+								
+								<td>Michael Javen Fortner
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>07 Jun 2017</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(102062, '{1FE10162-CB49-4E17-881A-6134C703B12B}')" title="You have a new Editor Assignment for JREP">Editor Assignment</a></td><td>Michael Javen Fortner</td>
+								<td>
+									With Editor
+
+								</td>
+
+                                
+								<td>
+									1
+								</td>
+
+								
+								<td>Allan Colbern, Ph.D.
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>31 May 2017</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(102044, '{456AFA79-1FC4-4904-84BE-E37E3210EEF5}')" title="You have a new Editor Assignment for JREP">Editor Assignment</a></td><td>S. Karthick Ramakrishnan</td>
+								<td>
+									With Editor
+
+								</td>
+
+                                
+								<td>
+									1
+								</td>
+
+								
+								<td>Allan Colbern, Ph.D.
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>30 May 2017</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(102043, '{9448A7A6-4121-401C-B9D3-EE0897648989}')" title="REP notification: Revision Submitted for &quot;%ARTICLE_TITLE%&quot;">Journal Office Notice Revised Submission</a></td><td>Dan Gibson</td>
+								<td>
+									Revised Manuscript Submitted
+
+								</td>
+
+                                
+								<td>
+									1
+								</td>
+
+								
+								<td>Christopher T. Stout, Ph.D.
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>30 May 2017</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(102042, '{72AEDD22-FACE-4EE2-B4E4-A59B3A277176}')" title="REP notification: Revision Submitted for &quot;%ARTICLE_TITLE%&quot;">Journal Office Notice Revised Submission</a></td><td>Danielle Casarez Lemi, PhD</td>
+								<td>
+									Revised Manuscript Submitted
+
+								</td>
+
+                                
+								<td>
+									1
+								</td>
+
+								
+								<td>Christopher T. Stout, Ph.D.
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>30 May 2017</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(102041, '{D4C5403F-4009-4D28-A471-E63BE6E887E0}')" title="REP notification: Revision Submitted for &quot;%ARTICLE_TITLE%&quot;">Journal Office Notice Revised Submission</a></td><td>Andrea Silva, PhD</td>
+								<td>
+									Revised Manuscript Submitted
+
+								</td>
+
+                                
+								<td>
+									1
+								</td>
+
+								
+								<td>Christopher T. Stout, Ph.D.
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>30 May 2017</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(102040, '{ECDD6D0B-56B4-4C2D-8E51-5F009FE8AD9E}')" title="REP notification: Revision Submitted for &quot;%ARTICLE_TITLE%&quot;">Journal Office Notice Revised Submission</a></td><td>Allan Colbern, Ph.D.</td>
+								<td>
+									Revised Manuscript Submitted
+
+								</td>
+
+                                
+								<td>
+									1
+								</td>
+
+								
+								<td>Christopher T. Stout, Ph.D.
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>30 May 2017</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(102039, '{04BD13B9-761A-4245-B8E6-872AD6BAA34C}')" title="REP notification: Revision Submitted for &quot;%ARTICLE_TITLE%&quot;">Journal Office Notice Revised Submission</a></td><td>S. Karthick Ramakrishnan</td>
+								<td>
+									Revised Manuscript Submitted
+
+								</td>
+
+                                
+								<td>
+									1
+								</td>
+
+								
+								<td>Christopher T. Stout, Ph.D.
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>30 May 2017</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(102038, '{E346770D-5901-4F4D-9498-3044B53B3F68}')" title="Revision Confirmation for JREP">Author Submits Revision Confirmation</a></td><td>Christopher T. Stout, Ph.D.</td>
+								<td>
+									Revised Manuscript Submitted
+
+								</td>
+
+                                
+								<td>
+									1
+								</td>
+
+								
+								<td>Christopher T. Stout, Ph.D.
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>05 Feb 2017</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(101783, '{AB1BD9E8-AE98-44A0-A3BF-853115A02E0A}')" title="Revise and Resubmit: JREP Submission">Editor Decision - Revise</a></td><td>Christopher T. Stout, Ph.D.</td>
+								<td>
+									Revise
+
+								</td>
+
+                                
+								<td>
+									0
+								</td>
+
+								
+								<td>S. Karthick Ramakrishnan
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>05 Feb 2017</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(101782, '{8437E4AA-BE47-4BA2-91EE-83543E582E64}')" title="To assist. Editor: Decision Notification">Journal Office Notice Editor Decision Notification</a></td><td>Allan Colbern, Ph.D.</td>
+								<td>
+									Decision in Process
+
+								</td>
+
+                                
+								<td>
+									0
+								</td>
+
+								
+								<td>S. Karthick Ramakrishnan
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>05 Feb 2017</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(101766, '{8739D422-2428-404E-BFEB-437AE92B96D1}')" title="You have a new Editor Assignment for JREP">Editor Assignment</a></td><td>S. Karthick Ramakrishnan</td>
+								<td>
+									With Editor
+
+								</td>
+
+                                
+								<td>
+									0
+								</td>
+
+								
+								<td>S. Karthick Ramakrishnan
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>20 Jan 2017</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(101672, '{C583D932-612D-402F-8577-552B5A950B41}')" title="To assist. Editor: Decision Notification">Journal Office Notice Editor Decision Notification</a></td><td>Allan Colbern, Ph.D.</td>
+								<td>
+									Decision in Process
+
+								</td>
+
+                                
+								<td>
+									0
+								</td>
+
+								
+								<td>Michael Javen Fortner
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>04 Jan 2017</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(101624, '{D203C11C-2C6B-44EE-8EE0-7BC25C2D7F6B}')" title="JREP Completed Reviews for &quot;%ARTICLE_TITLE%&quot;">Editor Notice All Reviews Complete</a></td><td>Michael Javen Fortner</td>
+								<td>
+									Required Reviews Completed
+
+								</td>
+
+                                
+								<td>
+									0
+								</td>
+
+								
+								<td>Benjamin Bishin
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>04 Jan 2017</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(101623, '{A2D00A88-6E0F-479D-A76A-3BFB1D3E9EA8}')" title="JREP Completed Reviews for &quot;%ARTICLE_TITLE%&quot;">Editor Notice All Reviews Complete</a></td><td>S. Karthick Ramakrishnan</td>
+								<td>
+									Required Reviews Completed
+
+								</td>
+
+                                
+								<td>
+									0
+								</td>
+
+								
+								<td>Benjamin Bishin
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>04 Jan 2017</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(101622, '{6D67218B-F29D-4882-A425-D866B164CBFC}')" title="Thank you for the review for JREP">Reviewer Thank You</a></td><td>Benjamin Bishin</td>
+								<td>
+									Under Review
+
+								</td>
+
+                                
+								<td>
+									0
+								</td>
+
+								
+								<td>Benjamin Bishin
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>03 Jan 2017</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(101609, '{5345AF16-4833-44B5-AA63-C02B029F8A53}')" title="Reminder of Late Review for JREP">Reviewer - First Late Reminder</a></td><td>Benjamin Bishin</td>
+								<td>
+									Under Review
+
+								</td>
+
+                                
+								<td>
+									0
+								</td>
+
+								
+								<td>S. Karthick Ramakrishnan
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>27 Dec 2016</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(101587, '{94549B98-502E-4A05-A816-E8870185A2DD}')" title="JREP Reminder: Review assignment is due soon">Reviewer Reminder - Before Due Date</a></td><td>Benjamin Bishin</td>
+								<td>
+									Under Review
+
+								</td>
+
+                                
+								<td>
+									0
+								</td>
+
+								
+								<td>S. Karthick Ramakrishnan
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>27 Nov 2016</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(101410, '{BA7FB043-CC8C-4CCD-AFB9-98E29F9CF886}')" title="JREP: Thank you for agreeing to review">Reviewer Instructions and Due Date</a>&nbsp;<img style="vertical-align:middle;margin-top:4px" src="img/paperclip_icon.gif" alt=""/></td><td>Benjamin Bishin</td>
+								<td>
+									Under Review
+
+								</td>
+
+                                
+								<td>
+									0
+								</td>
+
+								
+								<td>Benjamin Bishin
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>27 Nov 2016</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(101409, '{667C1278-2C2B-4CCD-B0DC-AE4C65AE97C4}')" title="Reviewer agrees to review &quot;%ARTICLE_TITLE%&quot;">Editor Notice Reviewer Agrees to Review</a></td><td>Michael Javen Fortner</td>
+								<td>
+									Under Review
+
+								</td>
+
+                                
+								<td>
+									0
+								</td>
+
+								
+								<td>Benjamin Bishin
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>27 Nov 2016</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(101406, '{09558C7D-E6B3-4307-8D67-4B57B797A473}')" title="Reviewer Invitation for JREP">Reviewer Invitation</a></td><td>Benjamin Bishin</td>
+								<td>
+									Under Review
+
+								</td>
+
+                                
+								<td>
+									0
+								</td>
+
+								
+								<td>Michael Javen Fortner
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>27 Nov 2016</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(101405, '{FA3205D3-3CCE-4227-BE81-9E09491AF66D}')" title="Declined invitation for JREP">Reviewer Invitation Declined</a></td><td>Danny Hayes, PHD</td>
+								<td>
+									No Change
+
+								</td>
+
+                                
+								<td>
+									0
+								</td>
+
+								
+								<td>Danny Hayes, PHD
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>27 Nov 2016</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(101404, '{D795CC3C-B703-494C-9C7A-135CB0C4647E}')" title="Reviewer declines to review &quot;%ARTICLE_TITLE%&quot;">Editor Notice Reviewer Declines to Review</a></td><td>Michael Javen Fortner</td>
+								<td>
+									No Change
+
+								</td>
+
+                                
+								<td>
+									0
+								</td>
+
+								
+								<td>Danny Hayes, PHD
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>26 Nov 2016</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(101381, '{C66B5033-3094-45C0-B038-56B99A89D343}')" title="JREP Completed Reviews for &quot;%ARTICLE_TITLE%&quot;">Editor Notice All Reviews Complete</a></td><td>Michael Javen Fortner</td>
+								<td>
+									Required Reviews Completed
+
+								</td>
+
+                                
+								<td>
+									0
+								</td>
+
+								
+								<td>Michael Javen Fortner
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>26 Nov 2016</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(101380, '{218F7939-C690-462E-93E9-9F9D03C64D7E}')" title="JREP Completed Reviews for &quot;%ARTICLE_TITLE%&quot;">Editor Notice All Reviews Complete</a></td><td>S. Karthick Ramakrishnan</td>
+								<td>
+									Required Reviews Completed
+
+								</td>
+
+                                
+								<td>
+									0
+								</td>
+
+								
+								<td>Michael Javen Fortner
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>26 Nov 2016</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(101379, '{6043AC79-98D4-4407-900F-A61963BC0673}')" title="Reviewer Invitation for JREP">Reviewer Invitation</a></td><td>Danny Hayes, PHD</td>
+								<td>
+									Under Review
+
+								</td>
+
+                                
+								<td>
+									0
+								</td>
+
+								
+								<td>Michael Javen Fortner
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>25 Nov 2016</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(101369, '{C579D943-CEA5-405B-8FC9-15648CA5A566}')" title="You have a new Editor Assignment for JREP">Editor Assignment</a></td><td>Michael Javen Fortner</td>
+								<td>
+									With Editor
+
+								</td>
+
+                                
+								<td>
+									0
+								</td>
+
+								
+								<td>S. Karthick Ramakrishnan
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>14 Nov 2016</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(101331, '{D86F4B08-6223-4093-9009-66CA148363EC}')" title="Author query to JREP Office">Author Query to Journal Office</a></td><td>Journal of Race, Ethnicity, and Politics</td>
+								<td>
+									Decision in Process
+
+								</td>
+
+                                
+								<td>
+									0
+								</td>
+
+								
+								<td>Christopher T. Stout, Ph.D.
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>06 Oct 2016</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(101165, '{EAEF6BEA-2FFB-496D-AFB7-204764CCAF87}')" title="Author query to JREP Office">Author Query to Journal Office</a></td><td>Journal of Race, Ethnicity, and Politics</td>
+								<td>
+									Decision in Process
+
+								</td>
+
+                                
+								<td>
+									0
+								</td>
+
+								
+								<td>Christopher T. Stout, Ph.D.
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>09 Jun 2016</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(100899, '{C8664FF4-1E2C-4624-BEA9-F14BC4674B6D}')" title="JREP Completed Reviews for &quot;%ARTICLE_TITLE%&quot;">Editor Notice All Reviews Complete</a></td><td>Sheryl R. Lightfoot, PhD</td>
+								<td>
+									Required Reviews Completed
+
+								</td>
+
+                                
+								<td>
+									0
+								</td>
+
+								
+								<td>Richard Flores
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>09 Jun 2016</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(100898, '{D85941D2-D83A-4821-8482-2EA5834D1FE4}')" title="JREP Completed Reviews for &quot;%ARTICLE_TITLE%&quot;">Editor Notice All Reviews Complete</a></td><td>Allan Colbern, Ph.D.</td>
+								<td>
+									Required Reviews Completed
+
+								</td>
+
+                                
+								<td>
+									0
+								</td>
+
+								
+								<td>Richard Flores
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>09 Jun 2016</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(100897, '{F315395B-CCBD-4601-90DA-23C51CA506D4}')" title="Thank you for the review for JREP">Reviewer Thank You</a></td><td>Richard Flores</td>
+								<td>
+									Under Review
+
+								</td>
+
+                                
+								<td>
+									0
+								</td>
+
+								
+								<td>Richard Flores
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>31 May 2016</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(100881, '{D0CE38A8-1B4D-40A7-8B8F-7C5A0A2E4ED2}')" title="Second Reminder of Late Review for %ARTICLE_TITLE%">Reviewer - Second Late Reminder</a></td><td>Richard Flores</td>
+								<td>
+									Under Review
+
+								</td>
+
+                                
+								<td>
+									0
+								</td>
+
+								
+								<td>S. Karthick Ramakrishnan
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>26 May 2016</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(100867, '{A8D80BB4-68F7-43BA-97AD-B0665600AC9B}')" title="Reminder of Late Review for JREP">Reviewer - First Late Reminder</a></td><td>Richard Flores</td>
+								<td>
+									Under Review
+
+								</td>
+
+                                
+								<td>
+									0
+								</td>
+
+								
+								<td>S. Karthick Ramakrishnan
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>25 May 2016</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(100864, '{DA3A2713-EB4E-4573-95EA-6DE55B8A4D11}')" title="JREP Reminder: Review assignment is due soon">Reviewer Reminder - Before Due Date</a></td><td>Jerome R. Hunt, PHD</td>
+								<td>
+									Under Review
+
+								</td>
+
+                                
+								<td>
+									0
+								</td>
+
+								
+								<td>S. Karthick Ramakrishnan
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>19 May 2016</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(100852, '{3B88FAC2-1A72-4816-9A04-A41FEB0957E3}')" title="JREP Reminder: Review assignment is due soon">Reviewer Reminder - Before Due Date</a></td><td>Richard Flores</td>
+								<td>
+									Under Review
+
+								</td>
+
+                                
+								<td>
+									0
+								</td>
+
+								
+								<td>S. Karthick Ramakrishnan
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>19 Apr 2016</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(100816, '{D7BD9616-3552-4DEA-9649-F63D3BE8F5B1}')" title="JREP: Thank you for agreeing to review">Reviewer Instructions and Due Date</a>&nbsp;<img style="vertical-align:middle;margin-top:4px" src="img/paperclip_icon.gif" alt=""/></td><td>Richard Flores</td>
+								<td>
+									Under Review
+
+								</td>
+
+                                
+								<td>
+									0
+								</td>
+
+								
+								<td>Richard Flores
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>19 Apr 2016</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(100811, '{D9998AF0-A1E7-49C0-9E51-CDBF4FB6D32A}')" title="Reviewer Invitation for JREP">Reviewer Invitation</a></td><td>Richard Flores</td>
+								<td>
+									Under Review
+
+								</td>
+
+                                
+								<td>
+									0
+								</td>
+
+								
+								<td>Sheryl R. Lightfoot, PhD
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>19 Apr 2016</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(100810, '{44BC3FF4-D9E7-4389-B6A6-2CD93BD1B78E}')" title="Reviewer Invitation for JREP">Reviewer Invitation</a></td><td>Jerome R. Hunt, PHD</td>
+								<td>
+									Under Review
+
+								</td>
+
+                                
+								<td>
+									0
+								</td>
+
+								
+								<td>Sheryl R. Lightfoot, PhD
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>12 Apr 2016</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(100785, '{C1185FD6-5029-477E-A6E9-FD298C5714B9}')" title="Thank you for the review for JREP">Reviewer Thank You</a></td><td>Seth McKee</td>
+								<td>
+									Under Review
+
+								</td>
+
+                                
+								<td>
+									0
+								</td>
+
+								
+								<td>Seth McKee
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>11 Apr 2016</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(100781, '{76D9463D-E4F8-447F-8D60-2D237D4A74D3}')" title="Reviewer Invitation for JREP">Reviewer Invitation</a></td><td>Karen M. Kaufmann, PHD</td>
+								<td>
+									Under Review
+
+								</td>
+
+                                
+								<td>
+									0
+								</td>
+
+								
+								<td>Sheryl R. Lightfoot, PhD
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>06 Apr 2016</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(100741, '{A76A7739-1495-4466-AB2A-BB1DCA6CE0DA}')" title="JREP Reminder: Review assignment is due soon">Reviewer Reminder - Before Due Date</a></td><td>Seth McKee</td>
+								<td>
+									Under Review
+
+								</td>
+
+                                
+								<td>
+									0
+								</td>
+
+								
+								<td>S. Karthick Ramakrishnan
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>07 Mar 2016</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(100577, '{4559692E-DEED-44FE-85D9-035149E150F6}')" title="Reviewer Invitation for JREP">Reviewer Invitation</a></td><td>Karen M. Kaufmann, PHD</td>
+								<td>
+									Under Review
+
+								</td>
+
+                                
+								<td>
+									0
+								</td>
+
+								
+								<td>Sheryl R. Lightfoot, PhD
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>07 Mar 2016</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(100572, '{17C52550-6797-4F96-B752-FA8413F3BDDA}')" title="Declined invitation for JREP">Reviewer Invitation Declined</a></td><td>Ebonya Washington, PHD</td>
+								<td>
+									Under Review
+
+								</td>
+
+                                
+								<td>
+									0
+								</td>
+
+								
+								<td>Ebonya Washington, PHD
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>07 Mar 2016</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(100571, '{69E611C6-EF82-46D6-952A-BF2BB7DE0945}')" title="JREP: Thank you for agreeing to review">Reviewer Instructions and Due Date</a>&nbsp;<img style="vertical-align:middle;margin-top:4px" src="img/paperclip_icon.gif" alt=""/></td><td>Seth McKee</td>
+								<td>
+									Under Review
+
+								</td>
+
+                                
+								<td>
+									0
+								</td>
+
+								
+								<td>Seth McKee
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>07 Mar 2016</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(100570, '{C9E6CEF5-B390-4875-B6CE-716EE6CD214D}')" title="Reviewer Invitation for JREP">Reviewer Invitation</a></td><td>Ebonya Washington, PHD</td>
+								<td>
+									Under Review
+
+								</td>
+
+                                
+								<td>
+									0
+								</td>
+
+								
+								<td>Sheryl R. Lightfoot, PhD
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>07 Mar 2016</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(100569, '{DA3750CA-F74B-49AB-864F-C882593DB36C}')" title="Reviewer Invitation for JREP">Reviewer Invitation</a></td><td>Seth McKee</td>
+								<td>
+									Under Review
+
+								</td>
+
+                                
+								<td>
+									0
+								</td>
+
+								
+								<td>Sheryl R. Lightfoot, PhD
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>07 Mar 2016</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(100568, '{5A2F8A05-A8F8-4DA3-A7CE-287FD6E11F62}')" title="Reviewer Invitation for JREP">Reviewer Invitation</a></td><td>Lester Kenyatta Spence</td>
+								<td>
+									Under Review
+
+								</td>
+
+                                
+								<td>
+									0
+								</td>
+
+								
+								<td>Sheryl R. Lightfoot, PhD
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>07 Mar 2016</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(100561, '{6015360F-27ED-4EE1-9A25-7E9C58411D6C}')" title="You have a new Editor Assignment for JREP">Editor Assignment</a></td><td>Sheryl R. Lightfoot, PhD</td>
+								<td>
+									With Editor
+
+								</td>
+
+                                
+								<td>
+									0
+								</td>
+
+								
+								<td>Allan Colbern, Ph.D.
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>03 Mar 2016</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(100548, '{12E30CAD-AB6B-47A7-BE67-173F776E4961}')" title="Submission Confirmation for JREP">Author Submits New Manuscript Confirmation</a></td><td>Christopher T. Stout, Ph.D.</td>
+								<td>
+									Manuscript Submitted
+
+								</td>
+
+                                
+								<td>
+									0
+								</td>
+
+								
+								<td>Christopher T. Stout, Ph.D.
+								</td>
+
+							
+							</tr>
+							
+					</table>
+					
+			</fieldset>
+			
+	</div>
+	<div class="centered">
+		
+		<br /><br /><input type="button" name="close" value="Close" onclick="window.close();" />
+		<br /><br />
+		<a href="#status">Status History</a>&nbsp;&nbsp;&nbsp;<a href="#correspondence">Correspondence History</a>&nbsp;&nbsp;&nbsp;
+		<br /><br /><a href="docHistoryStatusTypeView.asp?docid=3514">Switch to Status Type View</a>
+	</div>
+
+    <div id="modalDiv" style="display:none"></div>
+
+</form>
+
+<script type="text/javascript">
+    if (typeof pageDataTracker !== 'undefined') {
+        RetrieveAnalyticsData();
+    }
+</script>
+    <script type="text/javascript">
+        $(document).ready(function() 
+	    {
+	        url = 'ajax/RenderControlToPage.ashx?control=DialogWidgetControl&id=warningDialog&titleResourceId=Common.Text.Warning&titleBarIcon=warning&showTitleBar=true&showTitleBarClose=false&dialogStyle=confirm&width=400';
+	        $.get(url, function (data) 
+	        {
+	            $('body').append(data);
+	        });
+        });
+    </script>
+</body>
+</html>

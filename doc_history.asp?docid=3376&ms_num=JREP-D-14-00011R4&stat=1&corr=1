@@ -1,0 +1,3629 @@
+
+
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+<head>
+	<title>History Details</title>
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+
+    <link rel="stylesheet" type="text/css" href="cssSiteStyle.aspx" />
+    <link rel="stylesheet" type="text/css" href="cssJQueryDialog.aspx" />
+
+	<style type="text/css">
+		.centered table
+		{
+			margin: 0 auto;
+		}
+        .activeSubFlagHistory
+        {
+            color: red;
+        }
+	</style>
+
+    <script type="text/javascript">
+//<![CDATA[
+
+function FormatString(stringToFormat, replacementValues)
+{
+	return stringToFormat.replace(/{([0-9]+)}/g, function(wholematch, firstmatch)
+		  { var i = +firstmatch; return i < replacementValues.length ? replacementValues[i] : wholematch; }
+		);
+}
+
+
+
+function EscapeAttributeValue(value) 
+{
+
+        return value.replace(/&/g, '&amp;')
+                    .replace(/'/g, "&apos;")
+                    .replace(/"/g, '&quot;')
+                    .replace(/</g, '&lt;')
+                    .replace(/>/g, '&gt;');
+}
+
+//]]>
+</script>
+
+<script type="text/javascript" src="/jrep/WebUserControls/ClientJScript/translatedClientutil.aspx?lang=en%2DUS"></script>
+<script type="text/javascript" src="/jrep/ClientScript/clientutil.aspx"></script>
+
+<script src="/jrep/ClientScript/jquery.js" type="text/javascript"></script>
+<script src="/jrep/ClientScript/jquery-ui.js" type="text/javascript"></script>   
+
+
+
+    <script type="text/javascript" src="ClientScript/MSPFunctions.js"></script>
+
+	<script type="text/javascript">
+		/***********************************************************************
+		* 7.0-39	TimH	20090424
+		* Navigate to the Add External Correspondence Page, providing
+		* info needed to add a new External Correspondence record.
+		***********************************************************************/
+		function AddExternalCorrespondence(externalCorrespType)
+		{
+			var hdnExternalCorrespondenceType = document.getElementById("hdnExternalCorrespondenceType");
+			hdnExternalCorrespondenceType.value = "" + externalCorrespType;
+
+			var hdnLetterSecurityID = document.getElementById("hdnLetterSecurityID");
+			hdnLetterSecurityID.value = "";
+
+			document.frmDocHistory.submit();
+		}
+
+		/***********************************************************************
+		* 7.0-39	TimH	20090424
+		* Edit or Remove the External Correspondence specified by the
+		* Edit or Remove hyperlink clicked by the user.
+		***********************************************************************/
+		function EditExternalCorrespondence(externalCorrespondenceID, externalCorrespType, remove, letterSecurityID)
+		{
+			var hdnExternalCorrespondenceID = document.getElementById("hdnExternalCorrespondenceID");
+			hdnExternalCorrespondenceID.value = "" + externalCorrespondenceID;
+
+			var hdnExternalCorrespondenceType = document.getElementById("hdnExternalCorrespondenceType");
+			hdnExternalCorrespondenceType.value = "" + externalCorrespType;
+
+			var hdnLetterSecurityID = document.getElementById("hdnLetterSecurityID");
+			hdnLetterSecurityID.value = letterSecurityID;
+
+			var hdnRemove = document.getElementById("hdnRemove");
+			hdnRemove.value = remove;
+
+			if(hdnRemove.value == "1")
+			{
+                var okAction = function ()
+                {
+					document.frmDocHistory.submit();	
+                }
+                $("#warningDialog")[0].showDialog('Removing the correspondence cannot be undone.\x0a\x3cbr\x2f\x3e\x3cbr\x2f\x3e\x0aClick Cancel to return to the History page without deleting the correspondence.\x0a\x3cbr\x2f\x3eClick OK to remove this item of correspondence.', okAction);
+                return;
+			}
+			else if(hdnRemove.value == "0")
+			{
+				document.frmDocHistory.submit();
+			}
+		}
+
+		/***********************************************************************
+		* 7.0-39	TimH	20090424
+		* In a new popup, View a read only version of the External Correspondence specified by the
+		* External Correspondence Description hyperlink clicked by the user.
+		***********************************************************************/
+		function ViewExternalCorrespondence(externalCorrespondenceID, externalCorrespType, letterSecurityID)
+		{
+			var sNavUrl = "DotNetPopUps/ViewExternalCorrespondence.aspx";
+			sNavUrl += "?hdnExternalCorrespondenceID=" + externalCorrespondenceID;
+			sNavUrl += "&hdnExternalCorrespondenceType=" + externalCorrespType;
+			sNavUrl += "&hdnLetterSecurityID=" + letterSecurityID;
+			sNavUrl += "&hdnAssociatedEntityType=" + EXT_CORRES_ASSOC_TYPE_SUBMISSION;
+
+			openCenterWin(sNavUrl, 'ViewExternalCorrespondence', 1, 1, 0, 0, 0, 0);
+		}
+
+		function resendEditorialStatus(statHistID, notLatest)
+		{
+            if (notLatest)
+            {
+                var okAction = function ()
+                {
+					resendStatus(statHistID);	
+                }
+                $("#warningDialog")[0].showDialog('The Status you are attempting to resend is not the most recent status. Do you want to continue\x3f', okAction);
+                return;
+            }
+            else
+            {
+                resendStatus(statHistID);
+            }
+        }
+        function resendStatus(statHistID)
+        {
+            // Resend status
+		    var documentID = "3376";
+		    var exportType = 4;
+		    var operatorID = "217520";
+		    var proxyOperatorID = "";
+		    if (proxyOperatorID != "")
+		    {
+		        operatorID = proxyOperatorID;
+		    }
+		    resendMSPEditorialStatus(documentID, exportType, operatorID, statHistID, "");
+        }
+
+		function displayOverlay(text) {
+		    $("#modalDiv").text(text);
+		    $("#modalDiv").dialog({
+	            title: '',
+	            resizable: true, modal: true, buttons: [{ text: 'OK',
+	                click: function () { $(this).dialog("close"); }
+	            }], closeText: '',
+
+	            open: function ()
+	            {
+	                $(this).dialog('widget').find(".ui-dialog-titlebar-close").hide();
+	                $(this).dialog({ position: 'center' });
+	            }
+
+	        });
+
+	        return false;
+		}
+	</script>
+    
+</head>
+<body>
+
+	<form name="frmDocHistory" method="post" id="frmDocHistory" action="DotNetPopUps/AddEditExternalCorrespondence.aspx">
+	<div class="centered">
+	    <input type="hidden" id="hdnAssociatedEntityID" name="hdnAssociatedEntityID" value="3376" />
+	    <input type="hidden" id="hdnLetterSecurityID" name="hdnLetterSecurityID" value="" />
+	    <input type="hidden" id="hdnAssociatedEntityType" name="hdnAssociatedEntityType" value="1" />
+	    <input type="hidden" id="hdnExternalCorrespondenceID" name="hdnExternalCorrespondenceID" value="" />
+	    <input type="hidden" id="hdnExternalCorrespondenceType" name="hdnExternalCorrespondenceType" value=""/>
+	    <input type="hidden" id="hdnRemove" name="hdnRemove" value="" />
+	    <input type="hidden" id="hdnReturnPage" name="hdnReturnPage" value="doc_history.asp" />
+	    <input type="hidden" id="hdnAttachmentGroupID" name="hdnAttachmentGroupID" value="" />
+		<h3>
+			History for Manuscript Number: JREP-D-14-00011R4 &quot;Is Only Fair Lovely in Indian Politics? Consequences of Skin Color in a Survey Experiment in Delhi&quot;
+		</h3>
+		<a href="#status">Status History</a>&nbsp;&nbsp;&nbsp;<a href="#correspondence">Correspondence History</a>&nbsp;&nbsp;&nbsp;
+
+
+		<br /><br /><a href="docHistoryStatusTypeView.asp?docid=3376">Switch to Status Type View</a>
+
+		
+		<br /><br /><input type="button" name="close" value="Close" onclick="window.close();" />
+	</div>
+
+	<div>
+		<br /><br />
+		
+			<fieldset>
+				<legend><a name="status"></a>STATUS HISTORY</legend>
+				
+					<table border="0" cellpadding="0" cellspacing="0" width="97%" class="datatable">
+						<tr>
+							<th>Status Date</th>
+							<th>Document Status</th>
+							<th>Edit Submission Status</th>
+							<th>Status Days</th>
+							<th>Role Family</th>
+							<th>Revision </th>
+							<th>Operator</th>
+						</tr>
+
+						
+							<tr>
+								
+								<td>Mar 21 2016 10:50PM</td>
+
+								
+								<td>
+									Completed Accept
+								</td>
+
+								
+									<td>
+										
+									</td>
+									
+								<td>----</td>
+
+								
+								<td>
+									EDITOR
+								</td>
+
+								
+								<td>4</td>
+
+								
+								<td>S. Karthick Ramakrishnan
+								</td>
+							</tr>
+							
+							<tr>
+								
+								<td>Mar 21 2016 10:49PM</td>
+
+								
+								<td>
+									Accept
+								</td>
+
+								
+									<td>
+										
+									</td>
+									
+								<td>----</td>
+
+								
+								<td>
+									EDITOR
+								</td>
+
+								
+								<td>4</td>
+
+								
+								<td>S. Karthick Ramakrishnan
+								</td>
+							</tr>
+							
+							<tr>
+								
+								<td>Mar 21 2016 10:49PM</td>
+
+								
+								<td>
+									Decision in Process
+								</td>
+
+								
+									<td>
+										Editor Approved Edited Submission
+									</td>
+									
+								<td>----</td>
+
+								
+								<td>
+									EDITOR
+								</td>
+
+								
+								<td>4</td>
+
+								
+								<td>S. Karthick Ramakrishnan
+								</td>
+							</tr>
+							
+							<tr>
+								
+								<td>Mar 21 2016 10:47PM</td>
+
+								
+								<td>
+									With Editor
+								</td>
+
+								
+									<td>
+										
+									</td>
+									
+								<td>----</td>
+
+								
+								<td>
+									EDITOR
+								</td>
+
+								
+								<td>4</td>
+
+								
+								<td>Allan Colbern, Ph.D.<br /><span class="proxy">[Proxied by S. Karthick Ramakrishnan]</span>
+								</td>
+							</tr>
+							
+							<tr>
+								
+								<td>Mar 21 2016 10:45PM</td>
+
+								
+								<td>
+									Revised Manuscript Submitted
+								</td>
+
+								
+									<td>
+										
+									</td>
+									
+								<td>----</td>
+
+								
+								<td>
+									EDITOR
+								</td>
+
+								
+								<td>4</td>
+
+								
+								<td>Amit Ahuja, PHD<br /><span class="proxy">[Proxied by S. Karthick Ramakrishnan]</span>
+								</td>
+							</tr>
+							
+							<tr>
+								
+								<td>Mar 21 2016 10:44PM</td>
+
+								
+								<td>
+									Revision Needs Approval
+								</td>
+
+								
+									<td>
+										
+									</td>
+									
+								<td>----</td>
+
+								
+								<td>
+									AUTHOR
+								</td>
+
+								
+								<td>4</td>
+
+								
+								<td>Amit Ahuja, PHD<br /><span class="proxy">[Proxied by S. Karthick Ramakrishnan]</span>
+								</td>
+							</tr>
+							
+							<tr>
+								
+								<td>Mar 21 2016 10:44PM</td>
+
+								
+								<td>
+									Building PDF
+								</td>
+
+								
+									<td>
+										
+									</td>
+									
+								<td>----</td>
+
+								
+								<td>
+									AUTHOR
+								</td>
+
+								
+								<td>4</td>
+
+								
+								<td>Amit Ahuja, PHD<br /><span class="proxy">[Proxied by S. Karthick Ramakrishnan]</span>
+								</td>
+							</tr>
+							
+							<tr>
+								
+								<td>Mar 21 2016 10:44PM</td>
+
+								
+								<td>
+									Incomplete
+								</td>
+
+								
+									<td>
+										
+									</td>
+									
+								<td>----</td>
+
+								
+								<td>
+									AUTHOR
+								</td>
+
+								
+								<td>4</td>
+
+								
+								<td>Amit Ahuja, PHD<br /><span class="proxy">[Proxied by S. Karthick Ramakrishnan]</span>
+								</td>
+							</tr>
+							
+							<tr>
+								
+								<td>Mar 21 2016 10:43PM</td>
+
+								
+								<td>
+									Revision Needs Approval
+								</td>
+
+								
+									<td>
+										
+									</td>
+									
+								<td>----</td>
+
+								
+								<td>
+									AUTHOR
+								</td>
+
+								
+								<td>4</td>
+
+								
+								<td>Amit Ahuja, PHD<br /><span class="proxy">[Proxied by S. Karthick Ramakrishnan]</span>
+								</td>
+							</tr>
+							
+							<tr>
+								
+								<td>Mar 21 2016 10:43PM</td>
+
+								
+								<td>
+									Building PDF
+								</td>
+
+								
+									<td>
+										
+									</td>
+									
+								<td>----</td>
+
+								
+								<td>
+									AUTHOR
+								</td>
+
+								
+								<td>4</td>
+
+								
+								<td>Amit Ahuja, PHD<br /><span class="proxy">[Proxied by S. Karthick Ramakrishnan]</span>
+								</td>
+							</tr>
+							
+							<tr>
+								
+								<td>Dec 13 2015  4:40PM</td>
+
+								
+								<td>
+									Incomplete
+								</td>
+
+								
+									<td>
+										
+									</td>
+									
+								<td>99</td>
+
+								
+								<td>
+									AUTHOR
+								</td>
+
+								
+								<td>4</td>
+
+								
+								<td>Amit Ahuja, PHD
+								</td>
+							</tr>
+							
+							<tr>
+								
+								<td>Nov 13 2015  4:28PM</td>
+
+								
+								<td>
+									Revise
+								</td>
+
+								
+									<td>
+										
+									</td>
+									
+								<td>30</td>
+
+								
+								<td>
+									AUTHOR
+								</td>
+
+								
+								<td>3</td>
+
+								
+								<td>S. Karthick Ramakrishnan
+								</td>
+							</tr>
+							
+							<tr>
+								
+								<td>Nov 13 2015  4:28PM</td>
+
+								
+								<td>
+									Decision in Process
+								</td>
+
+								
+									<td>
+										Editor Approved Edited Submission
+									</td>
+									
+								<td>----</td>
+
+								
+								<td>
+									EDITOR
+								</td>
+
+								
+								<td>3</td>
+
+								
+								<td>S. Karthick Ramakrishnan
+								</td>
+							</tr>
+							
+							<tr>
+								
+								<td>Nov 13 2015  3:00PM</td>
+
+								
+								<td>
+									With Editor
+								</td>
+
+								
+									<td>
+										
+									</td>
+									
+								<td>----</td>
+
+								
+								<td>
+									EDITOR
+								</td>
+
+								
+								<td>3</td>
+
+								
+								<td>Allan Colbern, Ph.D.
+								</td>
+							</tr>
+							
+							<tr>
+								
+								<td>Nov  9 2015 10:19AM</td>
+
+								
+								<td>
+									Revised Manuscript Submitted
+								</td>
+
+								
+									<td>
+										
+									</td>
+									
+								<td>4</td>
+
+								
+								<td>
+									EDITOR
+								</td>
+
+								
+								<td>3</td>
+
+								
+								<td>Amit Ahuja, PHD
+								</td>
+							</tr>
+							
+							<tr>
+								
+								<td>Nov  9 2015 10:16AM</td>
+
+								
+								<td>
+									Revision Needs Approval
+								</td>
+
+								
+									<td>
+										
+									</td>
+									
+								<td>----</td>
+
+								
+								<td>
+									AUTHOR
+								</td>
+
+								
+								<td>3</td>
+
+								
+								<td>Amit Ahuja, PHD
+								</td>
+							</tr>
+							
+							<tr>
+								
+								<td>Nov  9 2015 10:16AM</td>
+
+								
+								<td>
+									Building PDF
+								</td>
+
+								
+									<td>
+										
+									</td>
+									
+								<td>----</td>
+
+								
+								<td>
+									AUTHOR
+								</td>
+
+								
+								<td>3</td>
+
+								
+								<td>Amit Ahuja, PHD
+								</td>
+							</tr>
+							
+							<tr>
+								
+								<td>Nov  9 2015  9:55AM</td>
+
+								
+								<td>
+									Incomplete
+								</td>
+
+								
+									<td>
+										
+									</td>
+									
+								<td>----</td>
+
+								
+								<td>
+									AUTHOR
+								</td>
+
+								
+								<td>3</td>
+
+								
+								<td>Amit Ahuja, PHD
+								</td>
+							</tr>
+							
+							<tr>
+								
+								<td>Sep 23 2015  9:06PM</td>
+
+								
+								<td>
+									Revise
+								</td>
+
+								
+									<td>
+										
+									</td>
+									
+								<td>47</td>
+
+								
+								<td>
+									AUTHOR
+								</td>
+
+								
+								<td>2</td>
+
+								
+								<td>S. Karthick Ramakrishnan
+								</td>
+							</tr>
+							
+							<tr>
+								
+								<td>Sep 23 2015  9:06PM</td>
+
+								
+								<td>
+									Decision in Process
+								</td>
+
+								
+									<td>
+										
+									</td>
+									
+								<td>----</td>
+
+								
+								<td>
+									REVIEWER
+								</td>
+
+								
+								<td>2</td>
+
+								
+								<td>S. Karthick Ramakrishnan
+								</td>
+							</tr>
+							
+							<tr>
+								
+								<td>Aug 25 2015 11:29AM</td>
+
+								
+								<td>
+									Under Review
+								</td>
+
+								
+									<td>
+										
+									</td>
+									
+								<td>29</td>
+
+								
+								<td>
+									REVIEWER
+								</td>
+
+								
+								<td>2</td>
+
+								
+								<td>S. Karthick Ramakrishnan
+								</td>
+							</tr>
+							
+							<tr>
+								
+								<td>Aug 25 2015 11:29AM</td>
+
+								
+								<td>
+									
+								</td>
+
+								
+									<td>
+										Editor Approved Edited Submission
+									</td>
+									
+								<td>----</td>
+
+								
+								<td>
+									EDITOR
+								</td>
+
+								
+								<td>2</td>
+
+								
+								<td>S. Karthick Ramakrishnan
+								</td>
+							</tr>
+							
+							<tr>
+								
+								<td>Aug 25 2015 11:27AM</td>
+
+								
+								<td>
+									
+								</td>
+
+								
+									<td>
+										Revised PDF Needs Editor Approval
+									</td>
+									
+								<td>----</td>
+
+								
+								<td>
+									EDITOR
+								</td>
+
+								
+								<td>2</td>
+
+								
+								<td>S. Karthick Ramakrishnan
+								</td>
+							</tr>
+							
+							<tr>
+								
+								<td>Aug 25 2015 11:26AM</td>
+
+								
+								<td>
+									
+								</td>
+
+								
+									<td>
+										Building PDF for Editor
+									</td>
+									
+								<td>----</td>
+
+								
+								<td>
+									EDITOR
+								</td>
+
+								
+								<td>2</td>
+
+								
+								<td>S. Karthick Ramakrishnan
+								</td>
+							</tr>
+							
+							<tr>
+								
+								<td>Aug 25 2015 11:25AM</td>
+
+								
+								<td>
+									
+								</td>
+
+								
+									<td>
+										Incomplete with Editor
+									</td>
+									
+								<td>----</td>
+
+								
+								<td>
+									EDITOR
+								</td>
+
+								
+								<td>2</td>
+
+								
+								<td>S. Karthick Ramakrishnan
+								</td>
+							</tr>
+							
+							<tr>
+								
+								<td>Aug 10 2015  5:17PM</td>
+
+								
+								<td>
+									With Editor
+								</td>
+
+								
+									<td>
+										
+									</td>
+									
+								<td>----</td>
+
+								
+								<td>
+									EDITOR
+								</td>
+
+								
+								<td>2</td>
+
+								
+								<td>Allan Colbern, Ph.D.
+								</td>
+							</tr>
+							
+							<tr>
+								
+								<td>Aug  7 2015  4:32PM</td>
+
+								
+								<td>
+									Revised Manuscript Submitted
+								</td>
+
+								
+									<td>
+										
+									</td>
+									
+								<td>3</td>
+
+								
+								<td>
+									EDITOR
+								</td>
+
+								
+								<td>2</td>
+
+								
+								<td>Amit Ahuja, PHD
+								</td>
+							</tr>
+							
+							<tr>
+								
+								<td>Aug  7 2015  4:30PM</td>
+
+								
+								<td>
+									Revision Needs Approval
+								</td>
+
+								
+									<td>
+										
+									</td>
+									
+								<td>----</td>
+
+								
+								<td>
+									AUTHOR
+								</td>
+
+								
+								<td>2</td>
+
+								
+								<td>Amit Ahuja, PHD
+								</td>
+							</tr>
+							
+							<tr>
+								
+								<td>Aug  7 2015  4:30PM</td>
+
+								
+								<td>
+									Building PDF
+								</td>
+
+								
+									<td>
+										
+									</td>
+									
+								<td>----</td>
+
+								
+								<td>
+									AUTHOR
+								</td>
+
+								
+								<td>2</td>
+
+								
+								<td>Amit Ahuja, PHD
+								</td>
+							</tr>
+							
+							<tr>
+								
+								<td>Aug  7 2015  4:26PM</td>
+
+								
+								<td>
+									Incomplete
+								</td>
+
+								
+									<td>
+										
+									</td>
+									
+								<td>----</td>
+
+								
+								<td>
+									AUTHOR
+								</td>
+
+								
+								<td>2</td>
+
+								
+								<td>Amit Ahuja, PHD
+								</td>
+							</tr>
+							
+							<tr>
+								
+								<td>Aug  7 2015  3:08PM</td>
+
+								
+								<td>
+									Revision Needs Approval
+								</td>
+
+								
+									<td>
+										
+									</td>
+									
+								<td>----</td>
+
+								
+								<td>
+									AUTHOR
+								</td>
+
+								
+								<td>2</td>
+
+								
+								<td>Amit Ahuja, PHD
+								</td>
+							</tr>
+							
+							<tr>
+								
+								<td>Aug  7 2015  3:08PM</td>
+
+								
+								<td>
+									Building PDF
+								</td>
+
+								
+									<td>
+										
+									</td>
+									
+								<td>----</td>
+
+								
+								<td>
+									AUTHOR
+								</td>
+
+								
+								<td>2</td>
+
+								
+								<td>Amit Ahuja, PHD
+								</td>
+							</tr>
+							
+							<tr>
+								
+								<td>Aug  7 2015 11:55AM</td>
+
+								
+								<td>
+									Incomplete
+								</td>
+
+								
+									<td>
+										
+									</td>
+									
+								<td>----</td>
+
+								
+								<td>
+									AUTHOR
+								</td>
+
+								
+								<td>2</td>
+
+								
+								<td>Amit Ahuja, PHD
+								</td>
+							</tr>
+							
+							<tr>
+								
+								<td>Aug  7 2015 11:42AM</td>
+
+								
+								<td>
+									Revise
+								</td>
+
+								
+									<td>
+										
+									</td>
+									
+								<td>----</td>
+
+								
+								<td>
+									AUTHOR
+								</td>
+
+								
+								<td>1</td>
+
+								
+								<td>S. Karthick Ramakrishnan
+								</td>
+							</tr>
+							
+							<tr>
+								
+								<td>Aug  7 2015 11:42AM</td>
+
+								
+								<td>
+									Decision in Process
+								</td>
+
+								
+									<td>
+										
+									</td>
+									
+								<td>----</td>
+
+								
+								<td>
+									REVIEWER
+								</td>
+
+								
+								<td>1</td>
+
+								
+								<td>S. Karthick Ramakrishnan
+								</td>
+							</tr>
+							
+							<tr>
+								
+								<td>Jul  9 2015 12:33PM</td>
+
+								
+								<td>
+									
+								</td>
+
+								
+									<td>
+										Editor Approved Edited Submission
+									</td>
+									
+								<td>28</td>
+
+								
+								<td>
+									REVIEWER
+								</td>
+
+								
+								<td>1</td>
+
+								
+								<td>S. Karthick Ramakrishnan
+								</td>
+							</tr>
+							
+							<tr>
+								
+								<td>Jul  9 2015 12:33PM</td>
+
+								
+								<td>
+									
+								</td>
+
+								
+									<td>
+										Revised PDF Needs Editor Approval
+									</td>
+									
+								<td>----</td>
+
+								
+								<td>
+									REVIEWER
+								</td>
+
+								
+								<td>1</td>
+
+								
+								<td>S. Karthick Ramakrishnan
+								</td>
+							</tr>
+							
+							<tr>
+								
+								<td>Jul  9 2015 12:33PM</td>
+
+								
+								<td>
+									
+								</td>
+
+								
+									<td>
+										Building PDF for Editor
+									</td>
+									
+								<td>----</td>
+
+								
+								<td>
+									REVIEWER
+								</td>
+
+								
+								<td>1</td>
+
+								
+								<td>S. Karthick Ramakrishnan
+								</td>
+							</tr>
+							
+							<tr>
+								
+								<td>Jul  9 2015 12:30PM</td>
+
+								
+								<td>
+									
+								</td>
+
+								
+									<td>
+										Incomplete with Editor
+									</td>
+									
+								<td>----</td>
+
+								
+								<td>
+									REVIEWER
+								</td>
+
+								
+								<td>1</td>
+
+								
+								<td>S. Karthick Ramakrishnan
+								</td>
+							</tr>
+							
+							<tr>
+								
+								<td>Jul  3 2015 12:08PM</td>
+
+								
+								<td>
+									Under Review
+								</td>
+
+								
+									<td>
+										
+									</td>
+									
+								<td>----</td>
+
+								
+								<td>
+									REVIEWER
+								</td>
+
+								
+								<td>1</td>
+
+								
+								<td>S. Karthick Ramakrishnan
+								</td>
+							</tr>
+							
+							<tr>
+								
+								<td>Jul  3 2015 12:05PM</td>
+
+								
+								<td>
+									
+								</td>
+
+								
+									<td>
+										Editor Approved Edited Submission
+									</td>
+									
+								<td>----</td>
+
+								
+								<td>
+									EDITOR
+								</td>
+
+								
+								<td>1</td>
+
+								
+								<td>S. Karthick Ramakrishnan
+								</td>
+							</tr>
+							
+							<tr>
+								
+								<td>Jul  3 2015 12:03PM</td>
+
+								
+								<td>
+									
+								</td>
+
+								
+									<td>
+										Revised PDF Needs Editor Approval
+									</td>
+									
+								<td>----</td>
+
+								
+								<td>
+									EDITOR
+								</td>
+
+								
+								<td>1</td>
+
+								
+								<td>S. Karthick Ramakrishnan
+								</td>
+							</tr>
+							
+							<tr>
+								
+								<td>Jul  3 2015 12:03PM</td>
+
+								
+								<td>
+									
+								</td>
+
+								
+									<td>
+										Building PDF for Editor
+									</td>
+									
+								<td>----</td>
+
+								
+								<td>
+									EDITOR
+								</td>
+
+								
+								<td>1</td>
+
+								
+								<td>S. Karthick Ramakrishnan
+								</td>
+							</tr>
+							
+							<tr>
+								
+								<td>Jul  3 2015 12:02PM</td>
+
+								
+								<td>
+									
+								</td>
+
+								
+									<td>
+										Incomplete with Editor
+									</td>
+									
+								<td>----</td>
+
+								
+								<td>
+									EDITOR
+								</td>
+
+								
+								<td>1</td>
+
+								
+								<td>S. Karthick Ramakrishnan
+								</td>
+							</tr>
+							
+							<tr>
+								
+								<td>Jul  3 2015 12:01PM</td>
+
+								
+								<td>
+									
+								</td>
+
+								
+									<td>
+										Revised PDF Needs Editor Approval
+									</td>
+									
+								<td>----</td>
+
+								
+								<td>
+									EDITOR
+								</td>
+
+								
+								<td>1</td>
+
+								
+								<td>S. Karthick Ramakrishnan
+								</td>
+							</tr>
+							
+							<tr>
+								
+								<td>Jul  3 2015 12:01PM</td>
+
+								
+								<td>
+									
+								</td>
+
+								
+									<td>
+										Building PDF for Editor
+									</td>
+									
+								<td>----</td>
+
+								
+								<td>
+									EDITOR
+								</td>
+
+								
+								<td>1</td>
+
+								
+								<td>S. Karthick Ramakrishnan
+								</td>
+							</tr>
+							
+							<tr>
+								
+								<td>Jul  3 2015 11:59AM</td>
+
+								
+								<td>
+									
+								</td>
+
+								
+									<td>
+										Incomplete with Editor
+									</td>
+									
+								<td>----</td>
+
+								
+								<td>
+									EDITOR
+								</td>
+
+								
+								<td>1</td>
+
+								
+								<td>S. Karthick Ramakrishnan
+								</td>
+							</tr>
+							
+							<tr>
+								
+								<td>May  7 2015  2:51PM</td>
+
+								
+								<td>
+									With Editor
+								</td>
+
+								
+									<td>
+										
+									</td>
+									
+								<td>----</td>
+
+								
+								<td>
+									EDITOR
+								</td>
+
+								
+								<td>1</td>
+
+								
+								<td>Allan Colbern, Ph.D.
+								</td>
+							</tr>
+							
+							<tr>
+								
+								<td>May  6 2015  8:36PM</td>
+
+								
+								<td>
+									Revised Manuscript Submitted
+								</td>
+
+								
+									<td>
+										
+									</td>
+									
+								<td>----</td>
+
+								
+								<td>
+									EDITOR
+								</td>
+
+								
+								<td>1</td>
+
+								
+								<td>Amit Ahuja, PHD
+								</td>
+							</tr>
+							
+							<tr>
+								
+								<td>May  6 2015  8:34PM</td>
+
+								
+								<td>
+									Revision Needs Approval
+								</td>
+
+								
+									<td>
+										
+									</td>
+									
+								<td>----</td>
+
+								
+								<td>
+									AUTHOR
+								</td>
+
+								
+								<td>1</td>
+
+								
+								<td>Amit Ahuja, PHD
+								</td>
+							</tr>
+							
+							<tr>
+								
+								<td>May  6 2015  8:33PM</td>
+
+								
+								<td>
+									Building PDF
+								</td>
+
+								
+									<td>
+										
+									</td>
+									
+								<td>----</td>
+
+								
+								<td>
+									AUTHOR
+								</td>
+
+								
+								<td>1</td>
+
+								
+								<td>Amit Ahuja, PHD
+								</td>
+							</tr>
+							
+							<tr>
+								
+								<td>May  6 2015  8:32PM</td>
+
+								
+								<td>
+									Incomplete
+								</td>
+
+								
+									<td>
+										
+									</td>
+									
+								<td>----</td>
+
+								
+								<td>
+									AUTHOR
+								</td>
+
+								
+								<td>1</td>
+
+								
+								<td>Amit Ahuja, PHD
+								</td>
+							</tr>
+							
+							<tr>
+								
+								<td>May  6 2015  8:23PM</td>
+
+								
+								<td>
+									Revision Needs Approval
+								</td>
+
+								
+									<td>
+										
+									</td>
+									
+								<td>----</td>
+
+								
+								<td>
+									AUTHOR
+								</td>
+
+								
+								<td>1</td>
+
+								
+								<td>Amit Ahuja, PHD
+								</td>
+							</tr>
+							
+							<tr>
+								
+								<td>May  6 2015  8:23PM</td>
+
+								
+								<td>
+									Building PDF
+								</td>
+
+								
+									<td>
+										
+									</td>
+									
+								<td>----</td>
+
+								
+								<td>
+									AUTHOR
+								</td>
+
+								
+								<td>1</td>
+
+								
+								<td>Amit Ahuja, PHD
+								</td>
+							</tr>
+							
+							<tr>
+								
+								<td>May  6 2015  7:59PM</td>
+
+								
+								<td>
+									Incomplete
+								</td>
+
+								
+									<td>
+										
+									</td>
+									
+								<td>----</td>
+
+								
+								<td>
+									AUTHOR
+								</td>
+
+								
+								<td>1</td>
+
+								
+								<td>Amit Ahuja, PHD
+								</td>
+							</tr>
+							
+							<tr>
+								
+								<td>Mar  7 2015  7:27PM</td>
+
+								
+								<td>
+									Revise
+								</td>
+
+								
+									<td>
+										
+									</td>
+									
+								<td>60</td>
+
+								
+								<td>
+									AUTHOR
+								</td>
+
+								
+								<td>0</td>
+
+								
+								<td>S. Karthick Ramakrishnan
+								</td>
+							</tr>
+							
+							<tr>
+								
+								<td>Mar  7 2015  7:27PM</td>
+
+								
+								<td>
+									Decision in Process
+								</td>
+
+								
+									<td>
+										
+									</td>
+									
+								<td>----</td>
+
+								
+								<td>
+									EDITOR
+								</td>
+
+								
+								<td>0</td>
+
+								
+								<td>S. Karthick Ramakrishnan
+								</td>
+							</tr>
+							
+							<tr>
+								
+								<td>Mar  7 2015  7:15PM</td>
+
+								
+								<td>
+									Required Reviews Completed
+								</td>
+
+								
+									<td>
+										
+									</td>
+									
+								<td>----</td>
+
+								
+								<td>
+									EDITOR
+								</td>
+
+								
+								<td>0</td>
+
+								
+								<td>Bethany Albertson, PHD
+								</td>
+							</tr>
+							
+							<tr>
+								
+								<td>Mar  6 2015  3:58PM</td>
+
+								
+								<td>
+									
+								</td>
+
+								
+									<td>
+										Editor Approved Edited Submission
+									</td>
+									
+								<td>125</td>
+
+								
+								<td>
+									REVIEWER
+								</td>
+
+								
+								<td>0</td>
+
+								
+								<td>S. Karthick Ramakrishnan
+								</td>
+							</tr>
+							
+							<tr>
+								
+								<td>Mar  6 2015  3:57PM</td>
+
+								
+								<td>
+									
+								</td>
+
+								
+									<td>
+										PDF Needs Editor Approval
+									</td>
+									
+								<td>----</td>
+
+								
+								<td>
+									REVIEWER
+								</td>
+
+								
+								<td>0</td>
+
+								
+								<td>S. Karthick Ramakrishnan
+								</td>
+							</tr>
+							
+							<tr>
+								
+								<td>Mar  6 2015  3:57PM</td>
+
+								
+								<td>
+									
+								</td>
+
+								
+									<td>
+										Building PDF for Editor
+									</td>
+									
+								<td>----</td>
+
+								
+								<td>
+									REVIEWER
+								</td>
+
+								
+								<td>0</td>
+
+								
+								<td>S. Karthick Ramakrishnan
+								</td>
+							</tr>
+							
+							<tr>
+								
+								<td>Mar  6 2015  3:56PM</td>
+
+								
+								<td>
+									
+								</td>
+
+								
+									<td>
+										Incomplete with Editor
+									</td>
+									
+								<td>----</td>
+
+								
+								<td>
+									REVIEWER
+								</td>
+
+								
+								<td>0</td>
+
+								
+								<td>S. Karthick Ramakrishnan
+								</td>
+							</tr>
+							
+							<tr>
+								
+								<td>Jan 23 2015  1:54AM</td>
+
+								
+								<td>
+									Under Review
+								</td>
+
+								
+									<td>
+										
+									</td>
+									
+								<td>43</td>
+
+								
+								<td>
+									REVIEWER
+								</td>
+
+								
+								<td>0</td>
+
+								
+								<td>S. Karthick Ramakrishnan
+								</td>
+							</tr>
+							
+							<tr>
+								
+								<td>Dec 29 2014  7:18PM</td>
+
+								
+								<td>
+									With Editor
+								</td>
+
+								
+									<td>
+										
+									</td>
+									
+								<td>24</td>
+
+								
+								<td>
+									EDITOR
+								</td>
+
+								
+								<td>0</td>
+
+								
+								<td>Allan Colbern, Ph.D.
+								</td>
+							</tr>
+							
+							<tr>
+								
+								<td>Dec 29 2014  3:39PM</td>
+
+								
+								<td>
+									Manuscript Submitted
+								</td>
+
+								
+									<td>
+										
+									</td>
+									
+								<td>----</td>
+
+								
+								<td>
+									EDITOR
+								</td>
+
+								
+								<td>0</td>
+
+								
+								<td>Amit Ahuja, PHD
+								</td>
+							</tr>
+							
+							<tr>
+								
+								<td>Dec 29 2014  3:36PM</td>
+
+								
+								<td>
+									Needs Approval
+								</td>
+
+								
+									<td>
+										
+									</td>
+									
+								<td>----</td>
+
+								
+								<td>
+									AUTHOR
+								</td>
+
+								
+								<td>0</td>
+
+								
+								<td>Amit Ahuja, PHD
+								</td>
+							</tr>
+							
+							<tr>
+								
+								<td>Dec 29 2014  3:35PM</td>
+
+								
+								<td>
+									Building PDF
+								</td>
+
+								
+									<td>
+										
+									</td>
+									
+								<td>----</td>
+
+								
+								<td>
+									AUTHOR
+								</td>
+
+								
+								<td>0</td>
+
+								
+								<td>Amit Ahuja, PHD
+								</td>
+							</tr>
+							
+							<tr>
+								
+								<td>Dec 29 2014  3:19PM</td>
+
+								
+								<td>
+									Incomplete
+								</td>
+
+								
+									<td>
+										
+									</td>
+									
+								<td>----</td>
+
+								
+								<td>
+									AUTHOR
+								</td>
+
+								
+								<td>0</td>
+
+								
+								<td>Amit Ahuja, PHD
+								</td>
+							</tr>
+							
+					</table>
+					
+			</fieldset>
+			<br />
+			<br />
+		
+			<fieldset>
+				<legend><a name="correspondence"></a>CORRESPONDENCE HISTORY</legend>
+				
+						<div class="buttonAlign" style="padding-bottom:4px;">
+							<input type="button" name="btnAddExtEditorialCorrespondence" value="Add&#32;Editorial&#32;Correspondence" onclick="AddExternalCorrespondence(1);" />
+							
+						</div>
+					
+					<table border="0" cellpadding="0" cellspacing="0" width="97%" class="datatable">
+						<tr>
+							<th>Correspondence Date</th>
+							<th>Letter</th>
+							<th>Recipient</th>
+							<th>Status</th>
+                            
+							<th>Revision</th>
+							<th>Operator</th>
+						</tr>
+
+						
+							<tr>
+								
+								<td>21 Mar 2016</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(100648, '{F64E209B-16FA-4BB8-A0F5-56CCC32E3C1C}')" title="JREP %MS_NUMBER% is Accepted for Publication">Publisher Notification of Accepted Manuscript</a></td><td>Jon Samuel Geffner</td>
+								<td>
+									Completed Accept
+
+								</td>
+
+                                
+								<td>
+									4
+								</td>
+
+								
+								<td>S. Karthick Ramakrishnan
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>21 Mar 2016</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(100647, '{40B92C7D-760F-473E-8A07-8C4C266A9349}')" title="JREP %MS_NUMBER% is Accepted for Publication">Publisher Notification of Accepted Manuscript</a></td><td>Cambridge Production</td>
+								<td>
+									Completed Accept
+
+								</td>
+
+                                
+								<td>
+									4
+								</td>
+
+								
+								<td>S. Karthick Ramakrishnan
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>21 Mar 2016</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(100646, '{8BE9A13A-4EB8-4A45-A846-E985B0EF071D}')" title="Your Submission to JREP">Editor Decision - Accept</a></td><td>Amit Ahuja, PHD</td>
+								<td>
+									Accept
+
+								</td>
+
+                                
+								<td>
+									4
+								</td>
+
+								
+								<td>S. Karthick Ramakrishnan
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>21 Mar 2016</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(100645, '{A4599B24-DD39-4604-A249-BCB0AE7E7958}')" title="You have a new Editor Assignment for JREP">Editor Assignment</a></td><td>S. Karthick Ramakrishnan</td>
+								<td>
+									With Editor
+
+								</td>
+
+                                
+								<td>
+									4
+								</td>
+
+								
+								<td>Allan Colbern, Ph.D.<br /><span class="proxy">[Proxied by S. Karthick Ramakrishnan]</span>
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>21 Mar 2016</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(100642, '{E3BD49FB-041E-4C51-A6F8-38524B012700}')" title="Revision Confirmation for JREP">Author Submits Revision Confirmation</a></td><td>Amit Ahuja, PHD</td>
+								<td>
+									Revised Manuscript Submitted
+
+								</td>
+
+                                
+								<td>
+									4
+								</td>
+
+								
+								<td>Amit Ahuja, PHD<br /><span class="proxy">[Proxied by S. Karthick Ramakrishnan]</span>
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>13 Nov 2015</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(100170, '{CB57D6D2-790C-4005-A17D-7F50E8A19469}')" title="Decision on your JREP article">Editor Decision - Accept - Final Files Needed</a></td><td>Amit Ahuja, PHD</td>
+								<td>
+									Revise
+
+								</td>
+
+                                
+								<td>
+									3
+								</td>
+
+								
+								<td>S. Karthick Ramakrishnan
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>13 Nov 2015</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(100165, '{3DD92712-758C-43BE-9506-9AE4B5D32F11}')" title="You have a new Editor Assignment for JREP">Editor Assignment</a></td><td>S. Karthick Ramakrishnan</td>
+								<td>
+									With Editor
+
+								</td>
+
+                                
+								<td>
+									3
+								</td>
+
+								
+								<td>Allan Colbern, Ph.D.
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>09 Nov 2015</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(100157, '{4FD965AC-152F-45B6-8565-03DC87E1B915}')" title="Revision Confirmation for JREP">Author Submits Revision Confirmation</a></td><td>Amit Ahuja, PHD</td>
+								<td>
+									Revised Manuscript Submitted
+
+								</td>
+
+                                
+								<td>
+									3
+								</td>
+
+								
+								<td>Amit Ahuja, PHD
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>23 Sep 2015</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(99982, '{C3214EC5-F064-4A92-803E-1885F9A174AE}')" title="Your JREP Submission">Editor Decision - Conditional Accept</a></td><td>Amit Ahuja, PHD</td>
+								<td>
+									Revise
+
+								</td>
+
+                                
+								<td>
+									2
+								</td>
+
+								
+								<td>S. Karthick Ramakrishnan
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>23 Sep 2015</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(99981, '{E544ADCA-1AB0-4307-A284-62D98C9E1006}')" title="Your JREP Submission">Editor Decision - Conditional Accept</a></td><td>S. Karthick Ramakrishnan</td>
+								<td>
+									Under Review
+
+								</td>
+
+                                
+								<td>
+									2
+								</td>
+
+								
+								<td>S. Karthick Ramakrishnan
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>22 Sep 2015</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(99978, '{7D661272-A2EE-411C-94AA-38E8B9275E24}')" title="Thank you for the review for JREP">Reviewer Thank You</a></td><td>Bethany Albertson, PHD</td>
+								<td>
+									Under Review
+
+								</td>
+
+                                
+								<td>
+									2
+								</td>
+
+								
+								<td>Bethany Albertson, PHD
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>17 Sep 2015</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(99971, '{249CE7BE-FBC8-43E6-AF3F-C294CE13F188}')" title="Second Reminder of Late Review for %ARTICLE_TITLE%">Reviewer - Second Late Reminder</a></td><td>Bethany Albertson, PHD</td>
+								<td>
+									Under Review
+
+								</td>
+
+                                
+								<td>
+									2
+								</td>
+
+								
+								<td>S. Karthick Ramakrishnan
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>15 Sep 2015</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(99969, '{4B0BCE39-DE26-4DAB-902B-2F904C5CFA5E}')" title="Thank you for the review for JREP">Reviewer Thank You</a></td><td>Ben J. Newman, Ph.D.</td>
+								<td>
+									Under Review
+
+								</td>
+
+                                
+								<td>
+									2
+								</td>
+
+								
+								<td>Ben J. Newman, Ph.D.
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>12 Sep 2015</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(99958, '{6FF09B83-9D45-4BFB-9948-17E26E898D3F}')" title="Reminder of Late Review for JREP">Reviewer - First Late Reminder</a></td><td>Bethany Albertson, PHD</td>
+								<td>
+									Under Review
+
+								</td>
+
+                                
+								<td>
+									2
+								</td>
+
+								
+								<td>S. Karthick Ramakrishnan
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>11 Sep 2015</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(99956, '{DD59C79B-D7C1-4521-858D-510BB15F93F3}')" title="JREP Reminder: Review assignment is due soon">Reviewer Reminder - Before Due Date</a></td><td>Ben J. Newman, Ph.D.</td>
+								<td>
+									Under Review
+
+								</td>
+
+                                
+								<td>
+									2
+								</td>
+
+								
+								<td>S. Karthick Ramakrishnan
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>05 Sep 2015</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(99940, '{60E35E41-BD17-4B5A-A747-B7AA4A00EE61}')" title="JREP Reminder: Review assignment is due soon">Reviewer Reminder - Before Due Date</a></td><td>Bethany Albertson, PHD</td>
+								<td>
+									Under Review
+
+								</td>
+
+                                
+								<td>
+									2
+								</td>
+
+								
+								<td>S. Karthick Ramakrishnan
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>02 Sep 2015</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(99938, '{34639D47-8634-4F39-B280-4BF96D886E48}')" title="JREP: Thank you for agreeing to review">Reviewer Instructions and Due Date</a>&nbsp;<img style="vertical-align:middle;margin-top:4px" src="img/paperclip_icon.gif" alt=""/></td><td>Ben J. Newman, Ph.D.</td>
+								<td>
+									Under Review
+
+								</td>
+
+                                
+								<td>
+									2
+								</td>
+
+								
+								<td>Ben J. Newman, Ph.D.
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>02 Sep 2015</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(99937, '{A0A671D1-FCC5-46C8-ABF0-AD8C48A744CD}')" title="Reviewer Invitation for JREP">Reviewer Invitation</a></td><td>Ben J. Newman, Ph.D.</td>
+								<td>
+									Under Review
+
+								</td>
+
+                                
+								<td>
+									2
+								</td>
+
+								
+								<td>S. Karthick Ramakrishnan
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>02 Sep 2015</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(99936, '{EF77B1F5-751E-4911-BB0A-B723370311F0}')" title="JREP will seek alternate reviewer">Reviewer Uninvited Notice</a></td><td>Ben J. Newman, Ph.D.</td>
+								<td>
+									Under Review
+
+								</td>
+
+                                
+								<td>
+									2
+								</td>
+
+								
+								<td>S. Karthick Ramakrishnan
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>26 Aug 2015</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(99918, '{BCADFB87-68EC-433A-B9FD-719F484D6064}')" title="JREP: Thank you for agreeing to review">Reviewer Instructions and Due Date</a>&nbsp;<img style="vertical-align:middle;margin-top:4px" src="img/paperclip_icon.gif" alt=""/></td><td>Bethany Albertson, PHD</td>
+								<td>
+									Under Review
+
+								</td>
+
+                                
+								<td>
+									2
+								</td>
+
+								
+								<td>Bethany Albertson, PHD
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>25 Aug 2015</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(99909, '{70DA6EAA-29EA-410D-B0DF-4D0D48F4DEC3}')" title="Reviewer Invitation for JREP">Reviewer Invitation</a></td><td>Bethany Albertson, PHD</td>
+								<td>
+									Under Review
+
+								</td>
+
+                                
+								<td>
+									2
+								</td>
+
+								
+								<td>S. Karthick Ramakrishnan
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>25 Aug 2015</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(99908, '{0E6B7B8C-29B6-48E8-8714-48DF9EDEE11E}')" title="Reviewer Invitation for JREP">Reviewer Invitation</a></td><td>Ben J. Newman, Ph.D.</td>
+								<td>
+									Under Review
+
+								</td>
+
+                                
+								<td>
+									2
+								</td>
+
+								
+								<td>S. Karthick Ramakrishnan
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>10 Aug 2015</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(99882, '{8F22AB3F-D1DE-4EA9-B845-76E01B4F44F0}')" title="You have a new Editor Assignment for JREP">Editor Assignment</a></td><td>S. Karthick Ramakrishnan</td>
+								<td>
+									With Editor
+
+								</td>
+
+                                
+								<td>
+									2
+								</td>
+
+								
+								<td>Allan Colbern, Ph.D.
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>07 Aug 2015</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(99869, '{9D13D1FE-22C5-4722-979A-82FABEA237B7}')" title="Revision Confirmation for JREP">Author Submits Revision Confirmation</a></td><td>Amit Ahuja, PHD</td>
+								<td>
+									Revised Manuscript Submitted
+
+								</td>
+
+                                
+								<td>
+									2
+								</td>
+
+								
+								<td>Amit Ahuja, PHD
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>07 Aug 2015</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(99866, '{12BE2B84-1DB2-4687-8B3D-D718D3F83D3A}')" title="Your JREP Submission">Editor Decision - Revise</a></td><td>Amit Ahuja, PHD</td>
+								<td>
+									Revise
+
+								</td>
+
+                                
+								<td>
+									1
+								</td>
+
+								
+								<td>S. Karthick Ramakrishnan
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>30 Jul 2015</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(99846, '{7742FD88-DD9A-48E3-A32E-1AABC13C84DF}')" title="Second Reminder of Late Review for %ARTICLE_TITLE%">Reviewer - Second Late Reminder</a></td><td>Bethany Albertson, PHD</td>
+								<td>
+									Under Review
+
+								</td>
+
+                                
+								<td>
+									1
+								</td>
+
+								
+								<td>S. Karthick Ramakrishnan
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>25 Jul 2015</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(99794, '{352A8386-8A26-4819-B20C-668F55781E8D}')" title="Reminder of Late Review for JREP">Reviewer - First Late Reminder</a></td><td>Bethany Albertson, PHD</td>
+								<td>
+									Under Review
+
+								</td>
+
+                                
+								<td>
+									1
+								</td>
+
+								
+								<td>S. Karthick Ramakrishnan
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>18 Jul 2015</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(99788, '{D23FD49F-E7A1-49C5-A2A1-4CDD54D65CFB}')" title="JREP Reminder: Review assignment is due soon">Reviewer Reminder - Before Due Date</a></td><td>Bethany Albertson, PHD</td>
+								<td>
+									Under Review
+
+								</td>
+
+                                
+								<td>
+									1
+								</td>
+
+								
+								<td>S. Karthick Ramakrishnan
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>09 Jul 2015</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(99750, '{7786D476-93E7-432E-A59B-3C00BFE364BA}')" title="JREP: Thank you for agreeing to review">Reviewer Instructions and Due Date</a>&nbsp;<img style="vertical-align:middle;margin-top:4px" src="img/paperclip_icon.gif" alt=""/></td><td>Bethany Albertson, PHD</td>
+								<td>
+									Under Review
+
+								</td>
+
+                                
+								<td>
+									1
+								</td>
+
+								
+								<td>Bethany Albertson, PHD
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>05 Jul 2015</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(99740, '{98A184BE-4644-404E-BF5B-A8A7E2C93101}')" title="Thank you for the review for JREP">Reviewer Thank You</a></td><td>Ben J. Newman, Ph.D.</td>
+								<td>
+									Under Review
+
+								</td>
+
+                                
+								<td>
+									1
+								</td>
+
+								
+								<td>Ben J. Newman, Ph.D.
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>04 Jul 2015</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(99739, '{141E915B-2625-4782-B613-92150A5B2914}')" title="JREP: Thank you for agreeing to review">Reviewer Instructions and Due Date</a>&nbsp;<img style="vertical-align:middle;margin-top:4px" src="img/paperclip_icon.gif" alt=""/></td><td>Ben J. Newman, Ph.D.</td>
+								<td>
+									Under Review
+
+								</td>
+
+                                
+								<td>
+									1
+								</td>
+
+								
+								<td>Ben J. Newman, Ph.D.
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>03 Jul 2015</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(99733, '{F3165184-1481-43E3-8872-5190FBEA6C4D}')" title="Reviewer Invitation for JREP">Reviewer Invitation</a></td><td>Ben J. Newman, Ph.D.</td>
+								<td>
+									Under Review
+
+								</td>
+
+                                
+								<td>
+									1
+								</td>
+
+								
+								<td>S. Karthick Ramakrishnan
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>03 Jul 2015</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(99732, '{10A1446A-8908-486A-AAD1-851318E8455E}')" title="Reviewer Invitation for JREP">Reviewer Invitation</a></td><td>Bethany Albertson, PHD</td>
+								<td>
+									Under Review
+
+								</td>
+
+                                
+								<td>
+									1
+								</td>
+
+								
+								<td>S. Karthick Ramakrishnan
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>07 May 2015</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(99638, '{1AD5E88D-464F-4213-AB13-2C52CD5C47EF}')" title="You have a new Editor Assignment for JREP">Editor Assignment</a></td><td>S. Karthick Ramakrishnan</td>
+								<td>
+									With Editor
+
+								</td>
+
+                                
+								<td>
+									1
+								</td>
+
+								
+								<td>Allan Colbern, Ph.D.
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>06 May 2015</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(99636, '{41C05EF7-BDE9-4A30-B697-F921B2B7A9C3}')" title="Revision Confirmation for JREP">Author Submits Revision Confirmation</a></td><td>Amit Ahuja, PHD</td>
+								<td>
+									Revised Manuscript Submitted
+
+								</td>
+
+                                
+								<td>
+									1
+								</td>
+
+								
+								<td>Amit Ahuja, PHD
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>07 Mar 2015</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(99453, '{44EAE202-E814-4ED2-A9BC-F9FB8C483B1F}')" title="Decision on your JREP Submission">Editor Decision - Revise</a></td><td>Amit Ahuja, PHD</td>
+								<td>
+									Revise
+
+								</td>
+
+                                
+								<td>
+									0
+								</td>
+
+								
+								<td>S. Karthick Ramakrishnan
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>07 Mar 2015</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(99452, '{6EF4F148-ECD7-4BFE-8006-17ADE7233163}')" title="JREP Completed Reviews for &quot;%ARTICLE_TITLE%&quot;">Editor Notice All Reviews Complete</a></td><td>Allan Colbern, Ph.D.</td>
+								<td>
+									Required Reviews Completed
+
+								</td>
+
+                                
+								<td>
+									0
+								</td>
+
+								
+								<td>Bethany Albertson, PHD
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>07 Mar 2015</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(99451, '{FA80C932-54B2-4D18-8A6D-E8A8CD96FF3E}')" title="JREP Completed Reviews for &quot;%ARTICLE_TITLE%&quot;">Editor Notice All Reviews Complete</a></td><td>S. Karthick Ramakrishnan</td>
+								<td>
+									Required Reviews Completed
+
+								</td>
+
+                                
+								<td>
+									0
+								</td>
+
+								
+								<td>Bethany Albertson, PHD
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>07 Mar 2015</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(99450, '{08B0ADFA-36A5-4B98-8D4A-870C7FBE8509}')" title="Thank you for the review for JREP">Reviewer Thank You</a></td><td>Bethany Albertson, PHD</td>
+								<td>
+									Under Review
+
+								</td>
+
+                                
+								<td>
+									0
+								</td>
+
+								
+								<td>Bethany Albertson, PHD
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>07 Mar 2015</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(99447, '{750A936D-C765-4F88-8E34-84D99B3B28FF}')" title="Thank you for the review for JREP">Reviewer Thank You</a></td><td>Ben J. Newman, Ph.D.</td>
+								<td>
+									Under Review
+
+								</td>
+
+                                
+								<td>
+									0
+								</td>
+
+								
+								<td>Ben J. Newman, Ph.D.
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>06 Mar 2015</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(99440, '{93AF4265-ACF8-4EFB-BCA8-6E9F5AE69358}')" title="Second Reminder of Late Review for %ARTICLE_TITLE%">Reviewer - Second Late Reminder</a></td><td>Bethany Albertson, PHD</td>
+								<td>
+									Under Review
+
+								</td>
+
+                                
+								<td>
+									0
+								</td>
+
+								
+								<td>S. Karthick Ramakrishnan
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>01 Mar 2015</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(99403, '{B52D2859-B9AE-4694-9447-9DEC4084540D}')" title="JREP Reminder: Review assignment is due soon">Reviewer Reminder - Before Due Date</a></td><td>Ben J. Newman, Ph.D.</td>
+								<td>
+									Under Review
+
+								</td>
+
+                                
+								<td>
+									0
+								</td>
+
+								
+								<td>S. Karthick Ramakrishnan
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>01 Mar 2015</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(99402, '{CA04B43D-DD20-4AA0-9514-EA23D6FBEB7A}')" title="Reminder of Late Review for JREP">Reviewer - First Late Reminder</a></td><td>Bethany Albertson, PHD</td>
+								<td>
+									Under Review
+
+								</td>
+
+                                
+								<td>
+									0
+								</td>
+
+								
+								<td>S. Karthick Ramakrishnan
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>28 Feb 2015</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(99397, '{7608F0A6-08B3-419A-9EED-4E4BD4E6DE61}')" title="Thank you for the review for JREP">Reviewer Thank You</a></td><td>Ashutosh Varshney, PHD</td>
+								<td>
+									Under Review
+
+								</td>
+
+                                
+								<td>
+									0
+								</td>
+
+								
+								<td>Ashutosh Varshney, PHD
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>28 Feb 2015</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(99390, '{D9A79201-6903-425B-8AF6-91E2BCB1417F}')" title="JREP Reminder: Review assignment is due soon">Reviewer Reminder - Before Due Date</a></td><td>Ashutosh Varshney, PHD</td>
+								<td>
+									Under Review
+
+								</td>
+
+                                
+								<td>
+									0
+								</td>
+
+								
+								<td>S. Karthick Ramakrishnan
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>22 Feb 2015</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(99377, '{167587AA-B80E-4F76-9540-3F65A3C6BF54}')" title="JREP Reminder: Review assignment is due soon">Reviewer Reminder - Before Due Date</a></td><td>Bethany Albertson, PHD</td>
+								<td>
+									Under Review
+
+								</td>
+
+                                
+								<td>
+									0
+								</td>
+
+								
+								<td>S. Karthick Ramakrishnan
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>31 Jan 2015</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(99250, '{1600DE7A-8762-4B21-84C1-0CDC38B30289}')" title="JREP will seek alternate reviewer">Reviewer Uninvited Notice</a></td><td>Kanchan Chandra, PHD</td>
+								<td>
+									Under Review
+
+								</td>
+
+                                
+								<td>
+									0
+								</td>
+
+								
+								<td>S. Karthick Ramakrishnan
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>29 Jan 2015</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(99235, '{01CFF0D3-B02B-4DC7-BF46-8927547D3F4A}')" title="JREP: Thank you for agreeing to review">Reviewer Instructions and Due Date</a>&nbsp;<img style="vertical-align:middle;margin-top:4px" src="img/paperclip_icon.gif" alt=""/></td><td>Ashutosh Varshney, PHD</td>
+								<td>
+									Under Review
+
+								</td>
+
+                                
+								<td>
+									0
+								</td>
+
+								
+								<td>Ashutosh Varshney, PHD
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>29 Jan 2015</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(99213, '{560E9C88-903D-4D78-8B7D-9DDFB9A7609F}')" title="Reviewer Invitation for JREP">Reviewer Invitation</a></td><td>Ashutosh Varshney, PHD</td>
+								<td>
+									Under Review
+
+								</td>
+
+                                
+								<td>
+									0
+								</td>
+
+								
+								<td>S. Karthick Ramakrishnan
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>25 Jan 2015</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(99199, '{E94C905D-7FDE-4F80-B749-D963CB0158CA}')" title="JREP: Thank you for agreeing to review">Reviewer Instructions and Due Date</a>&nbsp;<img style="vertical-align:middle;margin-top:4px" src="img/paperclip_icon.gif" alt=""/></td><td>Ben J. Newman, Ph.D.</td>
+								<td>
+									Under Review
+
+								</td>
+
+                                
+								<td>
+									0
+								</td>
+
+								
+								<td>Ben J. Newman, Ph.D.
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>23 Jan 2015</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(99197, '{0086B007-2346-4006-A191-4556BA386B5D}')" title="JREP: Thank you for agreeing to review">Reviewer Instructions and Due Date</a>&nbsp;<img style="vertical-align:middle;margin-top:4px" src="img/paperclip_icon.gif" alt=""/></td><td>Bethany Albertson, PHD</td>
+								<td>
+									Under Review
+
+								</td>
+
+                                
+								<td>
+									0
+								</td>
+
+								
+								<td>Bethany Albertson, PHD
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>23 Jan 2015</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(99196, '{C3F4F451-359C-4A7F-9EB6-23868D9E9653}')" title="Reviewer Invitation for JREP">Reviewer Invitation</a></td><td>Bethany Albertson, PHD</td>
+								<td>
+									Under Review
+
+								</td>
+
+                                
+								<td>
+									0
+								</td>
+
+								
+								<td>S. Karthick Ramakrishnan
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>23 Jan 2015</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(99194, '{5FEE8631-039E-4647-ABE3-AA6189032BA1}')" title="Declined invitation for JREP">Reviewer Invitation Declined</a></td><td>Shana Kushner Gadarian, PHD</td>
+								<td>
+									Under Review
+
+								</td>
+
+                                
+								<td>
+									0
+								</td>
+
+								
+								<td>Shana Kushner Gadarian, PHD
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>23 Jan 2015</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(99190, '{EC480433-DF25-4463-91F5-B8B5FBEA39BC}')" title="Reviewer Invitation for JREP">Reviewer Invitation</a></td><td>Kanchan Chandra, PHD</td>
+								<td>
+									Under Review
+
+								</td>
+
+                                
+								<td>
+									0
+								</td>
+
+								
+								<td>S. Karthick Ramakrishnan
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>23 Jan 2015</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(99186, '{489725E0-39CD-4B67-BE74-070F7C2E7B65}')" title="Declined invitation for JREP">Reviewer Invitation Declined</a></td><td>Sahar Shafqat, PHD</td>
+								<td>
+									Under Review
+
+								</td>
+
+                                
+								<td>
+									0
+								</td>
+
+								
+								<td>Sahar Shafqat, PHD
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>23 Jan 2015</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(99181, '{E5235B84-9815-43C6-AD10-B2F609DBFF5F}')" title="Reviewer Invitation for JREP">Reviewer Invitation</a></td><td>Ben J. Newman, Ph.D.</td>
+								<td>
+									Under Review
+
+								</td>
+
+                                
+								<td>
+									0
+								</td>
+
+								
+								<td>S. Karthick Ramakrishnan
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>23 Jan 2015</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(99180, '{F5931ABF-5B3F-4B60-8EFE-DDFB0AA0F7C2}')" title="Reviewer Invitation for JREP">Reviewer Invitation</a></td><td>Shana Kushner Gadarian, PHD</td>
+								<td>
+									Under Review
+
+								</td>
+
+                                
+								<td>
+									0
+								</td>
+
+								
+								<td>S. Karthick Ramakrishnan
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>23 Jan 2015</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(99179, '{B0086FA4-A8EB-4021-BB13-F1B8F4A02B1A}')" title="Reviewer Invitation for JREP">Reviewer Invitation</a></td><td>Sahar Shafqat, PHD</td>
+								<td>
+									Under Review
+
+								</td>
+
+                                
+								<td>
+									0
+								</td>
+
+								
+								<td>S. Karthick Ramakrishnan
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>29 Dec 2014</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(99126, '{BAE0DB41-0F01-4459-A05A-92B34333AABA}')" title="You have a new Editor Assignment for JREP">Editor Assignment</a></td><td>S. Karthick Ramakrishnan</td>
+								<td>
+									With Editor
+
+								</td>
+
+                                
+								<td>
+									0
+								</td>
+
+								
+								<td>Allan Colbern, Ph.D.
+								</td>
+
+							
+							</tr>
+							
+							<tr>
+								
+								<td>29 Dec 2014</td>
+
+								<td>
+												<a style="vertical-align:middle;" href="javascript:popupLetter(99116, '{ED2E22CE-06A6-40CC-8D46-914A9FD80BFC}')" title="Submission Confirmation for JREP">Author Submits New Manuscript Confirmation</a></td><td>Amit Ahuja, PHD</td>
+								<td>
+									Manuscript Submitted
+
+								</td>
+
+                                
+								<td>
+									0
+								</td>
+
+								
+								<td>Amit Ahuja, PHD
+								</td>
+
+							
+							</tr>
+							
+					</table>
+					
+			</fieldset>
+			
+	</div>
+	<div class="centered">
+		
+		<br /><br /><input type="button" name="close" value="Close" onclick="window.close();" />
+		<br /><br />
+		<a href="#status">Status History</a>&nbsp;&nbsp;&nbsp;<a href="#correspondence">Correspondence History</a>&nbsp;&nbsp;&nbsp;
+		<br /><br /><a href="docHistoryStatusTypeView.asp?docid=3376">Switch to Status Type View</a>
+	</div>
+
+    <div id="modalDiv" style="display:none"></div>
+
+</form>
+
+<script type="text/javascript">
+    if (typeof pageDataTracker !== 'undefined') {
+        RetrieveAnalyticsData();
+    }
+</script>
+    <script type="text/javascript">
+        $(document).ready(function() 
+	    {
+	        url = 'ajax/RenderControlToPage.ashx?control=DialogWidgetControl&id=warningDialog&titleResourceId=Common.Text.Warning&titleBarIcon=warning&showTitleBar=true&showTitleBarClose=false&dialogStyle=confirm&width=400';
+	        $.get(url, function (data) 
+	        {
+	            $('body').append(data);
+	        });
+        });
+    </script>
+</body>
+</html>
