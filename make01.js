@@ -2,9 +2,12 @@ const fetch = require('node-fetch');
 const fs = require('fs');
 
 const submissions = [];
-    
+
+
+//Access the API to get info about all 431 (as of the time of writing this) journals, separated into 44 pages.
+//Headers copied from Firefox after logging in and below cookie assigned. Cookie will likely be expired by the time this script would need to run again.
 (async () => {
-    for (let page = 1; page <= 44; page++) {
+    for (let page = 1; page <= 44; page++) { //As of the time of writing this the goal is to run this scraper only once, so hard-coding values.
         const res = await fetch('https://www.editorialmanager.com/jrep/FG.ashx?fgdata=1&action=GetRecords', {
             method: 'POST',
             headers: {
@@ -39,13 +42,14 @@ const submissions = [];
         }
     }
     console.log(submissions);
-    fs.writeFileSync('./entries.json', JSON.stringify(submissions), 'utf-8');
-});
+    fs.writeFileSync('./01.json', JSON.stringify(submissions), 'utf-8');
+}); //removed () so this IIFE doesn't run again.
 
-const data = JSON.parse(fs.readFileSync('./entries.json'));
+//create list of URLs to download to parse later
+const data = JSON.parse(fs.readFileSync('./01.json'));
 let str;
 data.forEach(entry => {
     str = `${str}\nhttps://www.editorialmanager.com/jrep/EMDetails.aspx?docid=${entry.id}&ms_num=${entry.JREPNO}&sectionID=1`;
 });
-fs.writeFileSync('./urls.txt', str, 'utf-8');
+fs.writeFileSync('./details-urls.txt', str, 'utf-8');
 
