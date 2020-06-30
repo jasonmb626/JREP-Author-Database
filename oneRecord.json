@@ -1,0 +1,379 @@
+{
+    "id": 3376,
+    "paperTitle": "Is Only Fair Lovely in Indian Politics? Consequences of Skin Color in a Survey Experiment in Delhi",
+    "JREPNO": "JREP-D-14-00011R4",
+    "initialSubmissionDate": "29 Dec 2014",
+    "currentStatus": "Completed Accept",
+    "authors": [
+        {
+            "name": "Amit Ahuja",
+            "rank": "PHD, University of California, Santa Barbara| University of California, Santa Barbara"
+        },
+        {
+            "name": "Susan L. Ostermann",
+            "rank": "UC Berkeley| University of California Berkeley"
+        }
+    ],
+    "correspondence": [
+        {
+            "correspondenceDate": "29 Dec 2014",
+            "recipient": "Amit Ahuja, PHD",
+            "status": "Manuscript Submitted",
+            "revision": "0"
+        },
+        {
+            "correspondenceDate": "29 Dec 2014",
+            "recipient": "S. Karthick Ramakrishnan",
+            "status": "With Editor",
+            "revision": "0"
+        },
+        {
+            "correspondenceDate": "23 Jan 2015",
+            "recipient": "Sahar Shafqat, PHD",
+            "status": "Under Review",
+            "revision": "0"
+        },
+        {
+            "correspondenceDate": "23 Jan 2015",
+            "recipient": "Shana Kushner Gadarian, PHD",
+            "status": "Under Review",
+            "revision": "0"
+        },
+        {
+            "correspondenceDate": "23 Jan 2015",
+            "recipient": "Ben J. Newman, Ph.D.",
+            "status": "Under Review",
+            "revision": "0"
+        },
+        {
+            "correspondenceDate": "23 Jan 2015",
+            "recipient": "Sahar Shafqat, PHD",
+            "status": "Under Review",
+            "revision": "0"
+        },
+        {
+            "correspondenceDate": "23 Jan 2015",
+            "recipient": "Kanchan Chandra, PHD",
+            "status": "Under Review",
+            "revision": "0"
+        },
+        {
+            "correspondenceDate": "23 Jan 2015",
+            "recipient": "Shana Kushner Gadarian, PHD",
+            "status": "Under Review",
+            "revision": "0"
+        },
+        {
+            "correspondenceDate": "23 Jan 2015",
+            "recipient": "Bethany Albertson, PHD",
+            "status": "Under Review",
+            "revision": "0"
+        },
+        {
+            "correspondenceDate": "23 Jan 2015",
+            "recipient": "Bethany Albertson, PHD",
+            "status": "Under Review",
+            "revision": "0"
+        },
+        {
+            "correspondenceDate": "25 Jan 2015",
+            "recipient": "Ben J. Newman, Ph.D.",
+            "status": "Under Review",
+            "revision": "0"
+        },
+        {
+            "correspondenceDate": "29 Jan 2015",
+            "recipient": "Ashutosh Varshney, PHD",
+            "status": "Under Review",
+            "revision": "0"
+        },
+        {
+            "correspondenceDate": "29 Jan 2015",
+            "recipient": "Ashutosh Varshney, PHD",
+            "status": "Under Review",
+            "revision": "0"
+        },
+        {
+            "correspondenceDate": "31 Jan 2015",
+            "recipient": "Kanchan Chandra, PHD",
+            "status": "Under Review",
+            "revision": "0"
+        },
+        {
+            "correspondenceDate": "22 Feb 2015",
+            "recipient": "Bethany Albertson, PHD",
+            "status": "Under Review",
+            "revision": "0"
+        },
+        {
+            "correspondenceDate": "28 Feb 2015",
+            "recipient": "Ashutosh Varshney, PHD",
+            "status": "Under Review",
+            "revision": "0"
+        },
+        {
+            "correspondenceDate": "28 Feb 2015",
+            "recipient": "Ashutosh Varshney, PHD",
+            "status": "Under Review",
+            "revision": "0"
+        },
+        {
+            "correspondenceDate": "01 Mar 2015",
+            "recipient": "Bethany Albertson, PHD",
+            "status": "Under Review",
+            "revision": "0"
+        },
+        {
+            "correspondenceDate": "01 Mar 2015",
+            "recipient": "Ben J. Newman, Ph.D.",
+            "status": "Under Review",
+            "revision": "0"
+        },
+        {
+            "correspondenceDate": "06 Mar 2015",
+            "recipient": "Bethany Albertson, PHD",
+            "status": "Under Review",
+            "revision": "0"
+        },
+        {
+            "correspondenceDate": "07 Mar 2015",
+            "recipient": "Ben J. Newman, Ph.D.",
+            "status": "Under Review",
+            "revision": "0"
+        },
+        {
+            "correspondenceDate": "07 Mar 2015",
+            "recipient": "Bethany Albertson, PHD",
+            "status": "Under Review",
+            "revision": "0"
+        },
+        {
+            "correspondenceDate": "07 Mar 2015",
+            "recipient": "S. Karthick Ramakrishnan",
+            "status": "Required Reviews Completed",
+            "revision": "0"
+        },
+        {
+            "correspondenceDate": "07 Mar 2015",
+            "recipient": "Allan Colbern, Ph.D.",
+            "status": "Required Reviews Completed",
+            "revision": "0"
+        },
+        {
+            "correspondenceDate": "07 Mar 2015",
+            "recipient": "Amit Ahuja, PHD",
+            "status": "Revise",
+            "revision": "0"
+        },
+        {
+            "correspondenceDate": "06 May 2015",
+            "recipient": "Amit Ahuja, PHD",
+            "status": "Revised Manuscript Submitted",
+            "revision": "1"
+        },
+        {
+            "correspondenceDate": "07 May 2015",
+            "recipient": "S. Karthick Ramakrishnan",
+            "status": "With Editor",
+            "revision": "1"
+        },
+        {
+            "correspondenceDate": "03 Jul 2015",
+            "recipient": "Bethany Albertson, PHD",
+            "status": "Under Review",
+            "revision": "1"
+        },
+        {
+            "correspondenceDate": "03 Jul 2015",
+            "recipient": "Ben J. Newman, Ph.D.",
+            "status": "Under Review",
+            "revision": "1"
+        },
+        {
+            "correspondenceDate": "04 Jul 2015",
+            "recipient": "Ben J. Newman, Ph.D.",
+            "status": "Under Review",
+            "revision": "1"
+        },
+        {
+            "correspondenceDate": "05 Jul 2015",
+            "recipient": "Ben J. Newman, Ph.D.",
+            "status": "Under Review",
+            "revision": "1"
+        },
+        {
+            "correspondenceDate": "09 Jul 2015",
+            "recipient": "Bethany Albertson, PHD",
+            "status": "Under Review",
+            "revision": "1"
+        },
+        {
+            "correspondenceDate": "18 Jul 2015",
+            "recipient": "Bethany Albertson, PHD",
+            "status": "Under Review",
+            "revision": "1"
+        },
+        {
+            "correspondenceDate": "25 Jul 2015",
+            "recipient": "Bethany Albertson, PHD",
+            "status": "Under Review",
+            "revision": "1"
+        },
+        {
+            "correspondenceDate": "30 Jul 2015",
+            "recipient": "Bethany Albertson, PHD",
+            "status": "Under Review",
+            "revision": "1"
+        },
+        {
+            "correspondenceDate": "07 Aug 2015",
+            "recipient": "Amit Ahuja, PHD",
+            "status": "Revise",
+            "revision": "1"
+        },
+        {
+            "correspondenceDate": "07 Aug 2015",
+            "recipient": "Amit Ahuja, PHD",
+            "status": "Revised Manuscript Submitted",
+            "revision": "2"
+        },
+        {
+            "correspondenceDate": "10 Aug 2015",
+            "recipient": "S. Karthick Ramakrishnan",
+            "status": "With Editor",
+            "revision": "2"
+        },
+        {
+            "correspondenceDate": "25 Aug 2015",
+            "recipient": "Ben J. Newman, Ph.D.",
+            "status": "Under Review",
+            "revision": "2"
+        },
+        {
+            "correspondenceDate": "25 Aug 2015",
+            "recipient": "Bethany Albertson, PHD",
+            "status": "Under Review",
+            "revision": "2"
+        },
+        {
+            "correspondenceDate": "26 Aug 2015",
+            "recipient": "Bethany Albertson, PHD",
+            "status": "Under Review",
+            "revision": "2"
+        },
+        {
+            "correspondenceDate": "02 Sep 2015",
+            "recipient": "Ben J. Newman, Ph.D.",
+            "status": "Under Review",
+            "revision": "2"
+        },
+        {
+            "correspondenceDate": "02 Sep 2015",
+            "recipient": "Ben J. Newman, Ph.D.",
+            "status": "Under Review",
+            "revision": "2"
+        },
+        {
+            "correspondenceDate": "02 Sep 2015",
+            "recipient": "Ben J. Newman, Ph.D.",
+            "status": "Under Review",
+            "revision": "2"
+        },
+        {
+            "correspondenceDate": "05 Sep 2015",
+            "recipient": "Bethany Albertson, PHD",
+            "status": "Under Review",
+            "revision": "2"
+        },
+        {
+            "correspondenceDate": "11 Sep 2015",
+            "recipient": "Ben J. Newman, Ph.D.",
+            "status": "Under Review",
+            "revision": "2"
+        },
+        {
+            "correspondenceDate": "12 Sep 2015",
+            "recipient": "Bethany Albertson, PHD",
+            "status": "Under Review",
+            "revision": "2"
+        },
+        {
+            "correspondenceDate": "15 Sep 2015",
+            "recipient": "Ben J. Newman, Ph.D.",
+            "status": "Under Review",
+            "revision": "2"
+        },
+        {
+            "correspondenceDate": "17 Sep 2015",
+            "recipient": "Bethany Albertson, PHD",
+            "status": "Under Review",
+            "revision": "2"
+        },
+        {
+            "correspondenceDate": "22 Sep 2015",
+            "recipient": "Bethany Albertson, PHD",
+            "status": "Under Review",
+            "revision": "2"
+        },
+        {
+            "correspondenceDate": "23 Sep 2015",
+            "recipient": "S. Karthick Ramakrishnan",
+            "status": "Under Review",
+            "revision": "2"
+        },
+        {
+            "correspondenceDate": "23 Sep 2015",
+            "recipient": "Amit Ahuja, PHD",
+            "status": "Revise",
+            "revision": "2"
+        },
+        {
+            "correspondenceDate": "09 Nov 2015",
+            "recipient": "Amit Ahuja, PHD",
+            "status": "Revised Manuscript Submitted",
+            "revision": "3"
+        },
+        {
+            "correspondenceDate": "13 Nov 2015",
+            "recipient": "S. Karthick Ramakrishnan",
+            "status": "With Editor",
+            "revision": "3"
+        },
+        {
+            "correspondenceDate": "13 Nov 2015",
+            "recipient": "Amit Ahuja, PHD",
+            "status": "Revise",
+            "revision": "3"
+        },
+        {
+            "correspondenceDate": "21 Mar 2016",
+            "recipient": "Amit Ahuja, PHD",
+            "status": "Revised Manuscript Submitted",
+            "revision": "4"
+        },
+        {
+            "correspondenceDate": "21 Mar 2016",
+            "recipient": "S. Karthick Ramakrishnan",
+            "status": "With Editor",
+            "revision": "4"
+        },
+        {
+            "correspondenceDate": "21 Mar 2016",
+            "recipient": "Amit Ahuja, PHD",
+            "status": "Accept",
+            "revision": "4"
+        },
+        {
+            "correspondenceDate": "21 Mar 2016",
+            "recipient": "Cambridge Production",
+            "status": "Completed Accept",
+            "revision": "4"
+        },
+        {
+            "correspondenceDate": "21 Mar 2016",
+            "recipient": "Jon Samuel Geffner",
+            "status": "Completed Accept",
+            "revision": "4"
+        }
+    ]
+}

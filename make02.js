@@ -26,6 +26,7 @@ newData = oldData.map(entry => {
     const allAuthorsCell = $('span:contains("All Authors:")').parent().next()[0];
     const initialSubmissionDate = $('span:contains("Initial Date Submitted:")').parent().next()[0].children[0].children[0].nodeValue;
     const currentStatus = $('span:contains("Current Editorial Status:")').parent().next()[0].children[0].children[0].nodeValue;
+    const statusDate = $('span:contains("Editorial Status Date:")').parent().next()[0].children[0].children[0].nodeValue;
 
     const authors = [];
     allAuthorsCell.children.forEach(child => {
@@ -43,7 +44,7 @@ newData = oldData.map(entry => {
             }
         }
     });
-    return {...entry, initialSubmissionDate, currentStatus, authors};
+    return {...entry, initialSubmissionDate, currentStatus, statusDate, authors};
 });
 
 fs.writeFileSync('./02.json', JSON.stringify(newData), 'utf-8');
